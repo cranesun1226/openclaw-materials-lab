@@ -1,0 +1,4 @@
+mp-api>=0.45
+pymatgen>=2025.1.9
+ase>=3.23
+matplotlib>=3.9

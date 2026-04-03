@@ -1,0 +1,12 @@
+dist
+node_modules
+.DS_Store
+.coverage
+coverage
+.npm-cache
+.venv
+.pytest_cache
+__pycache__
+*.pyc
+materials-workspace
+tmp

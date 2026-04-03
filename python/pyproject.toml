@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "materials-lab-worker"
+version = "0.1.0"
+description = "Local Python worker for the OpenClaw Materials Lab plugin"
+requires-python = ">=3.10"
+dependencies = [
+  "mp-api>=0.45",
+  "pymatgen>=2025.1.9",
+  "ase>=3.23",
+  "matplotlib>=3.9"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

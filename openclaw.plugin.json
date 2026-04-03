@@ -1,0 +1,74 @@
+{
+  "id": "materials-lab",
+  "name": "Materials Lab",
+  "description": "Autonomous materials-science research tools and local Python workflows for OpenClaw.",
+  "version": "0.1.0",
+  "skills": [
+    "skills/material-science-research"
+  ],
+  "uiHints": {
+    "pythonPath": {
+      "label": "Python executable",
+      "help": "Used to launch the local materials worker.",
+      "placeholder": "python3"
+    },
+    "mpApiKey": {
+      "label": "Materials Project API key",
+      "help": "Optional for offline mode, required for live Materials Project queries.",
+      "placeholder": "mp-...",
+      "sensitive": true
+    },
+    "workspaceRoot": {
+      "label": "Workspace root",
+      "help": "All notes, reports, structures, plots, and cache files stay under this directory."
+    },
+    "cacheDir": {
+      "label": "Cache directory",
+      "help": "Defaults to <workspaceRoot>/cache.",
+      "advanced": true
+    },
+    "defaultBatchLimit": {
+      "label": "Default batch limit",
+      "help": "Upper bound for candidate batches in screening workflows.",
+      "advanced": true
+    },
+    "enableAseTools": {
+      "label": "Enable ASE tools",
+      "help": "Expose optional ASE-based workflows.",
+      "advanced": true
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "pythonPath": {
+        "type": "string",
+        "default": "python3",
+        "minLength": 1
+      },
+      "mpApiKey": {
+        "type": "string",
+        "default": ""
+      },
+      "workspaceRoot": {
+        "type": "string",
+        "default": "~/.openclaw/materials-lab"
+      },
+      "cacheDir": {
+        "type": "string",
+        "default": ""
+      },
+      "defaultBatchLimit": {
+        "type": "number",
+        "default": 20,
+        "minimum": 1,
+        "maximum": 500
+      },
+      "enableAseTools": {
+        "type": "boolean",
+        "default": false
+      }
+    }
+  }
+}
