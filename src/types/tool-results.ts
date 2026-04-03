@@ -1,3 +1,5 @@
+import type { AgentToolResult } from "@mariozechner/pi-agent-core";
+
 export interface ToolArtifact {
   label: string;
   path: string;
@@ -11,14 +13,14 @@ export interface ToolPayload<TData = unknown> {
   warnings: string[];
 }
 
-export interface OpenClawToolResponse<TData = unknown> {
-  content: Array<{ type: "text"; text: string }>;
+export type MaterialsToolResponse<TData = unknown> = AgentToolResult<ToolPayload<TData>> & {
   structuredContent: ToolPayload<TData>;
-}
+};
 
-export function toToolResponse<TData>(payload: ToolPayload<TData>): OpenClawToolResponse<TData> {
+export function toToolResponse<TData>(payload: ToolPayload<TData>): MaterialsToolResponse<TData> {
   return {
     content: [{ type: "text", text: payload.summary }],
+    details: payload,
     structuredContent: payload,
   };
 }

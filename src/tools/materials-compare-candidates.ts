@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
 import { toToolResponse } from "../types/tool-results.js";
@@ -46,9 +46,10 @@ export type MaterialsCompareCandidatesParams = Static<typeof CompareSchema>;
 
 export function createMaterialsCompareCandidatesTool(
   context: MaterialsPluginContext,
-): OpenClawToolDefinition<typeof CompareSchema> {
+): AnyAgentTool {
   return {
     name: "materials_compare_candidates",
+    label: "Compare Candidates",
     description: "Compare candidate materials and rank them by configurable criteria.",
     parameters: CompareSchema,
     async execute(_callId, rawParams) {

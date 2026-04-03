@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
 import { toToolResponse } from "../types/tool-results.js";
@@ -26,9 +26,10 @@ const SaveNoteSchema = Type.Object(
 
 export type MaterialsSaveNoteParams = Static<typeof SaveNoteSchema>;
 
-export function createMaterialsSaveNoteTool(context: MaterialsPluginContext): OpenClawToolDefinition<typeof SaveNoteSchema> {
+export function createMaterialsSaveNoteTool(context: MaterialsPluginContext): AnyAgentTool {
   return {
     name: "materials_save_note",
+    label: "Save Note",
     description: "Persist a structured research note under the plugin workspaceRoot.",
     parameters: SaveNoteSchema,
     async execute(_callId, rawParams) {

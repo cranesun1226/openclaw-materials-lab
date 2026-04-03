@@ -1,6 +1,5 @@
-import type { OpenClawCommandProgramLike } from "openclaw/plugin-sdk/plugin-entry";
-
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
+import type { MaterialsCommandProgramLike } from "../types/cli.js";
 import type { MaterialsLabPluginConfig } from "../types/config.js";
 
 export interface StatusOptions {
@@ -15,7 +14,7 @@ export interface StatusReport {
   tools: Record<string, string>;
 }
 
-export function registerStatusCommand(program: OpenClawCommandProgramLike, context: MaterialsPluginContext): void {
+export function registerStatusCommand(program: MaterialsCommandProgramLike, context: MaterialsPluginContext): void {
   program
     .command("status")
     .description("Show effective plugin config, resolved directories, and tool availability.")

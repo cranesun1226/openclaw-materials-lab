@@ -1,8 +1,7 @@
-import type { OpenClawCommandProgramLike } from "openclaw/plugin-sdk/plugin-entry";
-
 import { formatErrorForTool } from "../core/errors.js";
 import { assertWritableDirectory } from "../core/paths.js";
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
+import type { MaterialsCommandProgramLike } from "../types/cli.js";
 import type { MaterialsLabPluginConfig } from "../types/config.js";
 import { defaultProcessRunner, type ProcessRunner } from "./process-runner.js";
 
@@ -25,7 +24,7 @@ export interface DoctorReport {
   checks: DoctorCheck[];
 }
 
-export function registerDoctorCommand(program: OpenClawCommandProgramLike, context: MaterialsPluginContext): void {
+export function registerDoctorCommand(program: MaterialsCommandProgramLike, context: MaterialsPluginContext): void {
   program
     .command("doctor")
     .description("Check plugin config, Python availability, worker health, writable directories, and API key presence.")

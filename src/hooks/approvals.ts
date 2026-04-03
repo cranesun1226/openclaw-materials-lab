@@ -3,15 +3,18 @@ import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
 const APPROVAL_REQUIRED_TOOLS = new Set(["materials_ase_relax", "materials_batch_screen"]);
 
 export function registerMaterialsApprovalHook(api: OpenClawPluginApi): void {
-  api.on?.("before_tool_call", (context) => {
-    const toolName = extractToolName(context);
+  api.on("before_tool_call", (event) => {
+    const toolName = extractToolName(event);
     if (!toolName || !APPROVAL_REQUIRED_TOOLS.has(toolName)) {
-      return { block: false };
+      return undefined;
     }
 
     return {
-      requireApproval: true,
-      reason: `${toolName} can run heavier local computation and may write multiple artifacts.`,
+      requireApproval: {
+        title: `Approve ${toolName}`,
+        description: `${toolName} can run heavier local computation and may write multiple artifacts under the Materials Lab workspace.`,
+        severity: "warning",
+      },
     };
   });
 }

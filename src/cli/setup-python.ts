@@ -2,9 +2,8 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import type { OpenClawCommandProgramLike } from "openclaw/plugin-sdk/plugin-entry";
-
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
+import type { MaterialsCommandProgramLike } from "../types/cli.js";
 import type { MaterialsLabPluginConfig } from "../types/config.js";
 import { defaultProcessRunner, type ProcessRunner } from "./process-runner.js";
 
@@ -23,7 +22,7 @@ export interface SetupPythonReport {
   steps: string[];
 }
 
-export function registerSetupPythonCommand(program: OpenClawCommandProgramLike, context: MaterialsPluginContext): void {
+export function registerSetupPythonCommand(program: MaterialsCommandProgramLike, context: MaterialsPluginContext): void {
   program
     .command("setup-python")
     .description("Create or prepare a local Python environment and install plugin requirements.")

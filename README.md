@@ -43,7 +43,7 @@ The Node side never exposes an HTTP server. The plugin launches a short-lived Py
 
 ```bash
 openclaw plugins install @cranesun/openclaw-materials-lab
-openclaw plugins enable materials-lab
+openclaw gateway restart
 ```
 
 ### From a local path
@@ -51,7 +51,13 @@ openclaw plugins enable materials-lab
 ```bash
 npm install
 npm run build
-openclaw plugins install /absolute/path/to/openclaw-materials-lab
+openclaw plugins install -l /absolute/path/to/openclaw-materials-lab
+openclaw gateway restart
+```
+
+If `openclaw plugins list` shows `materials-lab` as disabled after install, run:
+
+```bash
 openclaw plugins enable materials-lab
 ```
 
@@ -91,7 +97,7 @@ Add or update the plugin entry in `~/.openclaw/openclaw.json`:
 
 OpenClaw ignores npm lifecycle hooks during plugin installation, so Python setup is explicit by design.
 
-1. Install the package and enable the plugin.
+1. Install or link the plugin.
 2. Run:
 
 ```bash
@@ -206,7 +212,7 @@ Key development notes:
 
 - Tests default to offline/mock behavior.
 - The bridge test uses the local Python worker and does not require live Materials Project access.
-- The OpenClaw SDK entrypoint is shimmed in tests so the plugin can be validated without a full gateway runtime.
+- The OpenClaw SDK entrypoint is shimmed at test runtime, but TypeScript resolves against the installed OpenClaw SDK.
 
 ## Roadmap
 

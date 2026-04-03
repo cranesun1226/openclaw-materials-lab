@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import { ConfigurationError } from "../core/errors.js";
 import { ensureWithinRoot } from "../core/paths.js";
@@ -21,9 +21,10 @@ const AseRelaxSchema = Type.Object(
 
 export type MaterialsAseRelaxParams = Static<typeof AseRelaxSchema>;
 
-export function createMaterialsAseRelaxTool(context: MaterialsPluginContext): OpenClawToolDefinition<typeof AseRelaxSchema> {
+export function createMaterialsAseRelaxTool(context: MaterialsPluginContext): AnyAgentTool {
   return {
     name: "materials_ase_relax",
+    label: "ASE Relax",
     description: "Run an approval-gated local ASE relaxation workflow.",
     parameters: AseRelaxSchema,
     async execute(_callId, rawParams) {

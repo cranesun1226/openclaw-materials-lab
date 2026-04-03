@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
 import { toToolResponse } from "../types/tool-results.js";
@@ -22,9 +22,10 @@ const SearchSchema = Type.Object(
 
 export type MaterialsSearchParams = Static<typeof SearchSchema>;
 
-export function createMaterialsSearchTool(context: MaterialsPluginContext): OpenClawToolDefinition<typeof SearchSchema> {
+export function createMaterialsSearchTool(context: MaterialsPluginContext): AnyAgentTool {
   return {
     name: "materials_search_mp",
+    label: "Search Materials",
     description: "Search Materials Project or the bundled offline dataset for candidate materials.",
     parameters: SearchSchema,
     async execute(_callId, rawParams) {

@@ -13,6 +13,15 @@ export function registerMaterialsCli(api: OpenClawPluginApi, context: MaterialsP
       registerSetupPythonCommand(materials, context);
       registerStatusCommand(materials, context);
     },
-    { commands: ["materials"] },
+    {
+      commands: ["materials"],
+      descriptors: [
+        {
+          name: "materials",
+          description: "Materials Lab setup and diagnostics commands.",
+          hasSubcommands: true,
+        },
+      ],
+    },
   );
 }

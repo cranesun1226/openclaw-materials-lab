@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import { ensureWithinRoot } from "../core/paths.js";
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
@@ -19,9 +19,10 @@ export type MaterialsAnalyzeStructureParams = Static<typeof AnalyzeStructureSche
 
 export function createMaterialsAnalyzeStructureTool(
   context: MaterialsPluginContext,
-): OpenClawToolDefinition<typeof AnalyzeStructureSchema> {
+): AnyAgentTool {
   return {
     name: "materials_analyze_structure",
+    label: "Analyze Structure",
     description: "Analyze a material structure with pymatgen-aware local tooling and return derived metrics.",
     parameters: AnalyzeStructureSchema,
     async execute(_callId, rawParams) {

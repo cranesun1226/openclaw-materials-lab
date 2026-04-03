@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import { ensureWithinRoot } from "../core/paths.js";
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
@@ -41,11 +41,10 @@ const ExportReportSchema = Type.Object(
 
 export type MaterialsExportReportParams = Static<typeof ExportReportSchema>;
 
-export function createMaterialsExportReportTool(
-  context: MaterialsPluginContext,
-): OpenClawToolDefinition<typeof ExportReportSchema> {
+export function createMaterialsExportReportTool(context: MaterialsPluginContext): AnyAgentTool {
   return {
     name: "materials_export_report",
+    label: "Export Report",
     description: "Export a markdown research report that references notes and generated artifacts.",
     parameters: ExportReportSchema,
     async execute(_callId, rawParams) {

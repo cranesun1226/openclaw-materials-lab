@@ -1,5 +1,5 @@
 import { Type, type Static } from "@sinclair/typebox";
-import type { OpenClawToolDefinition } from "openclaw/plugin-sdk/plugin-entry";
+import type { AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
 
 import type { MaterialsPluginContext } from "../core/runtime-context.js";
 import { toToolResponse } from "../types/tool-results.js";
@@ -18,9 +18,10 @@ export type MaterialsBatchScreenParams = Static<typeof BatchScreenSchema>;
 
 export function createMaterialsBatchScreenTool(
   context: MaterialsPluginContext,
-): OpenClawToolDefinition<typeof BatchScreenSchema> {
+): AnyAgentTool {
   return {
     name: "materials_batch_screen",
+    label: "Batch Screen",
     description: "Run an approval-gated batch screening workflow across multiple candidate ids.",
     parameters: BatchScreenSchema,
     async execute(_callId, rawParams) {
