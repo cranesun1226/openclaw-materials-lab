@@ -1,4 +1,6 @@
-import { spawn } from "node:child_process";
+import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
+
+const DEFAULT_PROCESS_TIMEOUT_MS = 10 * 60_000;
 
 export interface ProcessRunResult {
   code: number | null;
@@ -9,6 +11,7 @@ export interface ProcessRunResult {
 export interface ProcessRunOptions {
   cwd?: string;
   env?: NodeJS.ProcessEnv;
+  timeoutMs?: number;
 }
 
 export type ProcessRunner = (
@@ -17,27 +20,24 @@ export type ProcessRunner = (
   options?: ProcessRunOptions,
 ) => Promise<ProcessRunResult>;
 
-export const defaultProcessRunner: ProcessRunner = async (command, args, options) =>
-  new Promise<ProcessRunResult>((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: options?.cwd,
-      env: options?.env,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+export const defaultProcessRunner: ProcessRunner = async (command, args, options) => {
+  const commandOptions: { timeoutMs: number; cwd?: string; env?: NodeJS.ProcessEnv } = {
+    timeoutMs: options?.timeoutMs ?? DEFAULT_PROCESS_TIMEOUT_MS,
+  };
 
-    let stdout = "";
-    let stderr = "";
-    child.stdout.setEncoding("utf8");
-    child.stderr.setEncoding("utf8");
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk;
-    });
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk;
-    });
+  if (options?.cwd) {
+    commandOptions.cwd = options.cwd;
+  }
 
-    child.on("error", reject);
-    child.on("close", (code) => {
-      resolve({ code, stdout, stderr });
-    });
-  });
+  if (options?.env) {
+    commandOptions.env = options.env;
+  }
+
+  const result = await runCommandWithTimeout([command, ...args], commandOptions);
+
+  return {
+    code: result.code,
+    stdout: result.stdout,
+    stderr: result.stderr,
+  };
+};

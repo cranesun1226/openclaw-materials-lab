@@ -39,6 +39,19 @@ describe("CLI helpers", () => {
     expect(runner).toHaveBeenCalledWith("python3", ["--version"]);
   });
 
+  it("reports unsupported Python versions before starting the worker", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-doctor-python-"));
+    tempDirs.push(tempDir);
+    const context = createTestContext(tempDir);
+    const runner = vi.fn().mockResolvedValueOnce({ code: 0, stdout: "Python 3.9.6", stderr: "" });
+
+    const report = await runDoctor(context, {}, runner);
+
+    expect(report.checks.find((check) => check.id === "python-available")?.status).toBe("error");
+    expect(report.checks.find((check) => check.id === "python-available")?.message).toContain("requires Python >=3.10");
+    expect(report.checks.find((check) => check.id === "worker-health")?.message).toContain("Skipped");
+  });
+
   it("builds the setup-python command plan with the expected interpreter paths", async () => {
     const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-setup-"));
     tempDirs.push(tempDir);

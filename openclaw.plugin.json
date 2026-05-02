@@ -9,8 +9,8 @@
   "uiHints": {
     "pythonPath": {
       "label": "Python executable",
-      "help": "Used to launch the local materials worker.",
-      "placeholder": "python3"
+      "help": "Used to launch the local materials worker. Requires Python 3.10 or newer.",
+      "placeholder": "python3.12"
     },
     "mpApiKey": {
       "label": "Materials Project API key",

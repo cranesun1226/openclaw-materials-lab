@@ -5,6 +5,9 @@ import type { MaterialsCommandProgramLike } from "../types/cli.js";
 import type { MaterialsLabPluginConfig } from "../types/config.js";
 import { defaultProcessRunner, type ProcessRunner } from "./process-runner.js";
 
+const MIN_PYTHON_MAJOR = 3;
+const MIN_PYTHON_MINOR = 10;
+
 export interface DoctorOptions {
   json?: boolean;
   pythonPath?: string;
@@ -47,6 +50,7 @@ export async function runDoctor(
   const config = context.resolveConfig(overrides);
   const paths = context.resolvePaths(overrides);
   const checks: DoctorCheck[] = [];
+  let pythonCanRunWorker = false;
 
   const versionProbe = await safeCheck(async () => {
     const result = await processRunner(config.pythonPath, ["--version"]);
@@ -56,10 +60,17 @@ export async function runDoctor(
     return result;
   });
   if (versionProbe.ok) {
+    const versionText = (versionProbe.value.stdout || versionProbe.value.stderr).trim();
+    const parsedVersion = parsePythonVersion(versionText);
+    const unsupportedVersion = parsedVersion && !isSupportedPythonVersion(parsedVersion);
+    pythonCanRunWorker = !unsupportedVersion;
+
     checks.push({
       id: "python-available",
-      status: "ok",
-      message: `Python executable responded: ${(versionProbe.value.stdout || versionProbe.value.stderr).trim()}`,
+      status: unsupportedVersion ? "error" : "ok",
+      message: unsupportedVersion
+        ? `Python executable responded: ${versionText}, but Materials Lab requires Python >=${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}.`
+        : `Python executable responded: ${versionText}`,
     });
   } else {
     checks.push({
@@ -89,12 +100,20 @@ export async function runDoctor(
       : formatErrorForTool(workspaceCheck.error),
   });
 
-  const workerCheck = await safeCheck(async () => context.getBridge(overrides).ping());
-  checks.push({
-    id: "worker-health",
-    status: workerCheck.ok ? "ok" : "error",
-    message: workerCheck.ok ? workerCheck.value.summary : formatErrorForTool(workerCheck.error),
-  });
+  if (pythonCanRunWorker) {
+    const workerCheck = await safeCheck(async () => context.getBridge(overrides).ping());
+    checks.push({
+      id: "worker-health",
+      status: workerCheck.ok ? "ok" : "error",
+      message: workerCheck.ok ? workerCheck.value.summary : formatErrorForTool(workerCheck.error),
+    });
+  } else {
+    checks.push({
+      id: "worker-health",
+      status: "error",
+      message: `Skipped because Materials Lab requires Python >=${MIN_PYTHON_MAJOR}.${MIN_PYTHON_MINOR}.`,
+    });
+  }
 
   checks.push({
     id: "mp-api-key",
@@ -178,4 +197,24 @@ async function safeCheck<T>(check: () => Promise<T>): Promise<{ ok: true; value:
   } catch (error) {
     return { ok: false, error };
   }
+}
+
+function parsePythonVersion(value: string): { major: number; minor: number } | undefined {
+  const match = value.match(/Python\s+(\d+)\.(\d+)/i);
+  if (!match) {
+    return undefined;
+  }
+
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+  };
+}
+
+function isSupportedPythonVersion(version: { major: number; minor: number }): boolean {
+  if (version.major > MIN_PYTHON_MAJOR) {
+    return true;
+  }
+
+  return version.major === MIN_PYTHON_MAJOR && version.minor >= MIN_PYTHON_MINOR;
 }

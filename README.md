@@ -7,7 +7,7 @@ Native OpenClaw plugin for autonomous materials-science research. It lets an Ope
 This plugin is for OpenClaw users who already have the gateway running and want a local, inspectable workflow for materials research. It assumes:
 
 - OpenClaw is installed and working.
-- You are comfortable configuring a local Python environment.
+- You are comfortable configuring a local Python 3.10+ environment.
 - You may want live Materials Project access, but you still want sensible offline behavior for testing and development.
 
 ## What The Plugin Does
@@ -72,7 +72,7 @@ Add or update the plugin entry in `~/.openclaw/openclaw.json`:
       "materials-lab": {
         "enabled": true,
         "config": {
-          "pythonPath": "python3",
+          "pythonPath": "python3.12",
           "mpApiKey": "mp-your-key-here",
           "workspaceRoot": "~/.openclaw/materials-lab",
           "cacheDir": "~/.openclaw/materials-lab/cache",
@@ -116,7 +116,7 @@ The default setup command creates a virtual environment at `<workspaceRoot>/.ven
 ### Manual Python Setup
 
 ```bash
-python3 -m venv ~/.openclaw/materials-lab/.venv
+python3.12 -m venv ~/.openclaw/materials-lab/.venv
 ~/.openclaw/materials-lab/.venv/bin/pip install -r python/requirements.txt
 ```
 
@@ -170,6 +170,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 ### `openclaw materials doctor` shows Python worker errors
 
 - Confirm `pythonPath` points to a real interpreter.
+- Confirm `pythonPath` points to Python 3.10 or newer.
 - Re-run `openclaw materials setup-python`.
 - If you use a custom environment, install `python/requirements.txt` into that interpreter.
 

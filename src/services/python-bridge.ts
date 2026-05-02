@@ -1,7 +1,8 @@
-import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
 
 import { createBridgeRequest, parseBridgeResponse } from "../core/bridge-protocol.js";
 import { ConfigurationError, PythonBridgeError } from "../core/errors.js";
@@ -97,94 +98,45 @@ export class PythonBridgeService {
 
     const request = createBridgeRequest(action, payload);
 
-    return new Promise<BridgeSuccess<TData>>((resolve, reject) => {
-      const child = spawn(pythonPath, ["-m", "materials_lab.worker"], {
+    let result: Awaited<ReturnType<typeof runCommandWithTimeout>>;
+    try {
+      result = await runCommandWithTimeout([pythonPath, "-m", "materials_lab.worker"], {
         cwd: this.pluginRoot,
         env: {
-          ...process.env,
           PYTHONPATH: mergePythonPath(this.pythonModuleRoot, process.env.PYTHONPATH),
           MATERIALS_PROJECT_API_KEY: this.config.mpApiKey,
           MATERIALS_LAB_WORKSPACE_ROOT: this.workspacePaths.workspaceRoot,
           MATERIALS_LAB_CACHE_DIR: this.workspacePaths.cacheDir,
         },
-        stdio: ["pipe", "pipe", "pipe"],
+        input: JSON.stringify(request),
+        timeoutMs,
       });
-
-      let stdout = "";
-      let stderr = "";
-      let settled = false;
-
-      const timeout = setTimeout(() => {
-        child.kill("SIGKILL");
-        if (!settled) {
-          settled = true;
-          reject(
-            new PythonBridgeError(`Python worker timed out after ${timeoutMs} ms.`, {
-              hint: "Reduce the requested workload or inspect the Python environment with `openclaw materials doctor`.",
-              stderr,
-              details: { action, timeoutMs },
-            }),
-          );
-        }
-      }, timeoutMs);
-
-      child.stdout.setEncoding("utf8");
-      child.stderr.setEncoding("utf8");
-      child.stdout.on("data", (chunk) => {
-        stdout += chunk;
+    } catch (error) {
+      throw new PythonBridgeError(`Failed to start Python worker using ${pythonPath}.`, {
+        hint: "Check pythonPath and run `openclaw materials doctor` for environment diagnostics.",
+        cause: error,
       });
-      child.stderr.on("data", (chunk) => {
-        stderr += chunk;
+    }
+
+    this.logger.debug("Materials Lab bridge request sent.", { action, requestId: request.requestId });
+
+    if (result.termination === "timeout" || result.termination === "no-output-timeout") {
+      throw new PythonBridgeError(`Python worker timed out after ${timeoutMs} ms.`, {
+        hint: "Reduce the requested workload or inspect the Python environment with `openclaw materials doctor`.",
+        stderr: result.stderr,
+        details: { action, timeoutMs },
       });
+    }
 
-      child.on("error", (error) => {
-        clearTimeout(timeout);
-        if (settled) {
-          return;
-        }
-
-        settled = true;
-        reject(
-          new PythonBridgeError(`Failed to start Python worker using ${pythonPath}.`, {
-            hint: "Check pythonPath and run `openclaw materials doctor` for environment diagnostics.",
-            stderr,
-            cause: error,
-          }),
-        );
+    if (!result.stdout.trim() && result.code !== 0) {
+      throw new PythonBridgeError(`Python worker exited with code ${result.code ?? "unknown"}.`, {
+        hint: "Inspect stderr output or run `openclaw materials doctor`.",
+        stderr: result.stderr,
+        details: { action, code: result.code },
       });
+    }
 
-      child.on("close", (code) => {
-        clearTimeout(timeout);
-
-        if (settled) {
-          return;
-        }
-
-        settled = true;
-
-        if (!stdout.trim() && code !== 0) {
-          reject(
-            new PythonBridgeError(`Python worker exited with code ${code ?? "unknown"}.`, {
-              hint: "Inspect stderr output or run `openclaw materials doctor`.",
-              stderr,
-              details: { action, code },
-            }),
-          );
-          return;
-        }
-
-        try {
-          const parsed = parseBridgeResponse<TData>(stdout, stderr);
-          resolve(parsed);
-        } catch (error) {
-          reject(error);
-        }
-      });
-
-      child.stdin.write(JSON.stringify(request));
-      child.stdin.end();
-      this.logger.debug("Materials Lab bridge request sent.", { action, requestId: request.requestId });
-    });
+    return parseBridgeResponse<TData>(result.stdout, result.stderr);
   }
 }
 
