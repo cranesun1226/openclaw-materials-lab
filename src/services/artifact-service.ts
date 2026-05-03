@@ -55,6 +55,10 @@ export class ArtifactService {
     const ext = path.extname(targetPath).toLowerCase();
     const label = path.basename(targetPath);
 
+    if (ext === ".json" && !targetPath.startsWith(this.paths.structuresDir)) {
+      return { label, path: targetPath, kind: "json" };
+    }
+
     if (targetPath.startsWith(this.paths.reportsDir)) {
       return { label, path: targetPath, kind: "report" };
     }
@@ -69,10 +73,6 @@ export class ArtifactService {
 
     if (targetPath.startsWith(this.paths.plotsDir) || [".png", ".svg", ".pdf"].includes(ext)) {
       return { label, path: targetPath, kind: "plot" };
-    }
-
-    if (ext === ".json") {
-      return { label, path: targetPath, kind: "json" };
     }
 
     if ([".md", ".txt", ".log"].includes(ext)) {

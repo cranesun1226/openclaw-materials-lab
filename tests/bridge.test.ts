@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -41,5 +41,47 @@ describe("Python bridge", () => {
     expect(search.data.usedOfflineData).toBe(true);
     expect(search.data.candidates.length).toBeGreaterThan(0);
     expect(search.data.candidates[0]?.source).toBe("mock");
+  });
+
+  it("plans an approval-gated research loop", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-plan-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    const artifactDir = path.join(tempDir, "reports", "research-loop-plans");
+
+    const result = await bridge.planResearchLoop({
+      artifactDir,
+      criteria: { preset: "high-k-dielectric" },
+      budget: { maxCandidates: 1, maxCalculations: 3, maxWallTimeHours: 20 },
+      candidates: [
+        {
+          materialId: "mp-mock-hfo2",
+          formula: "HfO2",
+          source: "mock",
+          score: 0.9,
+          rank: 1,
+          reasons: ["test"],
+          domainEvidence: {
+            preset: "high-k-dielectric",
+            tier: "proxy-shortlist",
+            sourceLevel: "proxy-only",
+            missingProperties: ["dielectricTotal", "bandOffsetElectronEv"],
+          },
+        },
+      ],
+    });
+
+    expect(result.data.plan.executionStatus).toBe("planned-not-started");
+    expect(result.data.plan.calculationQueue).toBeDefined();
+    expect(result.artifacts).toContain(result.data.manifestPath);
+    expect(await readFile(result.data.reportPath, "utf8")).toContain("Approval Gates");
   });
 });

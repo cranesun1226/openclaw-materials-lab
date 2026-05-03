@@ -53,6 +53,8 @@ const RankedCandidateSchema = Type.Object(
     powerFactorUwCmK2: Type.Optional(Type.Number({ minimum: 0 })),
     latticeThermalConductivityWmK: Type.Optional(Type.Number({ minimum: 0 })),
     carrierConcentrationCm3: Type.Optional(Type.Number({ minimum: 0 })),
+    propertyProvenance: Type.Optional(Type.Record(Type.String(), Type.Any())),
+    calculationStatus: Type.Optional(Type.Record(Type.String(), Type.Any())),
   },
   { additionalProperties: false },
 );

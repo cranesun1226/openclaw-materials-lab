@@ -1,0 +1,414 @@
+{
+  "approvalGates": [
+    {
+      "blocks": [
+        "mp-1143-structure-preflight",
+        "mp-1143-dfpt-dielectric-tensor",
+        "mp-1143-band-alignment",
+        "mp-1143-interface-reaction",
+        "mp-1143-phonon-stability",
+        "mp-2652-structure-preflight",
+        "mp-2652-dfpt-dielectric-tensor",
+        "mp-2652-band-alignment",
+        "mp-2652-interface-reaction",
+        "mp-2652-phonon-stability"
+      ],
+      "gateId": "gate-0-human-plan-review",
+      "prompt": "Review objective, selected candidates, budget, and stop criteria before any calculation is executed.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-1143-dfpt-dielectric-tensor",
+        "mp-1143-band-alignment",
+        "mp-1143-interface-reaction",
+        "mp-1143-phonon-stability",
+        "mp-2652-dfpt-dielectric-tensor",
+        "mp-2652-band-alignment",
+        "mp-2652-interface-reaction",
+        "mp-2652-phonon-stability"
+      ],
+      "budgetCheck": {
+        "computeBudgetUsd": null,
+        "estimatedWallTimeHours": 84.1,
+        "maxWallTimeHours": 48.0,
+        "plannedCalculations": 10
+      },
+      "gateId": "gate-1-budget-confirmation",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-1143-dfpt-dielectric-tensor",
+        "mp-1143-phonon-stability",
+        "mp-2652-dfpt-dielectric-tensor",
+        "mp-2652-phonon-stability"
+      ],
+      "gateId": "gate-2-expensive-method-approval",
+      "prompt": "Approve expensive DFPT/AIMD/phonon/defect calculations explicitly.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "update-shortlist",
+        "export-final-report"
+      ],
+      "gateId": "gate-3-rerank-acceptance",
+      "prompt": "Accept parsed property results before they replace the proxy shortlist.",
+      "required": true,
+      "status": "pending"
+    }
+  ],
+  "autonomyBoundary": {
+    "allowedActionsBeforeApproval": [
+      "write-plan-artifacts",
+      "validate-input-artifacts"
+    ],
+    "approvalPolicy": "approval-required",
+    "blockedActionsBeforeApproval": [
+      "run-dft",
+      "submit-hpc-job",
+      "call-paid-compute-service",
+      "overwrite-candidate-ranking"
+    ],
+    "canExecuteWithoutApproval": false
+  },
+  "budget": {
+    "allowExpensiveCalculations": false,
+    "computeBudgetUsd": null,
+    "maxCalculations": 10,
+    "maxCandidates": 3,
+    "maxLoopIterations": 2,
+    "maxWallTimeHours": 48.0
+  },
+  "calculationQueue": [
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-1143-structure-preflight",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.05,
+      "formula": "Al2O3",
+      "id": "structure-preflight",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-1143",
+      "method": "fetch_structure + structural sanity checks",
+      "priority": "required-preflight",
+      "rationale": "Property calculations need a traceable, normalized input structure.",
+      "status": "planned",
+      "writesProperties": [
+        "structurePath",
+        "cifPath",
+        "structureQuality"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-1143-dfpt-dielectric-tensor",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 12.0,
+      "formula": "Al2O3",
+      "id": "dfpt-dielectric-tensor",
+      "label": "DFPT dielectric tensor",
+      "materialId": "mp-1143",
+      "method": "DFPT electronic + ionic dielectric calculation",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for dielectricTotal, dielectricElectronic.",
+      "status": "planned",
+      "writesProperties": [
+        "dielectricTotal",
+        "dielectricElectronic"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-1143-band-alignment",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 6.0,
+      "formula": "Al2O3",
+      "id": "band-alignment",
+      "label": "Band offsets",
+      "materialId": "mp-1143",
+      "method": "absolute band alignment against target channel",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for bandOffsetElectronEv, bandOffsetHoleEv.",
+      "status": "planned",
+      "writesProperties": [
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-1143-interface-reaction",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 6.0,
+      "formula": "Al2O3",
+      "id": "interface-reaction",
+      "label": "Interface reaction energy",
+      "materialId": "mp-1143",
+      "method": "interface thermodynamics against target channel",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for interfaceReactionEnergyEv.",
+      "status": "planned",
+      "writesProperties": [
+        "interfaceReactionEnergyEv"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-1143-phonon-stability",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 18.0,
+      "formula": "Al2O3",
+      "id": "phonon-stability",
+      "label": "Phonon stability",
+      "materialId": "mp-1143",
+      "method": "phonon or imaginary-mode screen",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for phononStability.",
+      "status": "planned",
+      "writesProperties": [
+        "phononStability"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-2652-structure-preflight",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.05,
+      "formula": "Y2O3",
+      "id": "structure-preflight",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-2652",
+      "method": "fetch_structure + structural sanity checks",
+      "priority": "required-preflight",
+      "rationale": "Property calculations need a traceable, normalized input structure.",
+      "status": "planned",
+      "writesProperties": [
+        "structurePath",
+        "cifPath",
+        "structureQuality"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-2652-dfpt-dielectric-tensor",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 12.0,
+      "formula": "Y2O3",
+      "id": "dfpt-dielectric-tensor",
+      "label": "DFPT dielectric tensor",
+      "materialId": "mp-2652",
+      "method": "DFPT electronic + ionic dielectric calculation",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for dielectricTotal, dielectricElectronic.",
+      "status": "planned",
+      "writesProperties": [
+        "dielectricTotal",
+        "dielectricElectronic"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-2652-band-alignment",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 6.0,
+      "formula": "Y2O3",
+      "id": "band-alignment",
+      "label": "Band offsets",
+      "materialId": "mp-2652",
+      "method": "absolute band alignment against target channel",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for bandOffsetElectronEv, bandOffsetHoleEv.",
+      "status": "planned",
+      "writesProperties": [
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-2652-interface-reaction",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 6.0,
+      "formula": "Y2O3",
+      "id": "interface-reaction",
+      "label": "Interface reaction energy",
+      "materialId": "mp-2652",
+      "method": "interface thermodynamics against target channel",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for interfaceReactionEnergyEv.",
+      "status": "planned",
+      "writesProperties": [
+        "interfaceReactionEnergyEv"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-2652-phonon-stability",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 18.0,
+      "formula": "Y2O3",
+      "id": "phonon-stability",
+      "label": "Phonon stability",
+      "materialId": "mp-2652",
+      "method": "phonon or imaginary-mode screen",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for phononStability.",
+      "status": "planned",
+      "writesProperties": [
+        "phononStability"
+      ]
+    }
+  ],
+  "executionStatus": "planned-not-started",
+  "loopPolicy": {
+    "afterEachIteration": [
+      "parse calculation artifacts into candidate property fields",
+      "rerun materials_compare_candidates with evidenceWeight enabled",
+      "compare domainCoverage against previous iteration",
+      "stop, continue, or request human review based on stopCriteria"
+    ],
+    "maxIterations": 2
+  },
+  "mode": "closed-loop",
+  "objective": "Move the high-k dielectric shortlist from proxy-only evidence to property-backed evidence with explicit approval gates.",
+  "planId": "high-k-dielectric-research-loop-1777798919914",
+  "preset": "high-k-dielectric",
+  "propertySchema": [
+    "dielectricTotal",
+    "dielectricElectronic",
+    "bandOffsetElectronEv",
+    "bandOffsetHoleEv",
+    "interfaceReactionEnergyEv",
+    "phononStability"
+  ],
+  "rerankingPolicy": {
+    "criteriaPatch": {
+      "evidenceWeight": 0.2,
+      "preset": "high-k-dielectric",
+      "screeningLevel": "property-backed-screen"
+    },
+    "promoteWhen": [
+      "domainEvidence.sourceLevel is mixed-property-proxy or property-backed",
+      "domainEvidence.missingCount decreases versus previous iteration",
+      "no fail gate appears in a required safety/stability criterion"
+    ],
+    "tool": "materials_compare_candidates"
+  },
+  "selectedCandidates": [
+    {
+      "domainEvidenceScore": 0.681958,
+      "evidenceTier": "proxy-shortlist",
+      "family": "binary-oxide",
+      "formula": "Al2O3",
+      "materialId": "mp-1143",
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1143",
+      "missingProperties": [
+        "dielectricTotal",
+        "dielectricElectronic",
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv",
+        "interfaceReactionEnergyEv",
+        "phononStability"
+      ],
+      "nextCalculations": [
+        "DFPT dielectric tensor with electronic and ionic components",
+        "band alignment against Si or the intended channel material",
+        "interface reaction energy and oxygen vacancy formation energy",
+        "phonon stability and leakage/effective-mass follow-up for top candidates"
+      ],
+      "plannedCalculations": [
+        "mp-1143-structure-preflight",
+        "mp-1143-dfpt-dielectric-tensor",
+        "mp-1143-band-alignment",
+        "mp-1143-interface-reaction",
+        "mp-1143-phonon-stability"
+      ],
+      "rank": 1,
+      "score": 0.891138,
+      "sourceLevel": "proxy-only"
+    },
+    {
+      "domainEvidenceScore": 0.724672,
+      "evidenceTier": "proxy-shortlist",
+      "family": "binary-oxide",
+      "formula": "Y2O3",
+      "materialId": "mp-2652",
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-2652",
+      "missingProperties": [
+        "dielectricTotal",
+        "dielectricElectronic",
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv",
+        "interfaceReactionEnergyEv",
+        "phononStability"
+      ],
+      "nextCalculations": [
+        "DFPT dielectric tensor with electronic and ionic components",
+        "band alignment against Si or the intended channel material",
+        "interface reaction energy and oxygen vacancy formation energy",
+        "phonon stability and leakage/effective-mass follow-up for top candidates"
+      ],
+      "plannedCalculations": [
+        "mp-2652-structure-preflight",
+        "mp-2652-dfpt-dielectric-tensor",
+        "mp-2652-band-alignment",
+        "mp-2652-interface-reaction",
+        "mp-2652-phonon-stability"
+      ],
+      "rank": 2,
+      "score": 0.856206,
+      "sourceLevel": "proxy-only"
+    },
+    {
+      "domainEvidenceScore": 0.654983,
+      "evidenceTier": "watchlist",
+      "family": "binary-oxide",
+      "formula": "SiO2",
+      "materialId": "mp-733790",
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
+      "missingProperties": [
+        "dielectricTotal",
+        "dielectricElectronic",
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv",
+        "interfaceReactionEnergyEv",
+        "phononStability"
+      ],
+      "nextCalculations": [
+        "DFPT dielectric tensor with electronic and ionic components",
+        "band alignment against Si or the intended channel material",
+        "interface reaction energy and oxygen vacancy formation energy",
+        "phonon stability and leakage/effective-mass follow-up for top candidates"
+      ],
+      "rank": 3,
+      "score": 0.856147,
+      "sourceLevel": "proxy-only"
+    }
+  ],
+  "stopCriteria": [
+    "at least one candidate reaches domainEvidence.tier == research-shortlist",
+    "domainCoverage.sourceLevelCounts.property-backed is nonzero",
+    "budget.maxCalculations or budget.maxWallTimeHours is exhausted",
+    "all candidates retain fail gates after required property calculations",
+    "human reviewer stops the high-k-dielectric loop"
+  ],
+  "warnings": [
+    "Planned calculation wall-time estimate exceeds maxWallTimeHours; trim queue before execution.",
+    "Selected candidates still have 18 missing research-grade property field(s)."
+  ]
+}

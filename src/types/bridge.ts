@@ -4,6 +4,7 @@ export type BridgeAction =
   | "fetch_structure"
   | "analyze_structure"
   | "compare_candidates"
+  | "plan_research_loop"
   | "ase_relax"
   | "batch_screen"
   | "export_report";
@@ -78,6 +79,8 @@ export interface CandidateSummary {
   powerFactorUwCmK2?: number;
   latticeThermalConductivityWmK?: number;
   carrierConcentrationCm3?: number;
+  propertyProvenance?: Record<string, unknown>;
+  calculationStatus?: Record<string, unknown>;
 }
 
 export interface SearchMaterialsPayload {
@@ -131,7 +134,7 @@ export interface AnalyzeStructureResult {
 
 export interface CompareCriteria {
   preset?: "generic" | "solid-electrolyte" | "high-k-dielectric" | "photovoltaic-absorber" | "thermoelectric";
-  screeningLevel?: "technical-smoke" | "proxy-screen" | "research-shortlist" | "validated-candidate";
+  screeningLevel?: "technical-smoke" | "proxy-screen" | "property-backed-screen" | "research-shortlist" | "closed-loop-plan" | "validated-candidate";
   stabilityWeight?: number;
   bandGapWeight?: number;
   densityWeight?: number;
@@ -193,6 +196,31 @@ export interface CompareCandidatesResult {
   diversity?: Record<string, unknown>;
   domainCoverage?: Record<string, unknown>;
   excludedCandidates?: Array<Record<string, unknown>>;
+}
+
+export interface ResearchBudget {
+  maxCandidates?: number;
+  maxCalculations?: number;
+  maxWallTimeHours?: number;
+  computeBudgetUsd?: number;
+  maxLoopIterations?: number;
+  allowExpensiveCalculations?: boolean;
+}
+
+export interface PlanResearchLoopPayload {
+  candidates: ComparedCandidate[];
+  criteria?: CompareCriteria;
+  objective?: string;
+  mode?: "property-backed" | "closed-loop";
+  approvalPolicy?: "plan-only" | "approval-required";
+  budget?: ResearchBudget;
+  artifactDir: string;
+}
+
+export interface PlanResearchLoopResult {
+  plan: Record<string, unknown>;
+  manifestPath: string;
+  reportPath: string;
 }
 
 export interface AseRelaxPayload {

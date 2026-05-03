@@ -1,6 +1,6 @@
 # `@cranesun/openclaw-materials-lab`
 
-Native OpenClaw plugin for autonomous materials-science research. It lets an OpenClaw user describe a research goal in chat and then search candidate materials, fetch structures, analyze them locally, compare options, save research notes, and export a report. Optional heavier workflows such as ASE-based relaxation and batch screening are included behind approval gates.
+Native OpenClaw plugin for autonomous materials-science research. It lets an OpenClaw user describe a research goal in chat and then search candidate materials, fetch structures, analyze them locally, compare options, plan property-backed follow-up calculations, save research notes, and export a report. Optional heavier workflows such as ASE-based relaxation and batch screening are included behind approval gates.
 
 ## Who This Is For
 
@@ -14,7 +14,7 @@ This plugin is for OpenClaw users who already have the gateway running and want 
 
 The plugin provides:
 
-- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, note saving, and report export.
+- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, approval-gated research-loop planning, note saving, and report export.
 - Optional approval-gated tools for ASE relaxation and batch screening.
 - A bundled research skill under `skills/material-science-research`.
 - A local Python worker under `python/` using stdin/stdout JSON requests.
@@ -151,6 +151,7 @@ If no key is present, the plugin still works in offline/mock mode for testing. L
 - "Search lithium phosphate cathode materials, fetch the top structures, and summarize the most promising candidates."
 - "Analyze the structure of `mp-149`, explain the coordination environment at a high level, and save a note."
 - "Export a markdown report comparing these three materials for thermal stability and insulating behavior."
+- "Use the ranked candidates to plan a property-backed high-k dielectric research loop with a 12-calculation budget."
 - "Prepare a batch screening plan, but ask me before running expensive relaxation jobs."
 
 ## Workspace Layout
@@ -197,6 +198,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - There is no shell passthrough or arbitrary command execution surface in tool handlers.
 - File writes are restricted to `workspaceRoot`.
 - Expensive or write-heavy workflows request approval before execution.
+- `materials_plan_research_loop` writes a plan and manifest only. It marks DFT/HPC/paid-compute work as blocked until a human explicitly approves a later execution workflow.
 - `mpApiKey` is marked sensitive in plugin UI hints and is also supported through environment variables.
 
 ## Development Workflow
@@ -220,6 +222,7 @@ Key development notes:
 Likely follow-up work after v1:
 
 - richer Materials Project query support and better search ranking,
+- execution adapters for DFPT, NEB, AIMD, optical absorption, defect, and transport workflows,
 - more robust pymatgen structural descriptors and plotting,
 - resumable batch workflows,
 - richer report templating,

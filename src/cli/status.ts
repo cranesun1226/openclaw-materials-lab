@@ -49,6 +49,7 @@ export function runStatus(context: MaterialsPluginContext, options: StatusOption
       materials_fetch_structure: "required",
       materials_analyze_structure: "required",
       materials_compare_candidates: "required",
+      materials_plan_research_loop: "required",
       materials_save_note: "required",
       materials_export_report: "required",
       materials_ase_relax: config.enableAseTools

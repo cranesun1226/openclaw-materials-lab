@@ -22,6 +22,8 @@ import type {
   ExportReportResult,
   FetchStructurePayload,
   FetchStructureResult,
+  PlanResearchLoopPayload,
+  PlanResearchLoopResult,
   SearchMaterialsPayload,
   SearchMaterialsResult,
 } from "../types/bridge.js";
@@ -69,6 +71,10 @@ export class PythonBridgeService {
 
   public async compareCandidates(payload: CompareCandidatesPayload): Promise<BridgeSuccess<CompareCandidatesResult>> {
     return this.call("compare_candidates", payload);
+  }
+
+  public async planResearchLoop(payload: PlanResearchLoopPayload): Promise<BridgeSuccess<PlanResearchLoopResult>> {
+    return this.call("plan_research_loop", payload);
   }
 
   public async aseRelax(payload: AseRelaxPayload): Promise<BridgeSuccess<AseRelaxResult>> {

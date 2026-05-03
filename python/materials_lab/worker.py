@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import sys
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -63,6 +64,7 @@ def dispatch(*, action: str, request_id: str, payload: dict[str, Any]) -> dict[s
         "fetch_structure": lambda: handle_fetch_structure(request_id=request_id, payload=payload, api_key=api_key),
         "analyze_structure": lambda: handle_analyze_structure(request_id=request_id, payload=payload, api_key=api_key),
         "compare_candidates": lambda: handle_compare_candidates(request_id=request_id, payload=payload),
+        "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload),
         "ase_relax": lambda: handle_ase_relax(request_id=request_id, payload=payload, api_key=api_key),
         "batch_screen": lambda: handle_batch_screen(request_id=request_id, payload=payload, api_key=api_key),
         "export_report": lambda: handle_export_report(request_id=request_id, payload=payload),
@@ -232,6 +234,47 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
     )
 
 
+def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    candidates = payload.get("candidates")
+    if not isinstance(candidates, list) or not candidates:
+        raise WorkerError("INVALID_PARAMS", "plan_research_loop requires at least one candidate object.")
+
+    criteria = _prepare_compare_criteria(ensure_dict(payload.get("criteria") or {}, field="criteria"))
+    budget = _normalize_research_budget(ensure_dict(payload.get("budget") or {}, field="budget"))
+    objective = ensure_string(payload.get("objective"), field="objective", required=False) or _default_research_objective(criteria)
+    mode = str(payload.get("mode") or "property-backed").strip().lower()
+    approval_policy = str(payload.get("approvalPolicy") or "approval-required").strip().lower()
+
+    plan = _build_research_loop_plan(
+        candidates=candidates,
+        criteria=criteria,
+        budget=budget,
+        objective=objective,
+        mode=mode,
+        approval_policy=approval_policy,
+    )
+    manifest_path = artifact_dir / f"{plan['planId']}.json"
+    report_path = artifact_dir / f"{plan['planId']}.md"
+    manifest_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(_research_plan_markdown(plan), encoding="utf-8")
+    data = {
+        "plan": plan,
+        "manifestPath": str(manifest_path),
+        "reportPath": str(report_path),
+    }
+    warnings = list(plan.get("warnings") or [])
+    return success(
+        action="plan_research_loop",
+        request_id=request_id,
+        summary=f"Planned {len(plan['calculationQueue'])} approval-gated research calculation(s) for {len(plan['selectedCandidates'])} candidate(s).",
+        data=data,
+        artifacts=[str(manifest_path), str(report_path)],
+        warnings=warnings,
+    )
+
+
 def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = ensure_string(payload.get("artifactDir"), field="artifactDir")
     structure_path = ensure_string(payload.get("structurePath"), field="structurePath", required=False)
@@ -345,6 +388,368 @@ def handle_export_report(*, request_id: str, payload: dict[str, Any]) -> dict[st
         data={"outputPath": output_file, "references": references},
         artifacts=[output_file],
     )
+
+
+def _normalize_research_budget(budget: dict[str, Any]) -> dict[str, Any]:
+    max_candidates = int(budget.get("maxCandidates") or 5)
+    max_calculations = int(budget.get("maxCalculations") or 12)
+    max_wall_time_hours = float(budget.get("maxWallTimeHours") or 48.0)
+    compute_budget_usd = budget.get("computeBudgetUsd")
+    return {
+        "maxCandidates": max(1, min(max_candidates, 50)),
+        "maxCalculations": max(1, min(max_calculations, 500)),
+        "maxWallTimeHours": max(0.25, max_wall_time_hours),
+        "computeBudgetUsd": float(compute_budget_usd) if isinstance(compute_budget_usd, (int, float)) else None,
+        "maxLoopIterations": max(1, min(int(budget.get("maxLoopIterations") or 2), 20)),
+        "allowExpensiveCalculations": bool(budget.get("allowExpensiveCalculations", False)),
+    }
+
+
+def _default_research_objective(criteria: dict[str, Any]) -> str:
+    preset = str(criteria.get("preset") or "generic")
+    return {
+        "solid-electrolyte": "Promote proxy solid-electrolyte candidates into a property-backed shortlist.",
+        "high-k-dielectric": "Promote proxy high-k dielectric candidates into a property-backed gate-dielectric shortlist.",
+        "photovoltaic-absorber": "Promote proxy photovoltaic absorber candidates into a property-backed device-material shortlist.",
+        "thermoelectric": "Promote proxy thermoelectric candidates into a property-backed transport shortlist.",
+    }.get(preset, "Promote proxy candidates into a property-backed materials shortlist.")
+
+
+def _build_research_loop_plan(
+    *,
+    candidates: list[dict[str, Any]],
+    criteria: dict[str, Any],
+    budget: dict[str, Any],
+    objective: str,
+    mode: str,
+    approval_policy: str,
+) -> dict[str, Any]:
+    preset = str(criteria.get("preset") or _infer_plan_preset(candidates) or "generic")
+    selected = _select_research_candidates(candidates, budget)
+    plan_id = f"{preset}-research-loop-{int(time.time() * 1000)}"
+    queue = _calculation_queue(selected, preset, budget)
+    approval_gates = _approval_gates(queue, budget, approval_policy)
+    warnings = _research_plan_warnings(selected, queue, budget, approval_policy)
+    return {
+        "planId": plan_id,
+        "mode": mode if mode in {"property-backed", "closed-loop"} else "property-backed",
+        "preset": preset,
+        "objective": objective,
+        "executionStatus": "planned-not-started",
+        "autonomyBoundary": {
+            "approvalPolicy": approval_policy if approval_policy in {"plan-only", "approval-required"} else "approval-required",
+            "canExecuteWithoutApproval": False,
+            "allowedActionsBeforeApproval": ["write-plan-artifacts", "validate-input-artifacts"],
+            "blockedActionsBeforeApproval": [
+                "run-dft",
+                "submit-hpc-job",
+                "call-paid-compute-service",
+                "overwrite-candidate-ranking",
+            ],
+        },
+        "budget": budget,
+        "selectedCandidates": selected,
+        "calculationQueue": queue,
+        "approvalGates": approval_gates,
+        "rerankingPolicy": _reranking_policy(preset),
+        "loopPolicy": {
+            "maxIterations": budget["maxLoopIterations"],
+            "afterEachIteration": [
+                "parse calculation artifacts into candidate property fields",
+                "rerun materials_compare_candidates with evidenceWeight enabled",
+                "compare domainCoverage against previous iteration",
+                "stop, continue, or request human review based on stopCriteria",
+            ],
+        },
+        "stopCriteria": _stop_criteria(preset),
+        "propertySchema": _domain_property_schema(preset),
+        "warnings": warnings,
+    }
+
+
+def _infer_plan_preset(candidates: list[dict[str, Any]]) -> str:
+    for candidate in candidates:
+        evidence = candidate.get("domainEvidence")
+        if isinstance(evidence, dict) and evidence.get("preset"):
+            return str(evidence["preset"])
+    for candidate in candidates:
+        level = candidate.get("screeningLevel")
+        if isinstance(level, str) and "solid" in level:
+            return "solid-electrolyte"
+    return "generic"
+
+
+def _select_research_candidates(candidates: list[dict[str, Any]], budget: dict[str, Any]) -> list[dict[str, Any]]:
+    selected = []
+    for candidate in candidates[: int(budget["maxCandidates"])]:
+        evidence = candidate.get("domainEvidence") if isinstance(candidate.get("domainEvidence"), dict) else {}
+        selected.append({
+            "rank": candidate.get("rank"),
+            "materialId": candidate.get("materialId"),
+            "formula": candidate.get("formula"),
+            "family": candidate.get("family"),
+            "score": candidate.get("score"),
+            "domainEvidenceScore": candidate.get("domainEvidenceScore") or evidence.get("score"),
+            "evidenceTier": evidence.get("tier", "unknown"),
+            "sourceLevel": evidence.get("sourceLevel", "unknown"),
+            "missingProperties": list(evidence.get("missingProperties") or []),
+            "nextCalculations": list(evidence.get("nextCalculations") or []),
+            "materialsProjectUrl": candidate.get("materialsProjectUrl"),
+        })
+    return selected
+
+
+def _calculation_queue(selected: list[dict[str, Any]], preset: str, budget: dict[str, Any]) -> list[dict[str, Any]]:
+    recipes = _calculation_recipes(preset)
+    queue: list[dict[str, Any]] = []
+    remaining = int(budget["maxCalculations"])
+    for candidate in selected:
+        if remaining <= 0:
+            break
+        missing = set(str(item) for item in candidate.get("missingProperties") or [])
+        candidate_steps = []
+        for recipe in recipes:
+            if remaining <= 0:
+                break
+            writes = set(recipe.get("writesProperties") or [])
+            priority = str(recipe.get("priority") or "normal")
+            if missing and not writes.intersection(missing) and priority != "required-preflight":
+                continue
+            step = dict(recipe)
+            step["calculationId"] = f"{candidate.get('materialId', 'unknown')}-{recipe['id']}"
+            step["materialId"] = candidate.get("materialId")
+            step["formula"] = candidate.get("formula")
+            expensive_blocked = recipe.get("costClass") == "expensive" and not budget.get("allowExpensiveCalculations")
+            step["status"] = "blocked-pending-expensive-approval" if expensive_blocked else "planned"
+            if expensive_blocked:
+                step["blockedReason"] = "budget.allowExpensiveCalculations is false; explicit approval is required before execution."
+            step["approvalRequired"] = True
+            step["consumesBudget"] = recipe.get("costClass") != "metadata"
+            candidate_steps.append(step)
+            queue.append(step)
+            remaining -= 1
+        candidate["plannedCalculations"] = [step["calculationId"] for step in candidate_steps]
+    return queue
+
+
+def _calculation_recipes(preset: str) -> list[dict[str, Any]]:
+    universal_preflight = {
+        "id": "structure-preflight",
+        "label": "Structure fetch and normalization preflight",
+        "priority": "required-preflight",
+        "method": "fetch_structure + structural sanity checks",
+        "costClass": "metadata",
+        "estimatedWallTimeHours": 0.05,
+        "writesProperties": ["structurePath", "cifPath", "structureQuality"],
+        "rationale": "Property calculations need a traceable, normalized input structure.",
+    }
+    by_preset = {
+        "solid-electrolyte": [
+            universal_preflight,
+            _recipe("li-migration-barrier", "Li migration barrier", "NEB or bond-valence pathway screen", "medium", 8.0, ["migrationBarrierEv"]),
+            _recipe("aimd-ionic-conductivity", "Finite-temperature ionic conductivity", "AIMD or surrogate conductivity workflow", "expensive", 24.0, ["ionicConductivityScm"]),
+            _recipe("electrochemical-window", "Electrochemical stability window", "grand-potential phase stability", "medium", 4.0, ["electrochemicalWindowV"]),
+            _recipe("interface-stability", "Electrode interface reaction", "interfacial reaction energy screen", "medium", 5.0, ["interfaceReactionEnergyEv"]),
+        ],
+        "high-k-dielectric": [
+            universal_preflight,
+            _recipe("dfpt-dielectric-tensor", "DFPT dielectric tensor", "DFPT electronic + ionic dielectric calculation", "expensive", 12.0, ["dielectricTotal", "dielectricElectronic"]),
+            _recipe("band-alignment", "Band offsets", "absolute band alignment against target channel", "medium", 6.0, ["bandOffsetElectronEv", "bandOffsetHoleEv"]),
+            _recipe("interface-reaction", "Interface reaction energy", "interface thermodynamics against target channel", "medium", 6.0, ["interfaceReactionEnergyEv"]),
+            _recipe("phonon-stability", "Phonon stability", "phonon or imaginary-mode screen", "expensive", 18.0, ["phononStability"]),
+        ],
+        "photovoltaic-absorber": [
+            universal_preflight,
+            _recipe("optical-absorption", "Optical absorption", "direct/indirect gap and absorption spectrum", "medium", 8.0, ["absorptionCoefficientCm1", "directBandGapEv"]),
+            _recipe("band-edge-alignment", "Band-edge alignment", "absolute CBM/VBM alignment", "medium", 5.0, ["cbmEv", "vbmEv"]),
+            _recipe("defect-tolerance", "Defect tolerance", "dominant intrinsic defect formation-energy screen", "expensive", 24.0, ["defectToleranceScore"]),
+            _recipe("carrier-masses", "Carrier effective masses", "band curvature effective-mass calculation", "medium", 4.0, ["effectiveMassElectron", "effectiveMassHole"]),
+        ],
+        "thermoelectric": [
+            universal_preflight,
+            _recipe("boltzmann-transport", "Boltzmann transport", "Seebeck and power-factor sweep", "medium", 8.0, ["seebeckUvK", "powerFactorUwCmK2"]),
+            _recipe("lattice-thermal-conductivity", "Lattice thermal conductivity", "phonon/BTE or surrogate kappa lattice", "expensive", 30.0, ["latticeThermalConductivityWmK"]),
+            _recipe("carrier-concentration-sweep", "Carrier concentration sweep", "doping-dependent transport sweep", "medium", 8.0, ["carrierConcentrationCm3"]),
+            _recipe("phonon-stability", "High-temperature stability", "phonon/dynamic stability screen", "expensive", 18.0, ["phononStability"]),
+        ],
+    }
+    return by_preset.get(preset, [
+        universal_preflight,
+        _recipe("domain-property-model", "Domain property model", "domain-specific property calculation", "medium", 6.0, ["domainSpecificProperty"]),
+    ])
+
+
+def _recipe(id_: str, label: str, method: str, cost_class: str, hours: float, writes: list[str]) -> dict[str, Any]:
+    return {
+        "id": id_,
+        "label": label,
+        "priority": "property",
+        "method": method,
+        "costClass": cost_class,
+        "estimatedWallTimeHours": hours,
+        "writesProperties": writes,
+        "rationale": f"Promotes proxy evidence into property-backed evidence for {', '.join(writes)}.",
+    }
+
+
+def _approval_gates(queue: list[dict[str, Any]], budget: dict[str, Any], approval_policy: str) -> list[dict[str, Any]]:
+    total_hours = round(sum(float(step.get("estimatedWallTimeHours") or 0.0) for step in queue), 3)
+    expensive = [step["calculationId"] for step in queue if step.get("costClass") == "expensive"]
+    return [
+        {
+            "gateId": "gate-0-human-plan-review",
+            "status": "pending",
+            "required": approval_policy != "plan-only",
+            "blocks": [step["calculationId"] for step in queue],
+            "prompt": "Review objective, selected candidates, budget, and stop criteria before any calculation is executed.",
+        },
+        {
+            "gateId": "gate-1-budget-confirmation",
+            "status": "pending",
+            "required": True,
+            "blocks": [step["calculationId"] for step in queue if step.get("consumesBudget")],
+            "budgetCheck": {
+                "plannedCalculations": len(queue),
+                "estimatedWallTimeHours": total_hours,
+                "maxWallTimeHours": budget["maxWallTimeHours"],
+                "computeBudgetUsd": budget.get("computeBudgetUsd"),
+            },
+        },
+        {
+            "gateId": "gate-2-expensive-method-approval",
+            "status": "pending",
+            "required": bool(expensive),
+            "blocks": expensive,
+            "prompt": "Approve expensive DFPT/AIMD/phonon/defect calculations explicitly.",
+        },
+        {
+            "gateId": "gate-3-rerank-acceptance",
+            "status": "pending",
+            "required": True,
+            "blocks": ["update-shortlist", "export-final-report"],
+            "prompt": "Accept parsed property results before they replace the proxy shortlist.",
+        },
+    ]
+
+
+def _reranking_policy(preset: str) -> dict[str, Any]:
+    return {
+        "tool": "materials_compare_candidates",
+        "criteriaPatch": {
+            "preset": preset,
+            "screeningLevel": "property-backed-screen",
+            "evidenceWeight": 0.20,
+        },
+        "promoteWhen": [
+            "domainEvidence.sourceLevel is mixed-property-proxy or property-backed",
+            "domainEvidence.missingCount decreases versus previous iteration",
+            "no fail gate appears in a required safety/stability criterion",
+        ],
+    }
+
+
+def _stop_criteria(preset: str) -> list[str]:
+    return [
+        "at least one candidate reaches domainEvidence.tier == research-shortlist",
+        "domainCoverage.sourceLevelCounts.property-backed is nonzero",
+        "budget.maxCalculations or budget.maxWallTimeHours is exhausted",
+        "all candidates retain fail gates after required property calculations",
+        f"human reviewer stops the {preset} loop",
+    ]
+
+
+def _domain_property_schema(preset: str) -> list[str]:
+    return {
+        "solid-electrolyte": ["ionicConductivityScm", "migrationBarrierEv", "electrochemicalWindowV", "interfaceReactionEnergyEv"],
+        "high-k-dielectric": ["dielectricTotal", "dielectricElectronic", "bandOffsetElectronEv", "bandOffsetHoleEv", "interfaceReactionEnergyEv", "phononStability"],
+        "photovoltaic-absorber": ["absorptionCoefficientCm1", "directBandGapEv", "cbmEv", "vbmEv", "defectToleranceScore", "effectiveMassElectron", "effectiveMassHole"],
+        "thermoelectric": ["seebeckUvK", "powerFactorUwCmK2", "latticeThermalConductivityWmK", "carrierConcentrationCm3", "phononStability"],
+    }.get(preset, ["domainSpecificProperty"])
+
+
+def _research_plan_warnings(
+    selected: list[dict[str, Any]],
+    queue: list[dict[str, Any]],
+    budget: dict[str, Any],
+    approval_policy: str,
+) -> list[str]:
+    warnings = []
+    if approval_policy != "approval-required":
+        warnings.append("Approval policy is not approval-required; the generated plan still marks compute execution as blocked until explicit approval.")
+    if not queue:
+        warnings.append("No calculations were queued; candidates may already have property evidence or maxCalculations is too small.")
+    estimated_hours = sum(float(step.get("estimatedWallTimeHours") or 0.0) for step in queue)
+    if estimated_hours > float(budget["maxWallTimeHours"]):
+        warnings.append("Planned calculation wall-time estimate exceeds maxWallTimeHours; trim queue before execution.")
+    if any(step.get("status") == "blocked-pending-expensive-approval" for step in queue):
+        warnings.append("Expensive calculations are present but blocked until allowExpensiveCalculations and human approval are explicit.")
+    missing_total = sum(len(candidate.get("missingProperties") or []) for candidate in selected)
+    if missing_total:
+        warnings.append(f"Selected candidates still have {missing_total} missing research-grade property field(s).")
+    return warnings
+
+
+def _research_plan_markdown(plan: dict[str, Any]) -> str:
+    lines = [
+        f"# Research Loop Plan: {plan['preset']}",
+        "",
+        "## Objective",
+        "",
+        str(plan["objective"]),
+        "",
+        "## Autonomy Boundary",
+        "",
+        f"- Execution status: `{plan['executionStatus']}`",
+        f"- Approval policy: `{plan['autonomyBoundary']['approvalPolicy']}`",
+        f"- Can execute without approval: `{plan['autonomyBoundary']['canExecuteWithoutApproval']}`",
+        "",
+        "## Selected Candidates",
+        "",
+        "| Rank | Material | Formula | Evidence Tier | Source Level | Missing Properties | Planned Calculations |",
+        "| ---: | --- | --- | --- | --- | --- | --- |",
+    ]
+    for candidate in plan["selectedCandidates"]:
+        missing = ", ".join(candidate.get("missingProperties") or []) or "-"
+        planned = ", ".join(candidate.get("plannedCalculations") or []) or "-"
+        lines.append(
+            f"| {candidate.get('rank', '')} | {candidate.get('materialId', '')} | {candidate.get('formula', '')} | "
+            f"{candidate.get('evidenceTier', '')} | {candidate.get('sourceLevel', '')} | {missing} | {planned} |"
+        )
+    lines.extend([
+        "",
+        "## Calculation Queue",
+        "",
+        "| ID | Material | Label | Method | Cost | Est. Hours | Writes |",
+        "| --- | --- | --- | --- | --- | ---: | --- |",
+    ])
+    for step in plan["calculationQueue"]:
+        lines.append(
+            f"| {step['calculationId']} | {step.get('materialId', '')} | {step['label']} | {step['method']} | "
+            f"{step['costClass']} | {step['estimatedWallTimeHours']} | {', '.join(step.get('writesProperties') or [])} |"
+        )
+    lines.extend([
+        "",
+        "## Approval Gates",
+        "",
+        "| Gate | Required | Status | Blocks |",
+        "| --- | --- | --- | --- |",
+    ])
+    for gate in plan["approvalGates"]:
+        lines.append(
+            f"| {gate['gateId']} | {gate['required']} | {gate['status']} | {', '.join(gate.get('blocks') or [])} |"
+        )
+    lines.extend([
+        "",
+        "## Stop Criteria",
+        "",
+        *[f"- {item}" for item in plan["stopCriteria"]],
+        "",
+        "## Warnings",
+        "",
+        *([f"- {item}" for item in plan.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def _candidate_summary(item: dict[str, Any]) -> dict[str, Any]:
