@@ -46,6 +46,14 @@ Use `materials_evaluate_research_claim` after evidence has been imported or pars
 - Present the generated claim-review result instead of making your own unsupported claim.
 - If the review says `researchGradeClaimAllowed: false`, report the missing gates and next evidence needed.
 
+### 2.2 Ingest parsed evidence
+
+Use `materials_ingest_evidence` when backend outputs or literature/experiment tables are available.
+
+- For QE/VASP outputs, pass `artifactPaths`, `planPath`, and `candidateId`; use `parser: "auto"` unless a specific parser is known.
+- For literature/experiment data, pass JSON, JSONL, or CSV files with evidence requirement IDs, statuses, property values, citations, and artifact/source traces.
+- Re-run `materials_evaluate_research_claim` after ingestion so claim status is based on the merged ledger.
+
 ### 3. Define evaluation criteria
 
 Before searching, write down the criteria you will use to compare candidates. Common criteria:

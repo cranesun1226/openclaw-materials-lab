@@ -26,6 +26,8 @@ import type {
   ExportReportResult,
   FetchStructurePayload,
   FetchStructureResult,
+  IngestEvidencePayload,
+  IngestEvidenceResult,
   PlanResearchLoopPayload,
   PlanResearchLoopResult,
   SearchMaterialsPayload,
@@ -85,6 +87,10 @@ export class PythonBridgeService {
     payload: EvaluateResearchClaimPayload,
   ): Promise<BridgeSuccess<EvaluateResearchClaimResult>> {
     return this.call("evaluate_research_claim", payload);
+  }
+
+  public async ingestEvidence(payload: IngestEvidencePayload): Promise<BridgeSuccess<IngestEvidenceResult>> {
+    return this.call("ingest_evidence", payload);
   }
 
   public async executeResearchPlan(payload: ExecuteResearchPlanPayload): Promise<BridgeSuccess<ExecuteResearchPlanResult>> {

@@ -83,6 +83,7 @@ describe("plugin registration", () => {
         { name: "materials_analyze_structure", optional: false },
         { name: "materials_compare_candidates", optional: false },
         { name: "materials_plan_research_loop", optional: false },
+        { name: "materials_ingest_evidence", optional: false },
         { name: "materials_evaluate_research_claim", optional: false },
         { name: "materials_save_note", optional: false },
         { name: "materials_export_report", optional: false },

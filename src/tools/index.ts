@@ -9,6 +9,7 @@ import { createMaterialsExecuteResearchPlanTool } from "./materials-execute-rese
 import { createMaterialsEvaluateResearchClaimTool } from "./materials-evaluate-research-claim.js";
 import { createMaterialsExportReportTool } from "./materials-export-report.js";
 import { createMaterialsFetchStructureTool } from "./materials-fetch-structure.js";
+import { createMaterialsIngestEvidenceTool } from "./materials-ingest-evidence.js";
 import { createMaterialsPlanResearchLoopTool } from "./materials-plan-research-loop.js";
 import { createMaterialsSaveNoteTool } from "./materials-save-note.js";
 import { createMaterialsSearchTool } from "./materials-search-mp.js";
@@ -19,6 +20,7 @@ export function registerMaterialsTools(api: OpenClawPluginApi, context: Material
   api.registerTool(createMaterialsAnalyzeStructureTool(context));
   api.registerTool(createMaterialsCompareCandidatesTool(context));
   api.registerTool(createMaterialsPlanResearchLoopTool(context));
+  api.registerTool(createMaterialsIngestEvidenceTool(context));
   api.registerTool(createMaterialsEvaluateResearchClaimTool(context));
   api.registerTool(createMaterialsSaveNoteTool(context));
   api.registerTool(createMaterialsExportReportTool(context));

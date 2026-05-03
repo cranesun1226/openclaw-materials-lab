@@ -290,4 +290,71 @@ describe("Python bridge", () => {
     expect(result.data.missingEvidence).toEqual([]);
     expect(await readFile(result.data.reportPath, "utf8")).toContain("Research-grade claim allowed: `true`");
   });
+
+  it("parses QE output into evidence rows for claim evaluation", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-ingest-evidence-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    const outputDir = path.join(tempDir, "reports", "qe-output");
+    await mkdir(outputDir, { recursive: true });
+    const qeOutput = path.join(outputDir, "pw.scf.out");
+    await writeFile(
+      qeOutput,
+      [
+        "Program PWSCF",
+        "!    total energy              =     -123.456789 Ry",
+        "highest occupied, lowest unoccupied level (ev):     4.1000    5.5000",
+        "JOB DONE.",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    const plan = {
+      planId: "qe-ingest-plan",
+      selectedCandidates: [{ materialId: "mp-test", formula: "TestO2" }],
+      claimPolicy: {
+        requiredEvidenceRequirementIds: ["phase-stability"],
+      },
+      evidenceSchema: [
+        {
+          id: "phase-stability",
+          label: "Phase stability",
+          propertyKeys: ["totalEnergyEv"],
+          evidenceTypes: ["dft"],
+          requiredForClaim: true,
+        },
+      ],
+    };
+
+    const ingest = await bridge.ingestEvidence({
+      artifactDir: path.join(tempDir, "reports", "evidence-ingestion"),
+      plan,
+      candidateId: "mp-test",
+      parser: "quantum-espresso",
+      artifactPaths: [qeOutput],
+      evidenceRequirementId: "phase-stability",
+    });
+
+    expect(ingest.data.evidenceRowCount).toBeGreaterThan(0);
+    expect(ingest.data.evidenceRows[0]?.propertyValues?.totalEnergyRy).toBe(-123.456789);
+    expect(await readFile(ingest.data.reportPath, "utf8")).toContain("Evidence Ingestion");
+
+    const claim = await bridge.evaluateResearchClaim({
+      artifactDir: path.join(tempDir, "reports", "claim-reviews"),
+      plan,
+      candidateId: "mp-test",
+      evidenceLedgerPath: ingest.data.evidenceLedgerPath,
+    });
+
+    expect(claim.data.claimStatus.researchGradeClaimAllowed).toBe(true);
+    expect(claim.data.missingEvidence).toEqual([]);
+  });
 });

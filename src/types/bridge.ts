@@ -5,6 +5,7 @@ export type BridgeAction =
   | "analyze_structure"
   | "compare_candidates"
   | "plan_research_loop"
+  | "ingest_evidence"
   | "evaluate_research_claim"
   | "execute_research_plan"
   | "ase_relax"
@@ -314,6 +315,32 @@ export interface EvaluateResearchClaimResult {
   satisfiedEvidence: Array<Record<string, unknown>>;
   blockingEvidence: Array<Record<string, unknown>>;
   evidenceRowsReviewed: number;
+}
+
+export interface IngestEvidencePayload {
+  planPath?: string;
+  plan?: Record<string, unknown>;
+  candidateId?: string;
+  parser?: "auto" | "quantum-espresso" | "vasp" | "literature-json" | "experiment-json" | "evidence-jsonl" | "csv";
+  artifactPaths?: string[];
+  evidenceRows?: EvidenceLedgerInput[];
+  evidenceRequirementId?: string;
+  evidenceLedgerPath?: string;
+  outputLedgerPath?: string;
+  defaultStatus?: string;
+  sourceLabel?: string;
+  artifactDir: string;
+}
+
+export interface IngestEvidenceResult {
+  candidateId?: string;
+  parser: string;
+  evidenceRows: EvidenceLedgerInput[];
+  evidenceRowCount: number;
+  evidenceLedgerPath: string;
+  reportPath: string;
+  parsedArtifacts: Array<Record<string, unknown>>;
+  warnings: string[];
 }
 
 export interface ExecuteResearchPlanPayload {

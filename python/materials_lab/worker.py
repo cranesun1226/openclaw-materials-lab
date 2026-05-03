@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -132,6 +133,7 @@ def dispatch(*, action: str, request_id: str, payload: dict[str, Any]) -> dict[s
         "analyze_structure": lambda: handle_analyze_structure(request_id=request_id, payload=payload, api_key=api_key),
         "compare_candidates": lambda: handle_compare_candidates(request_id=request_id, payload=payload),
         "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload, api_key=api_key),
+        "ingest_evidence": lambda: handle_ingest_evidence(request_id=request_id, payload=payload),
         "evaluate_research_claim": lambda: handle_evaluate_research_claim(request_id=request_id, payload=payload),
         "execute_research_plan": lambda: handle_execute_research_plan(request_id=request_id, payload=payload, api_key=api_key),
         "ase_relax": lambda: handle_ase_relax(request_id=request_id, payload=payload, api_key=api_key),
@@ -452,6 +454,97 @@ def handle_evaluate_research_claim(*, request_id: str, payload: dict[str, Any]) 
     )
 
 
+def handle_ingest_evidence(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    plan: dict[str, Any] = {}
+    if payload.get("plan") or payload.get("planPath"):
+        plan = _load_research_plan(payload)
+    candidate_id = (
+        ensure_string(payload.get("candidateId"), field="candidateId", required=False)
+        or _default_claim_candidate_id(plan)
+    )
+    evidence_ledger_path = (
+        ensure_string(payload.get("evidenceLedgerPath"), field="evidenceLedgerPath", required=False)
+        or _default_evidence_ledger_path(plan)
+    )
+    output_ledger_path = ensure_string(payload.get("outputLedgerPath"), field="outputLedgerPath", required=False)
+    parser = str(payload.get("parser") or "auto").strip().lower()
+    artifact_paths = _string_list(payload.get("artifactPaths"))
+    provided_rows = [
+        _normalize_evidence_row(item, candidate_id=candidate_id)
+        for item in (payload.get("evidenceRows") or [])
+        if isinstance(item, dict)
+    ]
+    rows: list[dict[str, Any]] = []
+    parsed_artifacts: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    rows.extend(provided_rows)
+    for artifact_path in artifact_paths:
+        path = Path(artifact_path)
+        if not path.exists():
+            warnings.append(f"Artifact not found and was skipped: {artifact_path}")
+            continue
+        parsed_rows, record_warnings, parser_used = _parse_evidence_artifact(
+            path=path,
+            parser=parser,
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=ensure_string(payload.get("evidenceRequirementId"), field="evidenceRequirementId", required=False),
+            default_status=ensure_string(payload.get("defaultStatus"), field="defaultStatus", required=False),
+            source_label=ensure_string(payload.get("sourceLabel"), field="sourceLabel", required=False),
+        )
+        rows.extend(parsed_rows)
+        warnings.extend(record_warnings)
+        parsed_artifacts.append({
+            "path": str(path),
+            "parser": parser_used,
+            "evidenceRows": len(parsed_rows),
+        })
+    if not rows:
+        raise WorkerError(
+            "NO_EVIDENCE_PARSED",
+            "No evidence rows were parsed or provided.",
+            hint="Pass QE/VASP output files, evidenceRows, or JSON/CSV literature/experiment evidence.",
+        )
+    rows = [_normalize_evidence_row(row, candidate_id=candidate_id) for row in rows]
+    prior_rows = _read_evidence_ledger(evidence_ledger_path) if evidence_ledger_path and Path(evidence_ledger_path).exists() else []
+    output_path = Path(output_ledger_path or evidence_ledger_path or artifact_dir / "ingested-evidence-ledger.jsonl")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    merged_rows = _dedupe_evidence_rows([*prior_rows, *rows])
+    output_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in merged_rows), encoding="utf-8")
+    report_path = artifact_dir / "evidence-ingestion-report.md"
+    report = {
+        "candidateId": candidate_id,
+        "parser": parser,
+        "evidenceLedgerPath": str(output_path),
+        "newEvidenceRows": len(rows),
+        "totalEvidenceRows": len(merged_rows),
+        "parsedArtifacts": parsed_artifacts,
+        "warnings": warnings,
+        "evidenceRows": rows,
+    }
+    report_path.write_text(_evidence_ingestion_markdown(report), encoding="utf-8")
+    data = {
+        "candidateId": candidate_id,
+        "parser": parser,
+        "evidenceRows": rows,
+        "evidenceRowCount": len(rows),
+        "evidenceLedgerPath": str(output_path),
+        "reportPath": str(report_path),
+        "parsedArtifacts": parsed_artifacts,
+        "warnings": warnings,
+    }
+    return success(
+        action="ingest_evidence",
+        request_id=request_id,
+        summary=f"Ingested {len(rows)} evidence row(s) into {output_path}.",
+        data=data,
+        artifacts=[str(output_path), str(report_path)],
+        warnings=warnings,
+    )
+
+
 def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -618,6 +711,400 @@ def handle_export_report(*, request_id: str, payload: dict[str, Any]) -> dict[st
         data={"outputPath": output_file, "references": references},
         artifacts=[output_file],
     )
+
+
+def _parse_evidence_artifact(
+    *,
+    path: Path,
+    parser: str,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source_label: str | None,
+) -> tuple[list[dict[str, Any]], list[str], str]:
+    parser_used = _resolve_evidence_parser(path, parser)
+    if parser_used == "quantum-espresso":
+        return _parse_quantum_espresso_evidence(path, plan, candidate_id, evidence_requirement_id, default_status, source_label), [], parser_used
+    if parser_used == "vasp":
+        return _parse_vasp_evidence(path, plan, candidate_id, evidence_requirement_id, default_status, source_label), [], parser_used
+    if parser_used in {"literature-json", "experiment-json", "evidence-jsonl"}:
+        return _parse_structured_evidence(path, parser_used, candidate_id, default_status, source_label), [], parser_used
+    if parser_used == "csv":
+        return _parse_csv_evidence(path, candidate_id, default_status, source_label), [], parser_used
+    return [], [f"No evidence parser matched {path}."], parser_used
+
+
+def _resolve_evidence_parser(path: Path, parser: str) -> str:
+    if parser != "auto":
+        return parser
+    name = path.name.lower()
+    suffix = path.suffix.lower()
+    if name in {"outcar", "vasprun.xml"} or "vasp" in name:
+        return "vasp"
+    if name.endswith((".out", ".pwout")) or "qe" in name or "espresso" in name or "pw.scf" in name or "ph." in name:
+        return "quantum-espresso"
+    if suffix == ".csv":
+        return "csv"
+    if suffix == ".jsonl":
+        return "evidence-jsonl"
+    if suffix == ".json":
+        return "evidence-jsonl"
+    return "unknown"
+
+
+def _parse_quantum_espresso_evidence(
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source_label: str | None,
+) -> list[dict[str, Any]]:
+    text = path.read_text("utf-8", errors="replace")
+    rows: list[dict[str, Any]] = []
+    total = _last_float_match(text, r"!\s+total energy\s+=\s+([-+]?\d+(?:\.\d+)?)\s+Ry")
+    if total is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["totalEnergyRy", "totalEnergyEv"], "phase-stability"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "quantum-espresso",
+            status=default_status or "parsed-property",
+            claim="Quantum ESPRESSO output parsed total-energy evidence.",
+            property_values={
+                "totalEnergyRy": total,
+                "totalEnergyEv": total * 13.605693122994,
+                "jobDone": "JOB DONE" in text,
+            },
+        ))
+    band_gap = _qe_band_gap_ev(text)
+    if band_gap is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["directBandGapEv", "bandGapEv"], "optical-absorption"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "quantum-espresso",
+            status=default_status or "parsed-property",
+            claim="Quantum ESPRESSO output parsed band-gap evidence.",
+            property_values={"directBandGapEv": band_gap, "bandGapEv": band_gap},
+        ))
+    adsorption = _last_float_match(text, r"adsorption\s+energy\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*eV")
+    if adsorption is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["adsorptionEnergyEv"], "surface-activity"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "quantum-espresso",
+            status=default_status or "parsed-property",
+            claim="Quantum ESPRESSO-derived output parsed adsorption-energy evidence.",
+            property_values={"adsorptionEnergyEv": adsorption},
+        ))
+    dielectric = _parse_dielectric_scalar(text)
+    if dielectric is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["dielectricTotal"], "dielectric-response"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "quantum-espresso",
+            status=default_status or "parsed-property",
+            claim="Quantum ESPRESSO/DFPT output parsed dielectric evidence.",
+            property_values={"dielectricTotal": dielectric},
+        ))
+    return rows
+
+
+def _parse_vasp_evidence(
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source_label: str | None,
+) -> list[dict[str, Any]]:
+    text = path.read_text("utf-8", errors="replace")
+    rows: list[dict[str, Any]] = []
+    total = _last_float_match(text, r"TOTEN\s+=\s+([-+]?\d+(?:\.\d+)?)\s+eV")
+    if total is None:
+        total = _last_float_match(text, r"<i\s+name=\"e_fr_energy\">\s*([-+]?\d+(?:\.\d+)?)\s*</i>")
+    if total is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["totalEnergyEv"], "phase-stability"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "vasp",
+            status=default_status or "parsed-property",
+            claim="VASP output parsed total-energy evidence.",
+            property_values={"totalEnergyEv": total},
+        ))
+    band_gap = _last_float_match(text, r"band\s*gap\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*eV")
+    if band_gap is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["directBandGapEv", "bandGapEv"], "optical-absorption"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "vasp",
+            status=default_status or "parsed-property",
+            claim="VASP output parsed band-gap evidence.",
+            property_values={"directBandGapEv": band_gap, "bandGapEv": band_gap},
+        ))
+    adsorption = _last_float_match(text, r"adsorption\s+energy\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*eV")
+    if adsorption is not None:
+        rows.append(_parsed_evidence_row(
+            plan=plan,
+            candidate_id=candidate_id,
+            evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(plan, ["adsorptionEnergyEv"], "surface-activity"),
+            artifact_path=str(path),
+            source_type="parsed-calculation",
+            source=source_label or "vasp",
+            status=default_status or "parsed-property",
+            claim="VASP-derived output parsed adsorption-energy evidence.",
+            property_values={"adsorptionEnergyEv": adsorption},
+        ))
+    return rows
+
+
+def _parse_structured_evidence(
+    path: Path,
+    parser: str,
+    candidate_id: str | None,
+    default_status: str | None,
+    source_label: str | None,
+) -> list[dict[str, Any]]:
+    if path.suffix.lower() == ".jsonl":
+        parsed_rows = _read_evidence_ledger(str(path))
+    else:
+        parsed = json.loads(path.read_text("utf-8"))
+        if isinstance(parsed, list):
+            parsed_rows = [_normalize_evidence_row(item) for item in parsed if isinstance(item, dict)]
+        elif isinstance(parsed, dict) and isinstance(parsed.get("evidenceRows"), list):
+            parsed_rows = [_normalize_evidence_row(item) for item in parsed["evidenceRows"] if isinstance(item, dict)]
+        elif isinstance(parsed, dict):
+            parsed_rows = [_normalize_evidence_row(parsed)]
+        else:
+            parsed_rows = []
+    source_type = "literature" if parser == "literature-json" else "experiment" if parser == "experiment-json" else None
+    status = default_status or ("literature-supported" if parser == "literature-json" else "experimentally-supported" if parser == "experiment-json" else None)
+    rows = []
+    for row in parsed_rows:
+        if candidate_id and not row.get("candidateId"):
+            row["candidateId"] = candidate_id
+        if source_type and row.get("sourceType") in {"unknown", ""}:
+            row["sourceType"] = source_type
+        if source_label and not row.get("source"):
+            row["source"] = source_label
+        if status and row.get("status") in {"unknown", ""}:
+            row["status"] = status
+        row.setdefault("artifactPath", str(path))
+        rows.append(_normalize_evidence_row(row, candidate_id=candidate_id))
+    return rows
+
+
+def _parse_csv_evidence(path: Path, candidate_id: str | None, default_status: str | None, source_label: str | None) -> list[dict[str, Any]]:
+    rows = []
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        for item in csv.DictReader(handle):
+            property_values: dict[str, Any] = {}
+            if item.get("propertyValues"):
+                try:
+                    parsed = json.loads(str(item["propertyValues"]))
+                    if isinstance(parsed, dict):
+                        property_values.update(parsed)
+                except Exception:
+                    pass
+            if item.get("propertyKey"):
+                property_values[str(item["propertyKey"])] = _coerce_scalar(item.get("value"))
+            row = {
+                "candidateId": item.get("candidateId") or candidate_id,
+                "formula": item.get("formula"),
+                "evidenceRequirementId": item.get("evidenceRequirementId") or item.get("requirementId"),
+                "claim": item.get("claim"),
+                "status": item.get("status") or default_status or "parsed-property",
+                "sourceType": item.get("sourceType") or item.get("evidenceType") or "experiment",
+                "source": item.get("source") or source_label,
+                "confidence": item.get("confidence") or "imported-table",
+                "propertyValues": property_values,
+                "artifactPath": item.get("artifactPath") or str(path),
+                "sourcePath": item.get("sourcePath"),
+                "citation": item.get("citation"),
+                "queryIds": [item["queryId"]] if item.get("queryId") else [],
+            }
+            rows.append(_normalize_evidence_row(
+                {key: value for key, value in row.items() if value is not None and value != ""},
+                candidate_id=candidate_id,
+            ))
+    return rows
+
+
+def _parsed_evidence_row(
+    *,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str,
+    artifact_path: str,
+    source_type: str,
+    source: str,
+    status: str,
+    claim: str,
+    property_values: dict[str, Any],
+) -> dict[str, Any]:
+    return _normalize_evidence_row({
+        "ledgerVersion": "evidence-ledger-v1",
+        "evidenceId": _safe_file_stem(f"{candidate_id or 'candidate'}-{evidence_requirement_id}-{source}").lower(),
+        "candidateId": candidate_id,
+        "formula": _candidate_formula_for_plan(plan, candidate_id),
+        "evidenceRequirementId": evidence_requirement_id,
+        "claim": claim,
+        "status": status,
+        "sourceType": source_type,
+        "source": source,
+        "confidence": "parsed-output",
+        "propertyValues": property_values,
+        "artifactPath": artifact_path,
+        "generatedAt": int(time.time()),
+    }, candidate_id=candidate_id)
+
+
+def _candidate_formula_for_plan(plan: dict[str, Any], candidate_id: str | None) -> str | None:
+    for candidate in plan.get("selectedCandidates") or []:
+        if isinstance(candidate, dict) and str(candidate.get("materialId")) == str(candidate_id):
+            return str(candidate.get("formula") or "") or None
+    return None
+
+
+def _infer_requirement_for_properties(plan: dict[str, Any], property_keys: list[str], fallback: str) -> str:
+    wanted = set(property_keys)
+    for requirement in plan.get("evidenceSchema") or []:
+        if not isinstance(requirement, dict):
+            continue
+        keys = set(str(item) for item in requirement.get("propertyKeys") or [])
+        if keys.intersection(wanted):
+            return str(requirement.get("id") or fallback)
+    return fallback
+
+
+def _last_float_match(text: str, pattern: str) -> float | None:
+    matches = re.findall(pattern, text, flags=re.IGNORECASE | re.MULTILINE)
+    if not matches:
+        return None
+    try:
+        return float(matches[-1])
+    except Exception:
+        return None
+
+
+def _qe_band_gap_ev(text: str) -> float | None:
+    matches = re.findall(
+        r"highest\s+occupied,\s+lowest\s+unoccupied\s+level\s*\(ev\)\s*:\s*([-+]?\d+(?:\.\d+)?)\s+([-+]?\d+(?:\.\d+)?)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if matches:
+        homo, lumo = matches[-1]
+        return max(0.0, float(lumo) - float(homo))
+    return _last_float_match(text, r"band\s*gap\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*eV")
+
+
+def _parse_dielectric_scalar(text: str) -> float | None:
+    value = _last_float_match(text, r"dielectric(?:\s+constant|\s+total)?\s*[:=]\s*([-+]?\d+(?:\.\d+)?)")
+    if value is not None:
+        return value
+    tensor_block = re.search(r"dielectric.*?tensor(.*?)(?:\n\s*\n|$)", text, flags=re.IGNORECASE | re.DOTALL)
+    if not tensor_block:
+        return None
+    numbers = [float(item) for item in re.findall(r"[-+]?\d+(?:\.\d+)?", tensor_block.group(1))]
+    if len(numbers) >= 9:
+        return sum(numbers[index] for index in [0, 4, 8]) / 3.0
+    return None
+
+
+def _coerce_scalar(value: Any) -> Any:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        return float(text)
+    except Exception:
+        return text
+
+
+def _dedupe_evidence_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = set()
+    result = []
+    for row in rows:
+        key = json.dumps({
+            "candidateId": row.get("candidateId"),
+            "evidenceRequirementId": row.get("evidenceRequirementId"),
+            "status": row.get("status"),
+            "sourceType": row.get("sourceType"),
+            "source": row.get("source"),
+            "artifactPath": row.get("artifactPath"),
+            "propertyValues": row.get("propertyValues"),
+            "citation": row.get("citation"),
+        }, sort_keys=True)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(row)
+    return result
+
+
+def _evidence_ingestion_markdown(report: dict[str, Any]) -> str:
+    lines = [
+        "# Evidence Ingestion",
+        "",
+        "## Summary",
+        "",
+        f"- Candidate: `{report.get('candidateId') or '-'}`",
+        f"- Parser: `{report.get('parser')}`",
+        f"- New evidence rows: {report.get('newEvidenceRows')}",
+        f"- Total ledger rows: {report.get('totalEvidenceRows')}",
+        f"- Ledger: {report.get('evidenceLedgerPath')}",
+        "",
+        "## Parsed Artifacts",
+        "",
+        "| Path | Parser | Rows |",
+        "| --- | --- | ---: |",
+    ]
+    for item in report.get("parsedArtifacts") or []:
+        lines.append(f"| {item.get('path')} | {item.get('parser')} | {item.get('evidenceRows')} |")
+    if not report.get("parsedArtifacts"):
+        lines.append("| - | - | 0 |")
+    lines.extend([
+        "",
+        "## Evidence Rows",
+        "",
+        "| Candidate | Requirement | Status | Source Type | Properties |",
+        "| --- | --- | --- | --- | --- |",
+    ])
+    for row in report.get("evidenceRows") or []:
+        properties = ", ".join(sorted((row.get("propertyValues") or {}).keys())) if isinstance(row.get("propertyValues"), dict) else "-"
+        lines.append(
+            f"| {row.get('candidateId') or '-'} | {row.get('evidenceRequirementId')} | "
+            f"{row.get('status')} | {row.get('sourceType')} | {properties or '-'} |"
+        )
+    lines.extend([
+        "",
+        "## Warnings",
+        "",
+        *([f"- {warning}" for warning in report.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def _default_claim_candidate_id(plan: dict[str, Any]) -> str | None:

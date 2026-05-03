@@ -156,6 +156,8 @@ Live Materials Project search and structure fetch require a valid key and the `m
 - "Given only this research goal, autonomously compile the protocol, search candidate databases, write a candidate pool, and create an evidence ledger before making any claim."
 - "Use the ranked candidates to compile an evidence schema and validation queue with a 12-calculation budget."
 - "Evaluate whether this candidate's evidence ledger satisfies the claim policy for a research-grade candidate claim."
+- "Ingest these Quantum ESPRESSO/VASP outputs into the evidence ledger and re-evaluate the claim gate."
+- "Import this literature or experiment CSV/JSON evidence table into the ledger."
 - "Execute that research-loop plan with the dev-smoke backend to validate plumbing without generating research property evidence."
 - "Prepare Quantum ESPRESSO inputs for the top two calculations in that research-loop plan."
 - "Prepare VASP, atomate2/jobflow, or AiiDA backend inputs for this approved plan without submitting jobs."
@@ -209,6 +211,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - With only `researchGoal`, `materials_plan_research_loop` now runs the bounded autonomous discovery compiler: it writes a query log, candidate-pool JSONL, evidence-ledger JSONL, and candidate-backed protocol when database candidates are found.
 - Autonomous discovery never upgrades a candidate beyond `candidate-hypothesis`/proxy status; research-grade claims remain blocked until the evidence schema is closed with parsed evidence artifacts.
 - `materials_evaluate_research_claim` reads a plan plus evidence ledger or imported evidence rows and emits a claim-review certificate. It only allows `research-grade-candidate` when every required evidence gate has traceable, strong evidence and no blocking/conflicting rows.
+- `materials_ingest_evidence` parses QE/VASP outputs plus literature/experiment JSON, JSONL, or CSV evidence tables into standard evidence-ledger rows for claim evaluation.
 - `materials_execute_research_plan` supports a non-evidentiary `dev-smoke` backend plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
 - External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided.
 - The `dev-smoke` backend validates execution/provenance plumbing only. It does not emit property updates or reranking payloads.
