@@ -16,7 +16,7 @@ const CandidateSchema = Type.Object(
     sites: Type.Optional(Type.Number({ minimum: 1 })),
     spacegroup: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
     elements: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 20 })),
-    source: Type.Union([Type.Literal("materials-project"), Type.Literal("mock")]),
+    source: Type.Union([Type.Literal("materials-project"), Type.Literal("dev-fixture")]),
     notes: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 200 }), { maxItems: 20 })),
     materialsProjectUrl: Type.Optional(Type.String({ minLength: 1, maxLength: 300 })),
     family: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),

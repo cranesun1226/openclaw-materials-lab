@@ -12,9 +12,9 @@ except Exception:  # pragma: no cover - optional runtime dependency
     MPRester = None
 
 
-MOCK_MATERIALS: list[dict[str, Any]] = [
+DEV_FIXTURE_MATERIALS: list[dict[str, Any]] = [
     {
-        "material_id": "mp-mock-si",
+        "material_id": "fixture-si",
         "formula": "Si",
         "energy_above_hull_ev": 0.0,
         "band_gap_ev": 1.12,
@@ -23,7 +23,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         "sites": 8,
         "spacegroup": "Fd-3m",
         "elements": ["Si"],
-        "source": "mock",
+        "source": "dev-fixture",
         "structure": {
             "formula": "Si",
             "lattice": [[5.43, 0.0, 0.0], [0.0, 5.43, 0.0], [0.0, 0.0, 5.43]],
@@ -34,7 +34,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         },
     },
     {
-        "material_id": "mp-mock-lifepo4",
+        "material_id": "fixture-lifepo4",
         "formula": "LiFePO4",
         "energy_above_hull_ev": 0.0,
         "band_gap_ev": 3.8,
@@ -43,7 +43,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         "sites": 28,
         "spacegroup": "Pnma",
         "elements": ["Li", "Fe", "P", "O"],
-        "source": "mock",
+        "source": "dev-fixture",
         "structure": {
             "formula": "LiFePO4",
             "lattice": [[10.33, 0.0, 0.0], [0.0, 6.01, 0.0], [0.0, 0.0, 4.69]],
@@ -56,7 +56,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         },
     },
     {
-        "material_id": "mp-mock-srtio3",
+        "material_id": "fixture-srtio3",
         "formula": "SrTiO3",
         "energy_above_hull_ev": 0.012,
         "band_gap_ev": 3.25,
@@ -65,7 +65,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         "sites": 5,
         "spacegroup": "Pm-3m",
         "elements": ["Sr", "Ti", "O"],
-        "source": "mock",
+        "source": "dev-fixture",
         "structure": {
             "formula": "SrTiO3",
             "lattice": [[3.905, 0.0, 0.0], [0.0, 3.905, 0.0], [0.0, 0.0, 3.905]],
@@ -77,7 +77,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         },
     },
     {
-        "material_id": "mp-mock-al2o3",
+        "material_id": "fixture-al2o3",
         "formula": "Al2O3",
         "energy_above_hull_ev": 0.0,
         "band_gap_ev": 8.8,
@@ -86,7 +86,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         "sites": 30,
         "spacegroup": "R-3c",
         "elements": ["Al", "O"],
-        "source": "mock",
+        "source": "dev-fixture",
         "structure": {
             "formula": "Al2O3",
             "lattice": [[4.76, 0.0, 0.0], [-2.38, 4.12, 0.0], [0.0, 0.0, 12.99]],
@@ -97,7 +97,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         },
     },
     {
-        "material_id": "mp-mock-hfo2",
+        "material_id": "fixture-hfo2",
         "formula": "HfO2",
         "energy_above_hull_ev": 0.0,
         "band_gap_ev": 5.7,
@@ -106,7 +106,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
         "sites": 12,
         "spacegroup": "P21/c",
         "elements": ["Hf", "O"],
-        "source": "mock",
+        "source": "dev-fixture",
         "structure": {
             "formula": "HfO2",
             "lattice": [[5.12, 0.0, 0.0], [0.0, 5.17, 0.0], [0.0, 0.0, 5.29]],
@@ -120,7 +120,7 @@ MOCK_MATERIALS: list[dict[str, Any]] = [
 
 
 def search_materials(payload: dict[str, Any], *, api_key: str | None) -> tuple[list[dict[str, Any]], bool]:
-    allow_offline = bool(payload.get("allowOffline", True))
+    allow_offline = bool(payload.get("allowOffline", False))
     if api_key and MPRester is not None:
         try:
             return _live_search(payload, api_key), False
@@ -129,23 +129,23 @@ def search_materials(payload: dict[str, Any], *, api_key: str | None) -> tuple[l
                 raise WorkerError(
                     "MATERIALS_PROJECT_SEARCH_FAILED",
                     f"Materials Project search failed: {exc}",
-                    hint="Check mpApiKey and network access, or rerun with allowOffline=true.",
+                    hint="Check mpApiKey and network access. Development fixture fallback requires allowOffline=true.",
                 ) from exc
 
     if not allow_offline:
         raise WorkerError(
             "OFFLINE_NOT_ALLOWED",
-            "Materials Project access is unavailable and offline mode was disabled.",
-            hint="Configure mpApiKey or set allowOffline to true.",
+            "Materials Project access is unavailable and development fixture fallback was not explicitly enabled.",
+            hint="Configure mpApiKey or set allowOffline=true only for development smoke tests.",
         )
 
-    results = [deepcopy(item) for item in MOCK_MATERIALS]
+    results = [deepcopy(item) for item in DEV_FIXTURE_MATERIALS]
     filtered = _apply_filters(results, payload)
     limit = int(payload.get("limit") or 10)
     return filtered[:limit], True
 
 
-def fetch_material(material_id: str, *, api_key: str | None, allow_offline: bool = True) -> tuple[dict[str, Any], bool]:
+def fetch_material(material_id: str, *, api_key: str | None, allow_offline: bool = False) -> tuple[dict[str, Any], bool]:
     if api_key and MPRester is not None:
         try:
             return _live_fetch(material_id, api_key), False
@@ -154,17 +154,17 @@ def fetch_material(material_id: str, *, api_key: str | None, allow_offline: bool
                 raise WorkerError(
                     "MATERIALS_PROJECT_FETCH_FAILED",
                     f"Materials Project structure fetch failed: {exc}",
-                    hint="Check mpApiKey and network access, or rerun with allowOffline=true.",
+                    hint="Check mpApiKey and network access. Development fixture fallback requires allowOffline=true.",
                 ) from exc
 
-    for material in MOCK_MATERIALS:
+    for material in DEV_FIXTURE_MATERIALS:
         if material["material_id"] == material_id:
             return deepcopy(material), True
 
     raise WorkerError(
         "MATERIAL_NOT_FOUND",
-        f"Material '{material_id}' was not found in the available dataset.",
-        hint="Search candidates first or enable live Materials Project access.",
+        f"Material '{material_id}' was not found in Materials Project or the explicit development fixture dataset.",
+        hint="Search candidates first, configure Materials Project access, or set allowOffline=true only for development fixture data.",
     )
 
 

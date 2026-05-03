@@ -9,7 +9,7 @@ const BatchScreenSchema = Type.Object(
   {
     candidateIds: Type.Array(Type.String({ minLength: 1, maxLength: 80 }), { minItems: 1, maxItems: 500 }),
     limit: Type.Optional(Type.Number({ minimum: 1, maximum: 500 })),
-    allowOffline: Type.Optional(Type.Boolean({ default: true })),
+    allowOffline: Type.Optional(Type.Boolean({ default: false })),
   },
   { additionalProperties: false },
 );
@@ -32,7 +32,7 @@ export function createMaterialsBatchScreenTool(
         candidateIds: params.candidateIds,
         limit: params.limit ?? context.resolveConfig().defaultBatchLimit,
         artifactDir: artifactService.createPlotDir(),
-        allowOffline: params.allowOffline ?? true,
+        allowOffline: params.allowOffline ?? false,
       });
 
       return toToolResponse(payloadFromBridge(artifactService, bridgeResult));

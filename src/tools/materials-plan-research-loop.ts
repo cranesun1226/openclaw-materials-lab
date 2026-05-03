@@ -13,7 +13,7 @@ const PlanCandidateSchema = Type.Object(
   {
     materialId: Type.String({ minLength: 1, maxLength: 80 }),
     formula: Type.String({ minLength: 1, maxLength: 80 }),
-    source: Type.Optional(Type.Union([Type.Literal("materials-project"), Type.Literal("mock")])),
+    source: Type.Optional(Type.Union([Type.Literal("materials-project"), Type.Literal("dev-fixture")])),
     score: Type.Optional(Type.Number()),
     primaryScore: Type.Optional(Type.Number()),
     secondaryScore: Type.Optional(Type.Number()),

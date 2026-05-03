@@ -10,7 +10,7 @@ const RankedCandidateSchema = Type.Object(
   {
     materialId: Type.String({ minLength: 1, maxLength: 80 }),
     formula: Type.String({ minLength: 1, maxLength: 80 }),
-    source: Type.Union([Type.Literal("materials-project"), Type.Literal("mock")]),
+    source: Type.Union([Type.Literal("materials-project"), Type.Literal("dev-fixture")]),
     score: Type.Number(),
     primaryScore: Type.Optional(Type.Number()),
     secondaryScore: Type.Optional(Type.Number()),

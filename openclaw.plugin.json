@@ -14,7 +14,7 @@
     },
     "mpApiKey": {
       "label": "Materials Project API key",
-      "help": "Optional for offline mode, required for live Materials Project queries.",
+      "help": "Required for live Materials Project queries. Development fixtures require explicit allowOffline tool calls.",
       "placeholder": "mp-...",
       "sensitive": true
     },

@@ -54,7 +54,7 @@ export interface CandidateSummary {
   sites?: number;
   spacegroup?: string;
   elements?: string[];
-  source: "materials-project" | "mock";
+  source: "materials-project" | "dev-fixture";
   notes?: string[];
   materialsProjectUrl?: string;
   family?: string;
@@ -104,6 +104,7 @@ export interface SearchMaterialsPayload {
 export interface SearchMaterialsResult {
   candidates: CandidateSummary[];
   usedOfflineData: boolean;
+  usedDevelopmentFixtureData?: boolean;
 }
 
 export interface FetchStructurePayload {
@@ -119,6 +120,7 @@ export interface FetchStructureResult {
   cifPath?: string;
   structure?: Record<string, unknown>;
   usedOfflineData: boolean;
+  usedDevelopmentFixtureData?: boolean;
 }
 
 export interface AnalyzeStructurePayload {
@@ -136,6 +138,7 @@ export interface AnalyzeStructureResult {
   readableSummary: string;
   plotPath?: string;
   usedOfflineData: boolean;
+  usedDevelopmentFixtureData?: boolean;
 }
 
 export interface CompareCriteria {
@@ -232,10 +235,10 @@ export interface PlanResearchLoopResult {
 export interface ExecuteResearchPlanPayload {
   planPath?: string;
   plan?: Record<string, unknown>;
-  backend?: "local-surrogate" | "quantum-espresso" | "vasp" | "atomate2" | "aiida";
+  backend?: "dev-smoke" | "quantum-espresso" | "vasp" | "atomate2" | "aiida";
   executionMode?: "prepare" | "submit";
   maxSteps?: number;
-  allowBlockedSurrogate?: boolean;
+  allowBlockedDevSmoke?: boolean;
   allowExecution?: boolean;
   backendConfig?: Record<string, unknown>;
   artifactDir: string;
@@ -272,6 +275,7 @@ export interface AseRelaxResult {
   relaxedStructurePath?: string;
   trajectoryPath?: string;
   usedOfflineData: boolean;
+  usedDevelopmentFixtureData?: boolean;
 }
 
 export interface BatchScreenPayload {
@@ -287,6 +291,7 @@ export interface BatchScreenResult {
   tablePaths?: string[];
   excludedCandidates?: Array<Record<string, unknown>>;
   usedOfflineData: boolean;
+  usedDevelopmentFixtureData?: boolean;
 }
 
 export interface ExportReportPayload {

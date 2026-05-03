@@ -17,7 +17,7 @@ describe("Python bridge", () => {
     tempDirs.length = 0;
   });
 
-  it("talks to the local worker in offline mode", async () => {
+  it("talks to the local worker with explicit development fixture mode", async () => {
     const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-bridge-"));
     tempDirs.push(tempDir);
     const config: MaterialsLabPluginConfig = {
@@ -39,8 +39,9 @@ describe("Python bridge", () => {
 
     expect(ping.summary).toContain("ready");
     expect(search.data.usedOfflineData).toBe(true);
+    expect(search.data.usedDevelopmentFixtureData).toBe(true);
     expect(search.data.candidates.length).toBeGreaterThan(0);
-    expect(search.data.candidates[0]?.source).toBe("mock");
+    expect(search.data.candidates[0]?.source).toBe("dev-fixture");
   });
 
   it("plans an approval-gated research loop", async () => {
@@ -63,9 +64,9 @@ describe("Python bridge", () => {
       budget: { maxCandidates: 1, maxCalculations: 3, maxWallTimeHours: 20 },
       candidates: [
         {
-          materialId: "mp-mock-hfo2",
+          materialId: "fixture-hfo2",
           formula: "HfO2",
-          source: "mock",
+          source: "dev-fixture",
           score: 0.9,
           rank: 1,
           reasons: ["test"],
@@ -87,14 +88,15 @@ describe("Python bridge", () => {
     const execution = await bridge.executeResearchPlan({
       planPath: result.data.manifestPath,
       artifactDir: path.join(tempDir, "reports", "research-loop-executions"),
-      backend: "local-surrogate",
-      allowBlockedSurrogate: true,
+      backend: "dev-smoke",
+      allowBlockedDevSmoke: true,
       maxSteps: 3,
     });
 
     expect(execution.data.completedCalculations).toBeGreaterThan(0);
-    expect(execution.data.propertyUpdates[0]?.propertyProvenance).toBeDefined();
-    expect(await readFile(execution.data.reportPath, "utf8")).toContain("local-surrogate");
+    expect(execution.data.propertyUpdates).toEqual([]);
+    expect(execution.data.rerankingPayload).toBeUndefined();
+    expect(await readFile(execution.data.reportPath, "utf8")).toContain("dev-smoke");
 
     const externalPreparation = await bridge.executeResearchPlan({
       planPath: result.data.manifestPath,
@@ -102,7 +104,7 @@ describe("Python bridge", () => {
       backend: "quantum-espresso",
       executionMode: "prepare",
       maxSteps: 2,
-      backendConfig: { pseudoDir: "./pseudo", kpoints: "2 2 2 0 0 0" },
+      backendConfig: { pseudoDir: "./pseudo", kpoints: "2 2 2 0 0 0", allowDevFixtures: true },
     });
 
     expect(externalPreparation.data.completedCalculations).toBe(0);

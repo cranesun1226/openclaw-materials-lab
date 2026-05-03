@@ -102,7 +102,7 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
             "## Limitations",
             "",
             "- Ranking depends on the chosen criteria and available data.",
-            "- Offline/mock mode should not be treated as equivalent to live database validation.",
+            "- Development fixture data is for smoke testing only and should not be treated as live database validation.",
             "- Domain-specific properties such as ion mobility, defect chemistry, electrochemical windows, and interface reactivity require additional calculations or experiments.",
             "",
         ]

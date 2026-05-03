@@ -10,7 +10,7 @@ const AnalyzeStructureSchema = Type.Object(
   {
     materialId: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
     structurePath: Type.Optional(Type.String({ minLength: 1 })),
-    allowOffline: Type.Optional(Type.Boolean({ default: true })),
+    allowOffline: Type.Optional(Type.Boolean({ default: false })),
   },
   { additionalProperties: false },
 );
@@ -43,7 +43,7 @@ export function createMaterialsAnalyzeStructureTool(
         ...(params.materialId ? { materialId: params.materialId } : {}),
         ...(structurePath ? { structurePath } : {}),
         artifactDir,
-        allowOffline: params.allowOffline ?? true,
+        allowOffline: params.allowOffline ?? false,
       });
 
       return toToolResponse(payloadFromBridge(artifactService, bridgeResult));

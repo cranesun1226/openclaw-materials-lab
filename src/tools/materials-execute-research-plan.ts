@@ -14,7 +14,7 @@ const ExecuteResearchPlanSchema = Type.Object(
     plan: Type.Optional(Type.Record(Type.String(), Type.Any())),
     backend: Type.Optional(
       Type.Union([
-        Type.Literal("local-surrogate"),
+        Type.Literal("dev-smoke"),
         Type.Literal("quantum-espresso"),
         Type.Literal("vasp"),
         Type.Literal("atomate2"),
@@ -23,7 +23,7 @@ const ExecuteResearchPlanSchema = Type.Object(
     ),
     executionMode: Type.Optional(Type.Union([Type.Literal("prepare"), Type.Literal("submit")])),
     maxSteps: Type.Optional(Type.Number({ minimum: 1, maximum: 500 })),
-    allowBlockedSurrogate: Type.Optional(Type.Boolean()),
+    allowBlockedDevSmoke: Type.Optional(Type.Boolean()),
     allowExecution: Type.Optional(Type.Boolean()),
     backendConfig: Type.Optional(Type.Record(Type.String(), Type.Any())),
   },
@@ -56,12 +56,12 @@ export function createMaterialsExecuteResearchPlanTool(
       );
       const bridgeResult = await context.getBridge().executeResearchPlan({
         artifactDir,
-        backend: params.backend ?? "local-surrogate",
+        backend: params.backend ?? "dev-smoke",
         ...(planPath ? { planPath } : {}),
         ...(params.plan ? { plan: params.plan } : {}),
         ...(params.executionMode ? { executionMode: params.executionMode } : {}),
         ...(typeof params.maxSteps === "number" ? { maxSteps: params.maxSteps } : {}),
-        ...(typeof params.allowBlockedSurrogate === "boolean" ? { allowBlockedSurrogate: params.allowBlockedSurrogate } : {}),
+        ...(typeof params.allowBlockedDevSmoke === "boolean" ? { allowBlockedDevSmoke: params.allowBlockedDevSmoke } : {}),
         ...(typeof params.allowExecution === "boolean" ? { allowExecution: params.allowExecution } : {}),
         ...(params.backendConfig ? { backendConfig: params.backendConfig } : {}),
       });

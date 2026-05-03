@@ -53,9 +53,9 @@ describe("materials_export_report", () => {
       evaluationCriteria: ["stability", "band gap"],
       rankedCandidates: [
         {
-          materialId: "mp-mock-hfo2",
+          materialId: "fixture-hfo2",
           formula: "HfO2",
-          source: "mock",
+          source: "dev-fixture",
           score: 0.91,
           rank: 1,
           rawRank: 2,
@@ -63,7 +63,6 @@ describe("materials_export_report", () => {
           family: "zirconium-phosphate",
           duplicateGroup: "LiZr2(PO4)3",
           duplicateCount: 3,
-          materialsProjectUrl: "https://materialsproject.org/materials/mp-mock-hfo2",
           warnings: ["proxy only"],
           screeningLevel: "proxy-screen",
           scoreComponents: {
@@ -108,9 +107,9 @@ describe("materials_export_report", () => {
         evaluationCriteria: ["stability"],
         rankedCandidates: [
           {
-            materialId: "mp-mock-hfo2",
+            materialId: "fixture-hfo2",
             formula: "HfO2",
-            source: "mock",
+            source: "dev-fixture",
             score: 0.91,
             rank: 1,
             reasons: ["stable"],

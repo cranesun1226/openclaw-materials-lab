@@ -1,6 +1,6 @@
 # `@cranesun/openclaw-materials-lab`
 
-Native OpenClaw plugin for autonomous materials-science research. It lets an OpenClaw user describe a research goal in chat and then search candidate materials, fetch structures, analyze them locally, compare options, plan and execute backend-adapter follow-up calculations, save research notes, and export a report. Optional heavier workflows such as ASE-based relaxation, research-plan execution, and batch screening are included behind approval gates.
+Native OpenClaw plugin for evidence-tracked, approval-gated materials-science research workflows. It lets an OpenClaw user describe a research goal in chat and then search candidate materials, fetch structures, analyze them locally, compare options, plan backend-adapter follow-up calculations, save research notes, and export a report. Optional heavier workflows such as ASE-based relaxation, research-plan execution, and batch screening are included behind approval gates.
 
 ## Who This Is For
 
@@ -8,7 +8,7 @@ This plugin is for OpenClaw users who already have the gateway running and want 
 
 - OpenClaw is installed and working.
 - You are comfortable configuring a local Python 3.10+ environment.
-- You may want live Materials Project access, but you still want sensible offline behavior for testing and development.
+- You want live Materials Project access for research data, with explicit development fixtures only for smoke testing.
 
 ## What The Plugin Does
 
@@ -144,7 +144,7 @@ Set the key in plugin config or with an environment variable:
 - Preferred: `plugins.entries.materials-lab.config.mpApiKey`
 - Fallback: `MATERIALS_PROJECT_API_KEY`
 
-If no key is present, the plugin still works in offline/mock mode for testing. Live Materials Project search and structure fetch require a valid key and the `mp-api` Python package.
+Live Materials Project search and structure fetch require a valid key and the `mp-api` Python package. Development fixture data exists only for explicit smoke tests; runtime tools do not fall back to it unless `allowOffline: true` is passed intentionally.
 
 ## Example Chat Prompts
 
@@ -153,7 +153,7 @@ If no key is present, the plugin still works in offline/mock mode for testing. L
 - "Analyze the structure of `mp-149`, explain the coordination environment at a high level, and save a note."
 - "Export a markdown report comparing these three materials for thermal stability and insulating behavior."
 - "Use the ranked candidates to plan a property-backed high-k dielectric research loop with a 12-calculation budget."
-- "Execute that research-loop plan with the local-surrogate backend, then rerank the property-updated candidates."
+- "Execute that research-loop plan with the dev-smoke backend to validate plumbing without generating research property evidence."
 - "Prepare Quantum ESPRESSO inputs for the top two calculations in that research-loop plan."
 - "Prepare VASP, atomate2/jobflow, or AiiDA backend inputs for this approved plan without submitting jobs."
 - "Prepare a batch screening plan, but ask me before running expensive relaxation jobs."
@@ -183,7 +183,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 
 - Confirm `mpApiKey` is set correctly.
 - Verify outbound network access from the Python environment.
-- Use offline mode or the mock dataset while debugging tool flow locally.
+- For local plumbing tests, pass `allowOffline: true` explicitly to use development fixture data. Do not treat fixture data as research evidence.
 
 ### ASE tools do not appear
 
@@ -203,9 +203,9 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - File writes are restricted to `workspaceRoot`.
 - Expensive or write-heavy workflows request approval before execution.
 - `materials_plan_research_loop` writes a plan and manifest only. It marks DFT/HPC/paid-compute work as blocked until a human explicitly approves a later execution workflow.
-- `materials_execute_research_plan` supports `local-surrogate` plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
+- `materials_execute_research_plan` supports a non-evidentiary `dev-smoke` backend plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
 - External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided.
-- The `local-surrogate` backend is a low-confidence adapter for validating execution/provenance/reranking flow. It must not be treated as DFT or experimental evidence.
+- The `dev-smoke` backend validates execution/provenance plumbing only. It does not emit property updates or reranking payloads.
 - External prepared jobs do not produce property-backed candidate updates until completed outputs are parsed back into `propertyUpdates`.
 - `mpApiKey` is marked sensitive in plugin UI hints and is also supported through environment variables.
 
@@ -221,8 +221,8 @@ npm run pack:verify
 
 Key development notes:
 
-- Tests default to offline/mock behavior.
-- The bridge test uses the local Python worker and does not require live Materials Project access.
+- Tests can opt into development fixture data explicitly.
+- The bridge smoke test uses the local Python worker and development fixtures; live Materials Project access is still required for research-grade data retrieval.
 - The OpenClaw SDK entrypoint is shimmed at test runtime, but TypeScript resolves against the installed OpenClaw SDK.
 
 ## Roadmap

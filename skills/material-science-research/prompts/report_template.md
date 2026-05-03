@@ -25,7 +25,7 @@ Explain the ranking in terms of the chosen criteria.
 
 ## Assumptions And Limitations
 
-Document offline mode, missing data, failed paths, and uncertain interpretations.
+Document development fixture use, missing data, failed paths, and uncertain interpretations.
 
 ## Artifacts
 

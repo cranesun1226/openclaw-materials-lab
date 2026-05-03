@@ -120,7 +120,7 @@ export async function runDoctor(
     status: config.mpApiKey ? "ok" : "warn",
     message: config.mpApiKey
       ? "Materials Project API key is configured."
-      : "Materials Project API key is not configured. Offline/mock mode is still available.",
+      : "Materials Project API key is not configured. Live Materials Project queries will fail unless a tool call explicitly opts into development fixture data.",
   });
 
   return {

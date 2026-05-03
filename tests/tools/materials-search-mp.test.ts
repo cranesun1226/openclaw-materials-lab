@@ -28,16 +28,16 @@ describe("materials_search_mp", () => {
         ok: true,
         action: "search_materials",
         requestId: "req-1",
-        summary: "Found 2 candidate materials using offline mock data.",
+        summary: "Found 2 candidate materials using development fixture data.",
         data: {
           candidates: [
-            { materialId: "mp-mock-hfo2", formula: "HfO2", source: "mock" },
-            { materialId: "mp-mock-al2o3", formula: "Al2O3", source: "mock" },
+            { materialId: "fixture-hfo2", formula: "HfO2", source: "dev-fixture" },
+            { materialId: "fixture-al2o3", formula: "Al2O3", source: "dev-fixture" },
           ],
           usedOfflineData: true,
         },
         artifacts: [],
-        warnings: ["Using offline mock data."],
+        warnings: ["Using development fixture data; results are for smoke testing only."],
       }),
     };
     const context = createToolTestContext(tempDir, bridge);
@@ -50,7 +50,7 @@ describe("materials_search_mp", () => {
       allowOffline: true,
     });
     expect(result.structuredContent.data.candidates).toHaveLength(2);
-    expect(result.structuredContent.warnings).toContain("Using offline mock data.");
+    expect(result.structuredContent.warnings).toContain("Using development fixture data; results are for smoke testing only.");
   });
 });
 

@@ -45,7 +45,7 @@ Use `materials_search_mp` to find candidate materials.
 
 - Start broad enough to avoid premature narrowing.
 - Prefer a manageable first pass, then refine.
-- If Materials Project access is unavailable, tell the user you are using offline/mock data.
+- If Materials Project access is unavailable, do not silently continue with fixture data. Use development fixture data only when the user explicitly wants a smoke test.
 
 ### 4. Inspect structures
 
@@ -109,4 +109,4 @@ These workflows can be slow, write multiple artifacts, or trigger heavier local 
 - Prefer clarity over jargon when the user does not ask for deep technical detail.
 - If data is incomplete, say so plainly.
 - Separate observed outputs from interpretation.
-- Keep the user informed about what is live data, local analysis, or offline/mock fallback.
+- Keep the user informed about what is live data, local analysis, or explicitly requested development fixture fallback.

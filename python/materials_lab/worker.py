@@ -159,14 +159,15 @@ def handle_search_materials(*, request_id: str, payload: dict[str, Any], api_key
     data = {
         "candidates": [_candidate_summary(item) for item in candidates],
         "usedOfflineData": used_offline,
+        "usedDevelopmentFixtureData": used_offline,
     }
-    mode = "offline mock data" if used_offline else "Materials Project"
+    mode = "development fixture data" if used_offline else "Materials Project"
     return success(
         action="search_materials",
         request_id=request_id,
         summary=f"Found {len(data['candidates'])} candidate materials using {mode}.",
         data=data,
-        warnings=["Using offline mock data."] if used_offline else [],
+        warnings=["Using development fixture data; results are for smoke testing only."] if used_offline else [],
     )
 
 
@@ -175,7 +176,7 @@ def handle_fetch_structure(*, request_id: str, payload: dict[str, Any], api_key:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
     format_name = str(payload.get("format") or "both").lower()
-    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=True)
+    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=False)
     material, used_offline = fetch_material(material_id, api_key=api_key, allow_offline=allow_offline)
     structure_data = material.get("structure")
     if not isinstance(structure_data, dict):
@@ -193,6 +194,8 @@ def handle_fetch_structure(*, request_id: str, payload: dict[str, Any], api_key:
             artifacts.append(cif_path)
         else:
             warnings.append("CIF export was skipped because pymatgen is unavailable for this structure.")
+    if used_offline:
+        warnings.append("Using development fixture data; fetched structure is not live Materials Project evidence.")
 
     data = {
         "material": _candidate_summary(material),
@@ -200,6 +203,7 @@ def handle_fetch_structure(*, request_id: str, payload: dict[str, Any], api_key:
         "cifPath": cif_path,
         "structure": structure_data,
         "usedOfflineData": used_offline,
+        "usedDevelopmentFixtureData": used_offline,
     }
     return success(
         action="fetch_structure",
@@ -214,7 +218,7 @@ def handle_fetch_structure(*, request_id: str, payload: dict[str, Any], api_key:
 def handle_analyze_structure(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=True)
+    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=False)
     material_id = ensure_string(payload.get("materialId"), field="materialId", required=False)
     structure_path = ensure_string(payload.get("structurePath"), field="structurePath", required=False)
 
@@ -233,6 +237,8 @@ def handle_analyze_structure(*, request_id: str, payload: dict[str, Any], api_ke
     artifacts = [plot_path] if plot_path else []
     if plot_path is None:
         warnings.append("Metric plot was skipped because matplotlib is unavailable.")
+    if used_offline:
+        warnings.append("Using development fixture data; structural analysis is a smoke-test artifact.")
 
     data = {
         "materialId": material_id,
@@ -241,6 +247,7 @@ def handle_analyze_structure(*, request_id: str, payload: dict[str, Any], api_ke
         "readableSummary": analysis["readableSummary"],
         "plotPath": plot_path,
         "usedOfflineData": used_offline,
+        "usedDevelopmentFixtureData": used_offline,
     }
     return success(
         action="analyze_structure",
@@ -346,20 +353,20 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
 def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    backend = str(payload.get("backend") or "local-surrogate").strip().lower()
+    backend = str(payload.get("backend") or "dev-smoke").strip().lower()
     plan = _load_research_plan(payload)
     if not isinstance(plan.get("calculationQueue"), list):
         raise WorkerError("INVALID_PARAMS", "execute_research_plan requires a plan with calculationQueue.")
 
     max_steps = int(payload.get("maxSteps") or len(plan["calculationQueue"]))
-    if backend == "local-surrogate":
-        allow_blocked_surrogate = ensure_bool(payload.get("allowBlockedSurrogate"), field="allowBlockedSurrogate", default=False)
-        execution = _execute_local_surrogate_plan(
+    if backend == "dev-smoke":
+        allow_blocked_dev_smoke = ensure_bool(payload.get("allowBlockedDevSmoke"), field="allowBlockedDevSmoke", default=False)
+        execution = _execute_dev_smoke_plan(
             plan=plan,
             artifact_dir=artifact_dir,
             api_key=api_key,
             max_steps=max_steps,
-            allow_blocked_surrogate=allow_blocked_surrogate,
+            allow_blocked_dev_smoke=allow_blocked_dev_smoke,
         )
     elif backend in {"quantum-espresso", "vasp", "atomate2", "aiida"}:
         execution = _execute_external_backend_plan(
@@ -376,7 +383,7 @@ def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], ap
         raise WorkerError(
             "BACKEND_NOT_AVAILABLE",
             f"Research backend '{backend}' is not available in this build.",
-            hint="Use one of: local-surrogate, quantum-espresso, vasp, atomate2, aiida.",
+            hint="Use one of: dev-smoke, quantum-espresso, vasp, atomate2, aiida.",
         )
 
     artifacts = [execution["manifestPath"], execution["reportPath"], *execution.get("resultPaths", []), *execution.get("inputPaths", [])]
@@ -398,7 +405,7 @@ def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str |
     artifact_dir = ensure_string(payload.get("artifactDir"), field="artifactDir")
     structure_path = ensure_string(payload.get("structurePath"), field="structurePath", required=False)
     material_id = ensure_string(payload.get("materialId"), field="materialId", required=False)
-    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=True)
+    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=False)
     steps = int(ensure_number(payload.get("steps"), field="steps", default=100) or 100)
     fmax_ev_a = float(ensure_number(payload.get("fmaxEvA"), field="fmaxEvA", default=0.05) or 0.05)
     calculator = ensure_string(payload.get("calculator"), field="calculator", required=False) or "EMT"
@@ -426,6 +433,7 @@ def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str |
         "relaxedStructurePath": next((artifact for artifact in artifacts if artifact.endswith(".xyz")), None),
         "trajectoryPath": None,
         "usedOfflineData": used_offline,
+        "usedDevelopmentFixtureData": used_offline,
     }
     return success(
         action="ase_relax",
@@ -440,7 +448,7 @@ def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str |
 def handle_batch_screen(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     candidate_ids = ensure_string_list(payload.get("candidateIds"), field="candidateIds")
     limit = int(ensure_number(payload.get("limit"), field="limit", default=float(len(candidate_ids))) or len(candidate_ids))
-    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=True)
+    allow_offline = ensure_bool(payload.get("allowOffline"), field="allowOffline", default=False)
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
 
@@ -472,9 +480,10 @@ def handle_batch_screen(*, request_id: str, payload: dict[str, Any], api_key: st
             "tablePaths": table_paths,
             "excludedCandidates": excluded_candidates,
             "usedOfflineData": used_offline,
+            "usedDevelopmentFixtureData": used_offline,
         },
         artifacts=[artifact for artifact in [plot_path, *table_paths] if artifact],
-        warnings=["Using offline mock data."] if used_offline else [],
+        warnings=["Using development fixture data; batch screen is a smoke-test artifact."] if used_offline else [],
     )
 
 
@@ -537,15 +546,15 @@ def _load_research_plan(payload: dict[str, Any]) -> dict[str, Any]:
     raise WorkerError("INVALID_PARAMS", "execute_research_plan requires either plan or planPath.")
 
 
-def _execute_local_surrogate_plan(
+def _execute_dev_smoke_plan(
     *,
     plan: dict[str, Any],
     artifact_dir: Path,
     api_key: str | None,
     max_steps: int,
-    allow_blocked_surrogate: bool,
+    allow_blocked_dev_smoke: bool,
 ) -> dict[str, Any]:
-    run_id = f"{plan.get('planId', 'research-plan')}-local-surrogate-{int(time.time() * 1000)}"
+    run_id = f"{plan.get('planId', 'research-plan')}-dev-smoke-{int(time.time() * 1000)}"
     run_dir = artifact_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
     selected_by_id = {
@@ -555,9 +564,8 @@ def _execute_local_surrogate_plan(
     }
     completed: list[dict[str, Any]] = []
     skipped: list[dict[str, Any]] = []
-    property_updates: dict[str, dict[str, Any]] = {}
     warnings: list[str] = [
-        "local-surrogate backend produces low-confidence property estimates; do not treat them as DFT/experimental values."
+        "dev-smoke backend validates execution plumbing only; it does not generate property evidence or reranking updates."
     ]
 
     for step in (plan.get("calculationQueue") or [])[: max(0, max_steps)]:
@@ -565,7 +573,7 @@ def _execute_local_surrogate_plan(
             continue
         status = str(step.get("status") or "planned")
         calculation_id = str(step.get("calculationId") or step.get("id") or f"calculation-{len(completed) + len(skipped) + 1}")
-        if status.startswith("blocked") and not allow_blocked_surrogate:
+        if status.startswith("blocked") and not allow_blocked_dev_smoke:
             skipped.append({
                 "calculationId": calculation_id,
                 "materialId": step.get("materialId"),
@@ -576,44 +584,34 @@ def _execute_local_surrogate_plan(
 
         material_id = str(step.get("materialId") or "")
         candidate = selected_by_id.get(material_id, {"materialId": material_id, "formula": step.get("formula")})
-        result = _run_local_surrogate_step(step, candidate, plan, api_key=api_key)
+        result = _run_dev_smoke_step(step, candidate, plan, api_key=api_key)
         result_path = run_dir / f"{_safe_file_stem(calculation_id)}.json"
         result["resultPath"] = str(result_path)
         result_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         completed.append(result)
-        update = property_updates.setdefault(material_id, _candidate_update_base(candidate, plan))
-        _merge_property_result(update, result)
 
-    updated_candidates = [_finalize_candidate_update(update) for update in property_updates.values()]
     manifest = {
         "runId": run_id,
-        "backend": "local-surrogate",
+        "backend": "dev-smoke",
         "planId": plan.get("planId"),
         "preset": plan.get("preset"),
         "generatedAt": int(time.time()),
         "completedCalculations": len(completed),
         "skippedCalculations": len(skipped),
-        "allowBlockedSurrogate": allow_blocked_surrogate,
-        "propertyUpdates": updated_candidates,
+        "allowBlockedDevSmoke": allow_blocked_dev_smoke,
+        "propertyUpdates": [],
         "completed": completed,
         "skipped": skipped,
-        "rerankingPayload": {
-            "criteriaPatch": {
-                **((plan.get("rerankingPolicy") or {}).get("criteriaPatch") or {}),
-                "screeningLevel": "property-backed-screen",
-            },
-            "candidates": updated_candidates,
-        },
         "warnings": warnings,
     }
     manifest_path = run_dir / "execution-manifest.json"
     report_path = run_dir / "execution-report.md"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    report_path.write_text(_surrogate_execution_markdown(manifest), encoding="utf-8")
+    report_path.write_text(_dev_smoke_execution_markdown(manifest), encoding="utf-8")
     return {
         "runId": run_id,
-        "backend": "local-surrogate",
-        "statusSummary": "Executed local-surrogate backend",
+        "backend": "dev-smoke",
+        "statusSummary": "Executed dev-smoke backend",
         "manifestPath": str(manifest_path),
         "reportPath": str(report_path),
         "resultPaths": [str(Path(result["resultPath"])) for result in completed],
@@ -622,8 +620,7 @@ def _execute_local_surrogate_plan(
         "preparedCalculations": 0,
         "submittedCalculations": 0,
         "skippedCalculations": len(skipped),
-        "propertyUpdates": updated_candidates,
-        "rerankingPayload": manifest["rerankingPayload"],
+        "propertyUpdates": [],
         "warnings": warnings,
     }
 
@@ -764,7 +761,12 @@ def _prepare_external_backend_step(
     api_key: str | None,
     backend_config: dict[str, Any],
 ) -> dict[str, Any]:
-    material = _fetch_material_for_backend(str(candidate.get("materialId") or ""), str(candidate.get("formula") or step.get("formula") or ""), api_key=api_key)
+    material = _fetch_material_for_backend(
+        str(candidate.get("materialId") or ""),
+        str(candidate.get("formula") or step.get("formula") or ""),
+        api_key=api_key,
+        allow_dev_fixtures=backend_config.get("allowDevFixtures") is True,
+    )
     structure_data = material.get("structure") if isinstance(material, dict) else None
     structure_paths = _write_backend_structure_files(structure_data, material, step_dir)
     if str(step.get("id") or "") == "structure-preflight":
@@ -807,16 +809,16 @@ def _prepare_external_backend_step(
     return step_manifest
 
 
-def _fetch_material_for_backend(material_id: str, formula: str, *, api_key: str | None) -> dict[str, Any]:
+def _fetch_material_for_backend(material_id: str, formula: str, *, api_key: str | None, allow_dev_fixtures: bool = False) -> dict[str, Any]:
     if material_id:
         try:
-            material, _used_offline = fetch_material(material_id, api_key=api_key, allow_offline=True)
+            material, _used_offline = fetch_material(material_id, api_key=api_key, allow_offline=allow_dev_fixtures)
             summary = _candidate_summary(material)
             summary["structure"] = material.get("structure")
             return summary
         except Exception:
             pass
-    return {"materialId": material_id, "formula": formula, "source": "mock", "structure": None}
+    return {"materialId": material_id, "formula": formula, "source": "materials-project", "structure": None}
 
 
 def _write_backend_structure_files(structure_data: Any, material: dict[str, Any], step_dir: Path) -> dict[str, str]:
@@ -1323,254 +1325,62 @@ def _external_execution_markdown(manifest: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _run_local_surrogate_step(step: dict[str, Any], candidate: dict[str, Any], plan: dict[str, Any], *, api_key: str | None) -> dict[str, Any]:
+def _run_dev_smoke_step(step: dict[str, Any], candidate: dict[str, Any], plan: dict[str, Any], *, api_key: str | None) -> dict[str, Any]:
     material_id = str(step.get("materialId") or candidate.get("materialId") or "")
     formula = str(step.get("formula") or candidate.get("formula") or "")
-    material = _fetch_material_summary_for_surrogate(material_id, formula, api_key=api_key)
-    merged_candidate = {**material, **candidate, "materialId": material.get("materialId") or material_id, "formula": material.get("formula") or formula}
-    descriptors = _composition_descriptors(merged_candidate)
     calculation_type = str(step.get("id") or "")
-    properties = _surrogate_properties_for_step(calculation_type, merged_candidate, descriptors, str(plan.get("preset") or "generic"))
     return {
         "calculationId": step.get("calculationId"),
-        "materialId": merged_candidate.get("materialId"),
-        "formula": merged_candidate.get("formula"),
-        "backend": "local-surrogate",
-        "status": "completed-surrogate",
+        "materialId": material_id,
+        "formula": formula,
+        "backend": "dev-smoke",
+        "status": "completed-dev-smoke",
         "calculationType": calculation_type,
         "label": step.get("label"),
         "method": step.get("method"),
         "costClass": step.get("costClass"),
         "estimatedWallTimeHours": step.get("estimatedWallTimeHours"),
-        "properties": properties,
+        "diagnostics": {
+            "hasMaterialId": bool(material_id),
+            "hasFormula": bool(formula),
+            "preset": plan.get("preset"),
+            "writesPropertiesSuppressed": list(step.get("writesProperties") or []),
+        },
         "provenance": {
-            "backend": "local-surrogate",
-            "confidence": "low",
+            "backend": "dev-smoke",
+            "confidence": "none",
             "generatedAt": int(time.time()),
-            "basis": "composition, MP summary fields, and deterministic domain heuristics",
-            "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment",
+            "basis": "execution plumbing smoke test only",
+            "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment",
         },
     }
 
 
-def _fetch_material_summary_for_surrogate(material_id: str, formula: str, *, api_key: str | None) -> dict[str, Any]:
-    if material_id:
-        try:
-            material, _used_offline = fetch_material(material_id, api_key=api_key, allow_offline=True)
-            return _candidate_summary(material)
-        except Exception:
-            pass
-    return {
-        "materialId": material_id,
-        "formula": formula,
-        "source": "mock",
-    }
-
-
-def _surrogate_properties_for_step(
-    calculation_type: str,
-    candidate: dict[str, Any],
-    descriptors: dict[str, Any],
-    preset: str,
-) -> dict[str, Any]:
-    if calculation_type == "structure-preflight":
-        return {
-            "structureQuality": round(_structure_quality_surrogate(candidate, descriptors), 6),
-        }
-    if preset == "high-k-dielectric":
-        return _high_k_surrogate_properties(calculation_type, candidate, descriptors)
-    if preset == "solid-electrolyte":
-        return _solid_electrolyte_surrogate_properties(calculation_type, candidate, descriptors)
-    if preset == "photovoltaic-absorber":
-        return _photovoltaic_surrogate_properties(calculation_type, candidate, descriptors)
-    if preset == "thermoelectric":
-        return _thermoelectric_surrogate_properties(calculation_type, candidate, descriptors)
-    return {"domainSpecificProperty": round(_domain_descriptor_score(descriptors, preset), 6)}
-
-
-def _high_k_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
-    elements = set(str(item) for item in descriptors.get("elements") or [])
-    density = _numeric(candidate.get("densityGcm3"), 5.0)
-    gap = _numeric(candidate.get("bandGapEv"), 3.0)
-    high_k_strength = _high_k_chemistry_score(elements, descriptors, _infer_material_family(candidate, {"preset": "high-k-dielectric"}))
-    if calculation_type == "dfpt-dielectric-tensor":
-        total = 3.5 + high_k_strength * 28.0 + max(0.0, density - 4.0) * 0.8
-        if elements.intersection({"Ba", "Sr"}) and "Ti" in elements:
-            total += 55.0
-        if elements.intersection({"Al", "Si"}) and not elements.intersection({"Hf", "Zr", "Ti", "Ta", "Nb", "La", "Y"}):
-            total = min(total, 9.5 if "Al" in elements else 4.5)
-        return {
-            "dielectricTotal": round(total, 4),
-            "dielectricElectronic": round(max(1.8, min(total * 0.22, 7.5)), 4),
-        }
-    if calculation_type == "band-alignment":
-        offset = max(0.25, min(gap * 0.32, 2.4))
-        return {
-            "bandOffsetElectronEv": round(offset, 4),
-            "bandOffsetHoleEv": round(max(0.25, min(gap - offset, 3.5)), 4),
-        }
-    if calculation_type == "interface-reaction":
-        base = 0.04 if elements.intersection({"Al", "Si", "Hf", "Zr"}) else 0.16
-        return {"interfaceReactionEnergyEv": round(base + max(0.0, density - 7.0) * 0.015, 4)}
-    if calculation_type == "phonon-stability":
-        return {"phononStability": round(max(0.0, min(1.0, 1.0 - _numeric(candidate.get("energyAboveHullEv"), 0.05) / 0.18)), 4)}
-    return {}
-
-
-def _solid_electrolyte_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
-    li_fraction = float(descriptors.get("liAtomicFraction") or 0.0)
-    framework = max(float(descriptors.get("chalcogenideAtomicFraction") or 0.0), float(descriptors.get("halogenAtomicFraction") or 0.0), float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.75)
-    if calculation_type == "li-migration-barrier":
-        return {"migrationBarrierEv": round(max(0.18, 0.75 - li_fraction * 0.9 - framework * 0.18), 4)}
-    if calculation_type == "aimd-ionic-conductivity":
-        conductivity = 1e-6 + li_fraction * framework * 4e-3
-        return {"ionicConductivityScm": round(conductivity, 8)}
-    if calculation_type == "electrochemical-window":
-        return {"electrochemicalWindowV": round(2.5 + _numeric(candidate.get("bandGapEv"), 3.0) * 0.45, 4)}
-    if calculation_type == "interface-stability":
-        return {"interfaceReactionEnergyEv": round(max(0.02, _numeric(candidate.get("energyAboveHullEv"), 0.05) + 0.05), 4)}
-    return {}
-
-
-def _photovoltaic_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
-    gap = _numeric(candidate.get("bandGapEv"), 1.5)
-    absorber = max(float(descriptors.get("chalcogenideAtomicFraction") or 0.0), float(descriptors.get("halogenAtomicFraction") or 0.0) * 0.85, float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.45)
-    if calculation_type == "optical-absorption":
-        return {
-            "directBandGapEv": round(max(0.1, gap + (0.10 if absorber < 0.4 else -0.05)), 4),
-            "absorptionCoefficientCm1": round(2500 + absorber * 45000, 2),
-        }
-    if calculation_type == "band-edge-alignment":
-        return {"cbmEv": round(-4.0 + (gap - 1.4) * 0.25, 4), "vbmEv": round(-4.0 - gap, 4)}
-    if calculation_type == "defect-tolerance":
-        return {"defectToleranceScore": round(max(0.0, min(1.0, absorber * 0.75 + _target_score(gap, 1.45) * 0.25)), 4)}
-    if calculation_type == "carrier-masses":
-        return {
-            "effectiveMassElectron": round(max(0.12, 1.2 - absorber * 0.65), 4),
-            "effectiveMassHole": round(max(0.15, 1.4 - absorber * 0.55), 4),
-        }
-    return {}
-
-
-def _thermoelectric_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
-    heavy = float(descriptors.get("heavyAtomicFraction") or 0.0)
-    gap_score = _target_score(candidate.get("bandGapEv"), 0.35)
-    complexity = min(1.0, float(descriptors.get("numElements") or 1.0) / 4.0)
-    if calculation_type == "boltzmann-transport":
-        return {
-            "seebeckUvK": round(80 + gap_score * 180 + heavy * 90, 4),
-            "powerFactorUwCmK2": round(4 + gap_score * 24 + complexity * 12, 4),
-        }
-    if calculation_type == "lattice-thermal-conductivity":
-        return {"latticeThermalConductivityWmK": round(max(0.35, 6.0 - heavy * 4.0 - complexity * 1.5), 4)}
-    if calculation_type == "carrier-concentration-sweep":
-        return {"carrierConcentrationCm3": round(5e18 + gap_score * 8e19, 2)}
-    if calculation_type == "phonon-stability":
-        return {"phononStability": round(max(0.0, min(1.0, 1.0 - _numeric(candidate.get("energyAboveHullEv"), 0.05) / 0.25)), 4)}
-    return {}
-
-
-def _structure_quality_surrogate(candidate: dict[str, Any], descriptors: dict[str, Any]) -> float:
-    score = 0.55
-    if candidate.get("spacegroup"):
-        score += 0.15
-    if candidate.get("materialsProjectUrl") or candidate.get("source") == "materials-project":
-        score += 0.15
-    if descriptors.get("numElements"):
-        score += 0.10
-    return max(0.0, min(score, 1.0))
-
-
-def _candidate_update_base(candidate: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "materialId": candidate.get("materialId"),
-        "formula": candidate.get("formula"),
-        "source": candidate.get("source") or "materials-project",
-        "rank": candidate.get("rank"),
-        "score": candidate.get("score"),
-        "family": candidate.get("family"),
-        "energyAboveHullEv": candidate.get("energyAboveHullEv"),
-        "bandGapEv": candidate.get("bandGapEv"),
-        "densityGcm3": candidate.get("densityGcm3"),
-        "spacegroup": candidate.get("spacegroup"),
-        "elements": candidate.get("elements") or [],
-        "volume": candidate.get("volume"),
-        "sites": candidate.get("sites"),
-        "materialsProjectUrl": candidate.get("materialsProjectUrl"),
-        "propertyProvenance": {},
-        "calculationStatus": {},
-        "screeningLevel": "property-backed-screen",
-        "notes": [f"Updated by {plan.get('planId')} using local-surrogate backend."],
-    }
-
-
-def _merge_property_result(update: dict[str, Any], result: dict[str, Any]) -> None:
-    properties = result.get("properties") or {}
-    provenance = result.get("provenance") or {}
-    calculation_id = str(result.get("calculationId") or result.get("calculationType") or "unknown")
-    for key, value in properties.items():
-        update[key] = value
-        update["propertyProvenance"][key] = {
-            **provenance,
-            "calculationId": calculation_id,
-            "calculationType": result.get("calculationType"),
-            "resultPath": result.get("resultPath"),
-        }
-    update["calculationStatus"][calculation_id] = {
-        "status": result.get("status"),
-        "backend": result.get("backend"),
-        "resultPath": result.get("resultPath"),
-        "writesProperties": list(properties.keys()),
-    }
-
-
-def _finalize_candidate_update(update: dict[str, Any]) -> dict[str, Any]:
-    return {key: value for key, value in update.items() if value is not None}
-
-
-def _surrogate_execution_markdown(manifest: dict[str, Any]) -> str:
+def _dev_smoke_execution_markdown(manifest: dict[str, Any]) -> str:
     lines = [
         f"# Research Plan Execution: {manifest['runId']}",
         "",
         "## Backend",
         "",
-        "- Backend: `local-surrogate`",
-        "- Confidence: `low`",
-        "- These values are calculation-adapter smoke outputs, not DFT or experimental results.",
+        "- Backend: `dev-smoke`",
+        "- Confidence: `none`",
+        "- This backend validates execution plumbing only and does not create research property evidence.",
         "",
         "## Summary",
         "",
         f"- Completed calculations: {manifest['completedCalculations']}",
         f"- Skipped calculations: {manifest['skippedCalculations']}",
-        f"- Allow blocked surrogate execution: `{manifest['allowBlockedSurrogate']}`",
+        f"- Allow blocked dev-smoke execution: `{manifest['allowBlockedDevSmoke']}`",
         "",
-        "## Candidate Property Updates",
+        "## Completed Diagnostics",
         "",
-        "| Material | Formula | Updated Properties |",
-        "| --- | --- | --- |",
+        "| Calculation | Material | Formula | Suppressed Properties |",
+        "| --- | --- | --- | --- |",
     ]
-    for candidate in manifest["propertyUpdates"]:
-        property_keys = [
-            key
-            for key in candidate.keys()
-            if key not in {
-                "materialId",
-                "formula",
-                "source",
-                "rank",
-                "score",
-                "family",
-                "energyAboveHullEv",
-                "bandGapEv",
-                "densityGcm3",
-                "materialsProjectUrl",
-                "propertyProvenance",
-                "calculationStatus",
-                "screeningLevel",
-                "notes",
-            }
-        ]
-        lines.append(f"| {candidate.get('materialId')} | {candidate.get('formula')} | {', '.join(property_keys) or '-'} |")
+    for item in manifest["completed"]:
+        diagnostics = item.get("diagnostics") or {}
+        suppressed = ", ".join(diagnostics.get("writesPropertiesSuppressed") or []) or "-"
+        lines.append(f"| {item.get('calculationId')} | {item.get('materialId')} | {item.get('formula')} | {suppressed} |")
     lines.extend([
         "",
         "## Warnings",
@@ -1744,7 +1554,7 @@ def _calculation_recipes(preset: str) -> list[dict[str, Any]]:
         "solid-electrolyte": [
             universal_preflight,
             _recipe("li-migration-barrier", "Li migration barrier", "NEB or bond-valence pathway screen", "medium", 8.0, ["migrationBarrierEv"]),
-            _recipe("aimd-ionic-conductivity", "Finite-temperature ionic conductivity", "AIMD or surrogate conductivity workflow", "expensive", 24.0, ["ionicConductivityScm"]),
+            _recipe("aimd-ionic-conductivity", "Finite-temperature ionic conductivity", "AIMD or conductivity workflow", "expensive", 24.0, ["ionicConductivityScm"]),
             _recipe("electrochemical-window", "Electrochemical stability window", "grand-potential phase stability", "medium", 4.0, ["electrochemicalWindowV"]),
             _recipe("interface-stability", "Electrode interface reaction", "interfacial reaction energy screen", "medium", 5.0, ["interfaceReactionEnergyEv"]),
         ],
@@ -1765,7 +1575,7 @@ def _calculation_recipes(preset: str) -> list[dict[str, Any]]:
         "thermoelectric": [
             universal_preflight,
             _recipe("boltzmann-transport", "Boltzmann transport", "Seebeck and power-factor sweep", "medium", 8.0, ["seebeckUvK", "powerFactorUwCmK2"]),
-            _recipe("lattice-thermal-conductivity", "Lattice thermal conductivity", "phonon/BTE or surrogate kappa lattice", "expensive", 30.0, ["latticeThermalConductivityWmK"]),
+            _recipe("lattice-thermal-conductivity", "Lattice thermal conductivity", "phonon/BTE kappa lattice workflow", "expensive", 30.0, ["latticeThermalConductivityWmK"]),
             _recipe("carrier-concentration-sweep", "Carrier concentration sweep", "doping-dependent transport sweep", "medium", 8.0, ["carrierConcentrationCm3"]),
             _recipe("phonon-stability", "High-temperature stability", "phonon/dynamic stability screen", "expensive", 18.0, ["phononStability"]),
         ],
@@ -1952,7 +1762,7 @@ def _research_plan_markdown(plan: dict[str, Any]) -> str:
 def _candidate_summary(item: dict[str, Any]) -> dict[str, Any]:
     material_id = item.get("material_id") or item.get("materialId")
     formula = item.get("formula")
-    source = item.get("source", "mock")
+    source = item.get("source", "materials-project")
     summary = {
         "materialId": item.get("material_id"),
         "formula": formula,
@@ -2798,16 +2608,16 @@ def _evidence_source_level(gates: list[dict[str, Any]]) -> str:
     if not gates:
         return "none"
     property_count = sum(1 for gate in gates if gate.get("source") == "property")
-    surrogate_count = sum(1 for gate in gates if gate.get("source") == "surrogate-property")
+    estimated_count = sum(1 for gate in gates if gate.get("source") == "estimated-property")
     proxy_count = sum(1 for gate in gates if str(gate.get("source") or "").endswith("proxy") or gate.get("source") == "composition-proxy")
     if property_count >= max(2, len(gates) // 2):
         return "property-backed"
     if property_count > 0:
         return "mixed-property-proxy"
-    if surrogate_count >= max(2, len(gates) // 2):
-        return "surrogate-backed"
-    if surrogate_count > 0:
-        return "mixed-surrogate-proxy"
+    if estimated_count >= max(2, len(gates) // 2):
+        return "estimate-backed"
+    if estimated_count > 0:
+        return "mixed-estimate-proxy"
     if proxy_count:
         return "proxy-only"
     return "summary-only"
@@ -2819,8 +2629,8 @@ def _property_source(candidate: dict[str, Any], *keys: str) -> str:
         return "property"
     for key in keys:
         entry = provenance.get(key)
-        if isinstance(entry, dict) and entry.get("backend") == "local-surrogate":
-            return "surrogate-property"
+        if isinstance(entry, dict) and entry.get("backend") == "dev-smoke":
+            return "dev-smoke-diagnostic"
     return "property"
 
 

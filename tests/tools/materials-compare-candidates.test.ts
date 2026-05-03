@@ -32,8 +32,8 @@ describe("materials_compare_candidates", () => {
         summary: "Ranked 2 candidate materials.",
         data: {
           ranked: [
-            { materialId: "mp-mock-hfo2", formula: "HfO2", source: "mock", score: 0.91, reasons: ["stable"], rank: 1 },
-            { materialId: "mp-mock-al2o3", formula: "Al2O3", source: "mock", score: 0.87, reasons: ["wide gap"], rank: 2 },
+            { materialId: "fixture-hfo2", formula: "HfO2", source: "dev-fixture", score: 0.91, reasons: ["stable"], rank: 1 },
+            { materialId: "fixture-al2o3", formula: "Al2O3", source: "dev-fixture", score: 0.87, reasons: ["wide gap"], rank: 2 },
           ],
           criteria: {
             stabilityWeight: 0.45,
@@ -53,8 +53,8 @@ describe("materials_compare_candidates", () => {
 
     const result = await tool.execute("call-3", {
       candidates: [
-        { materialId: "mp-mock-hfo2", formula: "HfO2", source: "mock" },
-        { materialId: "mp-mock-al2o3", formula: "Al2O3", source: "mock" },
+        { materialId: "fixture-hfo2", formula: "HfO2", source: "dev-fixture" },
+        { materialId: "fixture-al2o3", formula: "Al2O3", source: "dev-fixture" },
       ],
       criteria: {
         preset: "solid-electrolyte",

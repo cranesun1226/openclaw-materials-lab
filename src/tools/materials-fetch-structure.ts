@@ -9,7 +9,7 @@ const FetchStructureSchema = Type.Object(
   {
     materialId: Type.String({ minLength: 1, maxLength: 80 }),
     format: Type.Optional(Type.Union([Type.Literal("json"), Type.Literal("cif"), Type.Literal("both")])),
-    allowOffline: Type.Optional(Type.Boolean({ default: true })),
+    allowOffline: Type.Optional(Type.Boolean({ default: false })),
   },
   { additionalProperties: false },
 );
@@ -33,7 +33,7 @@ export function createMaterialsFetchStructureTool(
         materialId: params.materialId,
         format: params.format ?? "both",
         artifactDir,
-        allowOffline: params.allowOffline ?? true,
+        allowOffline: params.allowOffline ?? false,
       });
 
       return toToolResponse(payloadFromBridge(artifactService, bridgeResult));

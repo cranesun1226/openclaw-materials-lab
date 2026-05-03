@@ -14,7 +14,7 @@ const AseRelaxSchema = Type.Object(
     steps: Type.Optional(Type.Number({ minimum: 1, maximum: 5000 })),
     fmaxEvA: Type.Optional(Type.Number({ minimum: 0.0001, maximum: 1 })),
     calculator: Type.Optional(Type.String({ minLength: 1, maxLength: 40 })),
-    allowOffline: Type.Optional(Type.Boolean({ default: true })),
+    allowOffline: Type.Optional(Type.Boolean({ default: false })),
   },
   { additionalProperties: false },
 );
@@ -55,7 +55,7 @@ export function createMaterialsAseRelaxTool(context: MaterialsPluginContext): An
         ...(typeof params.steps === "number" ? { steps: params.steps } : {}),
         ...(typeof params.fmaxEvA === "number" ? { fmaxEvA: params.fmaxEvA } : {}),
         ...(params.calculator ? { calculator: params.calculator } : {}),
-        allowOffline: params.allowOffline ?? true,
+        allowOffline: params.allowOffline ?? false,
       });
 
       return toToolResponse(payloadFromBridge(artifactService, bridgeResult));

@@ -15,7 +15,7 @@ const SearchSchema = Type.Object(
     minBandGapEv: Type.Optional(Type.Number({ minimum: 0 })),
     maxBandGapEv: Type.Optional(Type.Number({ minimum: 0 })),
     limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100 })),
-    allowOffline: Type.Optional(Type.Boolean({ default: true })),
+    allowOffline: Type.Optional(Type.Boolean({ default: false })),
   },
   { additionalProperties: false },
 );
@@ -26,7 +26,7 @@ export function createMaterialsSearchTool(context: MaterialsPluginContext): AnyA
   return {
     name: "materials_search_mp",
     label: "Search Materials",
-    description: "Search Materials Project or the bundled offline dataset for candidate materials.",
+    description: "Search Materials Project, or explicit development fixture data when allowOffline is true.",
     parameters: SearchSchema,
     async execute(_callId, rawParams) {
       const params = rawParams as MaterialsSearchParams;
@@ -35,7 +35,7 @@ export function createMaterialsSearchTool(context: MaterialsPluginContext): AnyA
       const bridgeResult = await context.getBridge().searchMaterials({
         ...params,
         limit: params.limit ?? 10,
-        allowOffline: params.allowOffline ?? true,
+        allowOffline: params.allowOffline ?? false,
       });
 
       return toToolResponse(payloadFromBridge(artifactService, bridgeResult));
