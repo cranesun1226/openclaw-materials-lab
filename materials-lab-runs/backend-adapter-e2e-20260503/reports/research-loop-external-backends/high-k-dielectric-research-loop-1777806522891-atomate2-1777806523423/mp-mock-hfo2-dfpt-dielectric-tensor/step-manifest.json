@@ -1,0 +1,31 @@
+{
+  "backend": "atomate2",
+  "calculationId": "mp-mock-hfo2-dfpt-dielectric-tensor",
+  "calculationType": "dfpt-dielectric-tensor",
+  "costClass": "expensive",
+  "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-atomate2-1777806523423/mp-mock-hfo2-dfpt-dielectric-tensor/atomate2_flow.py",
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-atomate2-1777806523423/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-atomate2-1777806523423/mp-mock-hfo2-dfpt-dielectric-tensor/atomate2_flow.py",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-atomate2-1777806523423/mp-mock-hfo2-dfpt-dielectric-tensor/requirements-note.txt"
+  ],
+  "label": "DFPT dielectric tensor",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "atomate2",
+    "generatedAt": 1777806523,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-atomate2-1777806523423/mp-mock-hfo2-dfpt-dielectric-tensor/step-manifest.json",
+  "structurePaths": {
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-atomate2-1777806523423/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json"
+  },
+  "writesProperties": [
+    "dielectricTotal",
+    "dielectricElectronic"
+  ]
+}

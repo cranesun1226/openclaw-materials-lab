@@ -1,0 +1,31 @@
+{
+  "backend": "vasp",
+  "calculationId": "mp-mock-hfo2-structure-preflight",
+  "calculationType": "structure-preflight",
+  "costClass": "metadata",
+  "executionScript": null,
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-vasp-1777806523247/mp-mock-hfo2-structure-preflight/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-vasp-1777806523247/mp-mock-hfo2-structure-preflight/preflight-note.md"
+  ],
+  "label": "Structure fetch and normalization preflight",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "vasp",
+    "generatedAt": 1777806523,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-vasp-1777806523247/mp-mock-hfo2-structure-preflight/step-manifest.json",
+  "structurePaths": {
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806522891-vasp-1777806523247/mp-mock-hfo2-structure-preflight/structure.json"
+  },
+  "writesProperties": [
+    "structurePath",
+    "cifPath",
+    "structureQuality"
+  ]
+}

@@ -1,0 +1,9 @@
+&INPUTPP
+  prefix = 'mp-mock-hfo2',
+  outdir = './tmp',
+  plot_num = 11,
+/
+&PLOT
+  iflag = 3,
+  fileout = 'mp-mock-hfo2.potential.cube',
+/

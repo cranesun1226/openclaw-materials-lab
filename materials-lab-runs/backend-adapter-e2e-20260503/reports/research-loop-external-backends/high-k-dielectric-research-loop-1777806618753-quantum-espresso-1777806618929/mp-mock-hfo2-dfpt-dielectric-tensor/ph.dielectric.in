@@ -1,0 +1,8 @@
+&INPUTPH
+  tr2_ph = 1.0d-14,
+  prefix = 'mp-mock-hfo2',
+  outdir = './tmp',
+  epsil = .true.,
+  fildyn = 'mp-mock-hfo2.dynG',
+/
+0.0 0.0 0.0

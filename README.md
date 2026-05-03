@@ -154,6 +154,8 @@ If no key is present, the plugin still works in offline/mock mode for testing. L
 - "Export a markdown report comparing these three materials for thermal stability and insulating behavior."
 - "Use the ranked candidates to plan a property-backed high-k dielectric research loop with a 12-calculation budget."
 - "Execute that research-loop plan with the local-surrogate backend, then rerank the property-updated candidates."
+- "Prepare Quantum ESPRESSO inputs for the top two calculations in that research-loop plan."
+- "Prepare VASP, atomate2/jobflow, or AiiDA backend inputs for this approved plan without submitting jobs."
 - "Prepare a batch screening plan, but ask me before running expensive relaxation jobs."
 
 ## Workspace Layout
@@ -201,7 +203,10 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - File writes are restricted to `workspaceRoot`.
 - Expensive or write-heavy workflows request approval before execution.
 - `materials_plan_research_loop` writes a plan and manifest only. It marks DFT/HPC/paid-compute work as blocked until a human explicitly approves a later execution workflow.
-- `materials_execute_research_plan` currently supports `local-surrogate`, a low-confidence backend adapter for validating execution/provenance/reranking flow. It must not be treated as DFT or experimental evidence.
+- `materials_execute_research_plan` supports `local-surrogate` plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
+- External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided.
+- The `local-surrogate` backend is a low-confidence adapter for validating execution/provenance/reranking flow. It must not be treated as DFT or experimental evidence.
+- External prepared jobs do not produce property-backed candidate updates until completed outputs are parsed back into `propertyUpdates`.
 - `mpApiKey` is marked sensitive in plugin UI hints and is also supported through environment variables.
 
 ## Development Workflow

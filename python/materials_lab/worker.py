@@ -3,6 +3,8 @@ from __future__ import annotations
 import csv
 import json
 import os
+import shutil
+import subprocess
 import sys
 import time
 from collections import Counter, defaultdict
@@ -26,9 +28,74 @@ from .schemas import (
 )
 
 try:
-    from pymatgen.core import Composition  # type: ignore
+    from pymatgen.core import Composition, Element, Structure  # type: ignore
 except Exception:  # pragma: no cover - optional runtime dependency
     Composition = None
+    Element = None
+    Structure = None
+
+try:
+    from pymatgen.io.vasp import Poscar  # type: ignore
+except Exception:  # pragma: no cover - optional runtime dependency
+    Poscar = None
+
+
+ATOMIC_MASS_FALLBACK = {
+    "H": 1.00794,
+    "Li": 6.941,
+    "Be": 9.012182,
+    "B": 10.811,
+    "C": 12.0107,
+    "N": 14.0067,
+    "O": 15.9994,
+    "F": 18.9984032,
+    "Na": 22.98976928,
+    "Mg": 24.305,
+    "Al": 26.9815386,
+    "Si": 28.0855,
+    "P": 30.973762,
+    "S": 32.065,
+    "Cl": 35.453,
+    "K": 39.0983,
+    "Ca": 40.078,
+    "Sc": 44.955912,
+    "Ti": 47.867,
+    "V": 50.9415,
+    "Cr": 51.9961,
+    "Mn": 54.938045,
+    "Fe": 55.845,
+    "Co": 58.933195,
+    "Ni": 58.6934,
+    "Cu": 63.546,
+    "Zn": 65.38,
+    "Ga": 69.723,
+    "Ge": 72.64,
+    "As": 74.9216,
+    "Se": 78.96,
+    "Br": 79.904,
+    "Rb": 85.4678,
+    "Sr": 87.62,
+    "Y": 88.90585,
+    "Zr": 91.224,
+    "Nb": 92.90638,
+    "Mo": 95.96,
+    "Ag": 107.8682,
+    "Cd": 112.411,
+    "In": 114.818,
+    "Sn": 118.71,
+    "Sb": 121.76,
+    "Te": 127.6,
+    "I": 126.90447,
+    "Cs": 132.9054519,
+    "Ba": 137.327,
+    "La": 138.90547,
+    "Ce": 140.116,
+    "Hf": 178.49,
+    "Ta": 180.94788,
+    "W": 183.84,
+    "Pb": 207.2,
+    "Bi": 208.9804,
+}
 
 
 def main() -> int:
@@ -280,33 +347,46 @@ def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], ap
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
     backend = str(payload.get("backend") or "local-surrogate").strip().lower()
-    if backend != "local-surrogate":
-        raise WorkerError(
-            "BACKEND_NOT_AVAILABLE",
-            f"Research backend '{backend}' is not available in this build.",
-            hint="Use backend='local-surrogate' or install a future external DFT backend adapter.",
-        )
-
     plan = _load_research_plan(payload)
     if not isinstance(plan.get("calculationQueue"), list):
         raise WorkerError("INVALID_PARAMS", "execute_research_plan requires a plan with calculationQueue.")
 
     max_steps = int(payload.get("maxSteps") or len(plan["calculationQueue"]))
-    allow_blocked_surrogate = ensure_bool(payload.get("allowBlockedSurrogate"), field="allowBlockedSurrogate", default=False)
-    execution = _execute_local_surrogate_plan(
-        plan=plan,
-        artifact_dir=artifact_dir,
-        api_key=api_key,
-        max_steps=max_steps,
-        allow_blocked_surrogate=allow_blocked_surrogate,
-    )
-    artifacts = [execution["manifestPath"], execution["reportPath"], *execution["resultPaths"]]
+    if backend == "local-surrogate":
+        allow_blocked_surrogate = ensure_bool(payload.get("allowBlockedSurrogate"), field="allowBlockedSurrogate", default=False)
+        execution = _execute_local_surrogate_plan(
+            plan=plan,
+            artifact_dir=artifact_dir,
+            api_key=api_key,
+            max_steps=max_steps,
+            allow_blocked_surrogate=allow_blocked_surrogate,
+        )
+    elif backend in {"quantum-espresso", "vasp", "atomate2", "aiida"}:
+        execution = _execute_external_backend_plan(
+            plan=plan,
+            artifact_dir=artifact_dir,
+            api_key=api_key,
+            backend=backend,
+            max_steps=max_steps,
+            execution_mode=str(payload.get("executionMode") or "prepare").strip().lower(),
+            allow_execution=ensure_bool(payload.get("allowExecution"), field="allowExecution", default=False),
+            backend_config=ensure_dict(payload.get("backendConfig") or {}, field="backendConfig"),
+        )
+    else:
+        raise WorkerError(
+            "BACKEND_NOT_AVAILABLE",
+            f"Research backend '{backend}' is not available in this build.",
+            hint="Use one of: local-surrogate, quantum-espresso, vasp, atomate2, aiida.",
+        )
+
+    artifacts = [execution["manifestPath"], execution["reportPath"], *execution.get("resultPaths", []), *execution.get("inputPaths", [])]
     return success(
         action="execute_research_plan",
         request_id=request_id,
         summary=(
-            f"Executed {execution['completedCalculations']} local-surrogate calculation(s); "
-            f"{execution['skippedCalculations']} skipped."
+            f"{execution['statusSummary']}: {execution.get('completedCalculations', 0)} completed, "
+            f"{execution.get('preparedCalculations', 0)} prepared, {execution.get('submittedCalculations', 0)} submitted, "
+            f"{execution.get('skippedCalculations', 0)} skipped."
         ),
         data=execution,
         artifacts=artifacts,
@@ -533,15 +613,714 @@ def _execute_local_surrogate_plan(
     return {
         "runId": run_id,
         "backend": "local-surrogate",
+        "statusSummary": "Executed local-surrogate backend",
         "manifestPath": str(manifest_path),
         "reportPath": str(report_path),
         "resultPaths": [str(Path(result["resultPath"])) for result in completed],
+        "inputPaths": [],
         "completedCalculations": len(completed),
+        "preparedCalculations": 0,
+        "submittedCalculations": 0,
         "skippedCalculations": len(skipped),
         "propertyUpdates": updated_candidates,
         "rerankingPayload": manifest["rerankingPayload"],
         "warnings": warnings,
     }
+
+
+def _execute_external_backend_plan(
+    *,
+    plan: dict[str, Any],
+    artifact_dir: Path,
+    api_key: str | None,
+    backend: str,
+    max_steps: int,
+    execution_mode: str,
+    allow_execution: bool,
+    backend_config: dict[str, Any],
+) -> dict[str, Any]:
+    if execution_mode not in {"prepare", "submit"}:
+        raise WorkerError("INVALID_PARAMS", "executionMode must be 'prepare' or 'submit'.")
+    run_id = f"{plan.get('planId', 'research-plan')}-{backend}-{int(time.time() * 1000)}"
+    run_dir = artifact_dir / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    selected_by_id = {
+        str(candidate.get("materialId")): candidate
+        for candidate in plan.get("selectedCandidates") or []
+        if candidate.get("materialId")
+    }
+    prepared: list[dict[str, Any]] = []
+    submitted: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    result_paths: list[str] = []
+    input_paths: list[str] = []
+    warnings: list[str] = []
+    allow_blocked_steps = backend_config.get("allowBlockedSteps") is True
+    if execution_mode == "submit" and not allow_execution:
+        warnings.append("executionMode=submit was requested, but allowExecution=false; prepared inputs without launching external jobs.")
+        execution_mode = "prepare"
+
+    for step in (plan.get("calculationQueue") or [])[: max(0, max_steps)]:
+        if not isinstance(step, dict):
+            continue
+        calculation_id = str(step.get("calculationId") or step.get("id") or f"calculation-{len(prepared) + len(skipped) + 1}")
+        material_id = str(step.get("materialId") or "")
+        candidate = selected_by_id.get(material_id, {"materialId": material_id, "formula": step.get("formula")})
+        step_dir = run_dir / _safe_file_stem(calculation_id)
+        step_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            prep = _prepare_external_backend_step(
+                backend=backend,
+                step=step,
+                candidate=candidate,
+                plan=plan,
+                step_dir=step_dir,
+                api_key=api_key,
+                backend_config=backend_config,
+            )
+        except WorkerError as exc:
+            skipped.append({
+                "calculationId": calculation_id,
+                "materialId": material_id,
+                "status": "skipped-prepare-failed",
+                "reason": exc.message,
+            })
+            warnings.append(f"{calculation_id}: {exc.message}")
+            continue
+        prepared.append(prep)
+        result_paths.append(prep["stepManifestPath"])
+        input_paths.extend(prep["inputPaths"])
+        if execution_mode == "submit":
+            status = str(step.get("status") or "planned")
+            if status.startswith("blocked") and not allow_blocked_steps:
+                submit = _submission_result(
+                    calculation_id,
+                    "not-submitted",
+                    "Step is blocked by the research plan approval gates; set backendConfig.allowBlockedSteps=true after human approval to submit it.",
+                )
+            else:
+                submit = _submit_external_backend_step(backend=backend, prepared_step=prep, backend_config=backend_config)
+            submitted.append(submit)
+            if submit.get("submissionManifestPath"):
+                result_paths.append(submit["submissionManifestPath"])
+            if submit.get("status") != "submitted":
+                warnings.append(f"{calculation_id}: {submit.get('message', 'submission did not start')}")
+
+    manifest = {
+        "runId": run_id,
+        "backend": backend,
+        "executionMode": execution_mode,
+        "allowBlockedSteps": allow_blocked_steps,
+        "planId": plan.get("planId"),
+        "preset": plan.get("preset"),
+        "generatedAt": int(time.time()),
+        "preparedCalculations": len(prepared),
+        "submittedCalculations": sum(1 for item in submitted if item.get("status") == "submitted"),
+        "completedCalculations": 0,
+        "skippedCalculations": len(skipped),
+        "prepared": prepared,
+        "submitted": submitted,
+        "skipped": skipped,
+        "propertyUpdates": [],
+        "warnings": warnings,
+    }
+    manifest_path = run_dir / "execution-manifest.json"
+    report_path = run_dir / "execution-report.md"
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(_external_execution_markdown(manifest), encoding="utf-8")
+    status_summary = f"Submitted {backend} backend" if execution_mode == "submit" else f"Prepared {backend} backend"
+    return {
+        "runId": run_id,
+        "backend": backend,
+        "statusSummary": status_summary,
+        "manifestPath": str(manifest_path),
+        "reportPath": str(report_path),
+        "resultPaths": [str(Path(path)) for path in result_paths],
+        "inputPaths": [str(Path(path)) for path in input_paths],
+        "completedCalculations": 0,
+        "preparedCalculations": len(prepared),
+        "submittedCalculations": sum(1 for item in submitted if item.get("status") == "submitted"),
+        "skippedCalculations": len(skipped),
+        "propertyUpdates": [],
+        "rerankingPayload": {
+            "criteriaPatch": {
+                **((plan.get("rerankingPolicy") or {}).get("criteriaPatch") or {}),
+                "screeningLevel": "property-backed-screen",
+            },
+            "candidates": [],
+            "note": "External backend preparation does not produce parsed propertyUpdates until completed calculations are parsed.",
+        },
+        "warnings": warnings,
+    }
+
+
+def _prepare_external_backend_step(
+    *,
+    backend: str,
+    step: dict[str, Any],
+    candidate: dict[str, Any],
+    plan: dict[str, Any],
+    step_dir: Path,
+    api_key: str | None,
+    backend_config: dict[str, Any],
+) -> dict[str, Any]:
+    material = _fetch_material_for_backend(str(candidate.get("materialId") or ""), str(candidate.get("formula") or step.get("formula") or ""), api_key=api_key)
+    structure_data = material.get("structure") if isinstance(material, dict) else None
+    structure_paths = _write_backend_structure_files(structure_data, material, step_dir)
+    if str(step.get("id") or "") == "structure-preflight":
+        input_paths = [_write_structure_preflight_note(step, material, structure_paths, step_dir)]
+    elif backend == "quantum-espresso":
+        input_paths = _write_quantum_espresso_inputs(step, material, structure_data, step_dir, backend_config)
+    elif backend == "vasp":
+        input_paths = _write_vasp_inputs(step, material, structure_data, step_dir, backend_config)
+    elif backend == "atomate2":
+        input_paths = _write_atomate2_inputs(step, material, structure_paths, step_dir, backend_config)
+    elif backend == "aiida":
+        input_paths = _write_aiida_inputs(step, material, structure_paths, step_dir, backend_config)
+    else:
+        raise WorkerError("BACKEND_NOT_AVAILABLE", f"Unsupported backend: {backend}")
+    all_inputs = [*structure_paths.values(), *input_paths]
+    step_manifest = {
+        "calculationId": step.get("calculationId"),
+        "backend": backend,
+        "status": "prepared",
+        "materialId": material.get("materialId"),
+        "formula": material.get("formula"),
+        "calculationType": step.get("id"),
+        "label": step.get("label"),
+        "costClass": step.get("costClass"),
+        "writesProperties": step.get("writesProperties") or [],
+        "inputPaths": all_inputs,
+        "structurePaths": structure_paths,
+        "executionScript": next((item for item in input_paths if item.endswith(("run.sh", "submit.sh", "atomate2_flow.py", "aiida_submit.py"))), None),
+        "provenance": {
+            "backend": backend,
+            "stage": "input-preparation",
+            "generatedAt": int(time.time()),
+            "requiresExternalCode": True,
+            "parsedPropertiesAvailable": False,
+        },
+    }
+    manifest_path = step_dir / "step-manifest.json"
+    step_manifest["stepManifestPath"] = str(manifest_path)
+    manifest_path.write_text(json.dumps(step_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return step_manifest
+
+
+def _fetch_material_for_backend(material_id: str, formula: str, *, api_key: str | None) -> dict[str, Any]:
+    if material_id:
+        try:
+            material, _used_offline = fetch_material(material_id, api_key=api_key, allow_offline=True)
+            summary = _candidate_summary(material)
+            summary["structure"] = material.get("structure")
+            return summary
+        except Exception:
+            pass
+    return {"materialId": material_id, "formula": formula, "source": "mock", "structure": None}
+
+
+def _write_backend_structure_files(structure_data: Any, material: dict[str, Any], step_dir: Path) -> dict[str, str]:
+    paths: dict[str, str] = {}
+    if isinstance(structure_data, dict):
+        json_path = step_dir / "structure.json"
+        json_path.write_text(json.dumps(structure_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        paths["structureJson"] = str(json_path)
+        cif_path = write_cif(structure_data, str(step_dir / "structure.cif"))
+        if cif_path:
+            paths["structureCif"] = cif_path
+        if Poscar is not None and Structure is not None:
+            try:
+                poscar_path = step_dir / "POSCAR"
+                Poscar(Structure.from_dict(structure_data)).write_file(str(poscar_path))
+                paths["poscar"] = str(poscar_path)
+            except Exception:
+                pass
+        if "poscar" not in paths:
+            poscar_path = _write_simple_poscar(structure_data, material, step_dir / "POSCAR")
+            if poscar_path:
+                paths["poscar"] = poscar_path
+    else:
+        note_path = step_dir / "structure-unavailable.md"
+        note_path.write_text(
+            "\n".join([
+                "# Structure Unavailable",
+                "",
+                f"- materialId: {material.get('materialId')}",
+                f"- formula: {material.get('formula')}",
+                "- The backend adapter prepared template inputs, but a real run requires a resolved structure.",
+                "",
+            ]),
+            encoding="utf-8",
+        )
+        paths["structureNote"] = str(note_path)
+    return paths
+
+
+def _write_simple_poscar(structure_data: Any, material: dict[str, Any], output_path: Path) -> str | None:
+    atoms = _structure_atoms_for_input(structure_data, material)
+    elements = _unique_ordered([atom["element"] for atom in atoms]) or _composition_elements(material)
+    if not atoms or not elements:
+        return None
+    grouped = {element: [atom for atom in atoms if atom["element"] == element] for element in elements}
+    lines = [
+        str(material.get("formula") or material.get("materialId") or "OpenClaw generated structure"),
+        "1.0",
+    ]
+    for row in _structure_lattice_for_input(structure_data):
+        lines.append("  " + " ".join(f"{value:.10f}" for value in row))
+    lines.append("  " + " ".join(elements))
+    lines.append("  " + " ".join(str(len(grouped[element])) for element in elements))
+    lines.append("Direct")
+    for element in elements:
+        for atom in grouped[element]:
+            lines.append("  " + " ".join(f"{value:.10f}" for value in atom["coords"]))
+    output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return str(output_path)
+
+
+def _write_structure_preflight_note(step: dict[str, Any], material: dict[str, Any], structure_paths: dict[str, str], step_dir: Path) -> str:
+    note_path = step_dir / "preflight-note.md"
+    note_path.write_text(
+        "\n".join([
+            "# Structure Preflight",
+            "",
+            f"- materialId: {material.get('materialId')}",
+            f"- formula: {material.get('formula')}",
+            f"- calculationId: {step.get('calculationId')}",
+            f"- structure artifacts: {len(structure_paths)}",
+            "",
+            "This step fetches and normalizes structure files for downstream backend calculations.",
+            "No external electronic-structure code is required for this metadata preflight step.",
+            "",
+        ]),
+        encoding="utf-8",
+    )
+    return str(note_path)
+
+
+def _write_quantum_espresso_inputs(
+    step: dict[str, Any],
+    material: dict[str, Any],
+    structure_data: Any,
+    step_dir: Path,
+    backend_config: dict[str, Any],
+) -> list[str]:
+    input_paths: list[str] = []
+    scf_path = step_dir / "pw.scf.in"
+    scf_path.write_text(_quantum_espresso_scf_input(material, structure_data, backend_config), encoding="utf-8")
+    input_paths.append(str(scf_path))
+    calc_type = str(step.get("id") or "")
+    if calc_type == "dfpt-dielectric-tensor":
+        ph_path = step_dir / "ph.dielectric.in"
+        ph_path.write_text(_quantum_espresso_ph_input(material, backend_config), encoding="utf-8")
+        input_paths.append(str(ph_path))
+    elif calc_type == "phonon-stability":
+        ph_path = step_dir / "ph.gamma.in"
+        ph_path.write_text(_quantum_espresso_ph_input(material, backend_config, epsil=False), encoding="utf-8")
+        input_paths.append(str(ph_path))
+    elif calc_type == "band-alignment":
+        pp_path = step_dir / "pp.potential.in"
+        pp_path.write_text(_quantum_espresso_pp_input(material, backend_config), encoding="utf-8")
+        input_paths.append(str(pp_path))
+    pseudo_path = step_dir / "PSEUDOPOTENTIALS.required"
+    pseudo_path.write_text(_pseudopotential_manifest(material), encoding="utf-8")
+    run_path = step_dir / "run.sh"
+    run_path.write_text(_quantum_espresso_run_script(step, backend_config), encoding="utf-8")
+    run_path.chmod(0o755)
+    input_paths.extend([str(pseudo_path), str(run_path)])
+    return input_paths
+
+
+def _write_vasp_inputs(
+    step: dict[str, Any],
+    material: dict[str, Any],
+    structure_data: Any,
+    step_dir: Path,
+    backend_config: dict[str, Any],
+) -> list[str]:
+    input_paths: list[str] = []
+    if "poscar" not in _write_backend_structure_files(structure_data, material, step_dir):
+        poscar_path = step_dir / "POSCAR.template"
+        poscar_path.write_text(f"{material.get('formula') or 'unknown'}\n1.0\n# Replace with real POSCAR before running VASP.\n", encoding="utf-8")
+        input_paths.append(str(poscar_path))
+    incar_path = step_dir / "INCAR"
+    incar_path.write_text(_vasp_incar(step, backend_config), encoding="utf-8")
+    kpoints_path = step_dir / "KPOINTS"
+    kpoints_path.write_text(_vasp_kpoints(backend_config), encoding="utf-8")
+    potcar_spec_path = step_dir / "POTCAR.spec"
+    potcar_spec_path.write_text(_vasp_potcar_spec(material), encoding="utf-8")
+    run_path = step_dir / "run.sh"
+    run_path.write_text(_vasp_run_script(backend_config), encoding="utf-8")
+    run_path.chmod(0o755)
+    input_paths.extend([str(incar_path), str(kpoints_path), str(potcar_spec_path), str(run_path)])
+    return input_paths
+
+
+def _write_atomate2_inputs(step: dict[str, Any], material: dict[str, Any], structure_paths: dict[str, str], step_dir: Path, backend_config: dict[str, Any]) -> list[str]:
+    script_path = step_dir / "atomate2_flow.py"
+    script_path.write_text(_atomate2_flow_script(step, material, structure_paths, backend_config), encoding="utf-8")
+    script_path.chmod(0o755)
+    requirements_path = step_dir / "requirements-note.txt"
+    requirements_path.write_text("Requires atomate2, jobflow, pymatgen, and a configured calculation backend.\n", encoding="utf-8")
+    return [str(script_path), str(requirements_path)]
+
+
+def _write_aiida_inputs(step: dict[str, Any], material: dict[str, Any], structure_paths: dict[str, str], step_dir: Path, backend_config: dict[str, Any]) -> list[str]:
+    script_path = step_dir / "aiida_submit.py"
+    script_path.write_text(_aiida_submit_script(step, material, structure_paths, backend_config), encoding="utf-8")
+    script_path.chmod(0o755)
+    profile_path = step_dir / "aiida-profile-note.txt"
+    profile_path.write_text("Requires a configured AiiDA profile, code, computer, pseudopotential family, and plugin stack.\n", encoding="utf-8")
+    return [str(script_path), str(profile_path)]
+
+
+def _submit_external_backend_step(*, backend: str, prepared_step: dict[str, Any], backend_config: dict[str, Any]) -> dict[str, Any]:
+    script = prepared_step.get("executionScript")
+    calculation_id = str(prepared_step.get("calculationId") or "calculation")
+    if not script:
+        return _submission_result(calculation_id, "not-submitted", "No execution script was generated.")
+    command = _backend_submit_command(backend, script, backend_config)
+    executable = shutil.which(command[0])
+    if executable is None:
+        result = _submission_result(calculation_id, "not-submitted", f"Executable not found: {command[0]}")
+    else:
+        timeout = int(backend_config.get("maxRuntimeSeconds") or 300)
+        try:
+            completed = subprocess.run(
+                [executable, *command[1:]],
+                cwd=str(Path(str(script)).parent),
+                text=True,
+                capture_output=True,
+                timeout=timeout,
+                check=False,
+            )
+            result = _submission_result(
+                calculation_id,
+                "submitted" if completed.returncode == 0 else "failed",
+                f"Return code {completed.returncode}",
+                stdout=completed.stdout[-4000:],
+                stderr=completed.stderr[-4000:],
+            )
+        except subprocess.TimeoutExpired as exc:
+            result = _submission_result(calculation_id, "failed", f"Timed out after {timeout}s", stdout=exc.stdout, stderr=exc.stderr)
+    submission_path = Path(str(script)).parent / "submission-manifest.json"
+    result["submissionManifestPath"] = str(submission_path)
+    submission_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return result
+
+
+def _backend_submit_command(backend: str, script: str, backend_config: dict[str, Any]) -> list[str]:
+    if backend in {"quantum-espresso", "vasp"}:
+        return [str(backend_config.get("shellCommand") or "bash"), str(Path(script).name)]
+    if backend == "atomate2":
+        return [str(backend_config.get("pythonCommand") or "python"), str(Path(script).name)]
+    if backend == "aiida":
+        return [str(backend_config.get("pythonCommand") or "python"), str(Path(script).name)]
+    return ["bash", str(Path(script).name)]
+
+
+def _submission_result(calculation_id: str, status: str, message: str, *, stdout: Any = "", stderr: Any = "") -> dict[str, Any]:
+    return {
+        "calculationId": calculation_id,
+        "status": status,
+        "message": message,
+        "stdout": stdout.decode("utf-8", errors="replace") if isinstance(stdout, bytes) else stdout,
+        "stderr": stderr.decode("utf-8", errors="replace") if isinstance(stderr, bytes) else stderr,
+        "generatedAt": int(time.time()),
+    }
+
+
+def _quantum_espresso_scf_input(material: dict[str, Any], structure_data: Any, backend_config: dict[str, Any]) -> str:
+    prefix = _safe_file_stem(str(material.get("materialId") or material.get("formula") or "qe"))
+    lines = [
+        "&CONTROL",
+        "  calculation = 'scf',",
+        f"  prefix = '{prefix}',",
+        "  outdir = './tmp',",
+        f"  pseudo_dir = '{backend_config.get('pseudoDir') or './pseudo'}',",
+        "/",
+        "&SYSTEM",
+        "  ibrav = 0,",
+        f"  ecutwfc = {float(backend_config.get('ecutwfc') or 60.0):.1f},",
+        f"  ecutrho = {float(backend_config.get('ecutrho') or 480.0):.1f},",
+    ]
+    atoms = _structure_atoms_for_input(structure_data, material)
+    elements = _unique_ordered([atom["element"] for atom in atoms]) or _composition_elements(material)
+    lines.extend([f"  nat = {max(len(atoms), 1)},", f"  ntyp = {max(len(elements), 1)},", "/"])
+    lines.extend(["&ELECTRONS", "  conv_thr = 1.0d-8,", "/"])
+    lines.append("ATOMIC_SPECIES")
+    for element in elements:
+        lines.append(f"  {element} {_atomic_mass(element):.6f} {element}.UPF")
+    lines.append("CELL_PARAMETERS angstrom")
+    for row in _structure_lattice_for_input(structure_data):
+        lines.append("  " + " ".join(f"{value:.10f}" for value in row))
+    lines.append("ATOMIC_POSITIONS crystal")
+    if atoms:
+        for atom in atoms:
+            lines.append(f"  {atom['element']} " + " ".join(f"{value:.10f}" for value in atom["coords"]))
+    else:
+        lines.append(f"  {elements[0] if elements else 'X'} 0.0000000000 0.0000000000 0.0000000000")
+    lines.extend(["K_POINTS automatic", str(backend_config.get("kpoints") or "4 4 4 0 0 0"), ""])
+    return "\n".join(lines)
+
+
+def _quantum_espresso_ph_input(material: dict[str, Any], backend_config: dict[str, Any], *, epsil: bool = True) -> str:
+    prefix = _safe_file_stem(str(material.get("materialId") or material.get("formula") or "qe"))
+    return "\n".join([
+        "&INPUTPH",
+        "  tr2_ph = 1.0d-14,",
+        f"  prefix = '{prefix}',",
+        "  outdir = './tmp',",
+        f"  epsil = {'.true.' if epsil else '.false.'},",
+        f"  fildyn = '{prefix}.dynG',",
+        "/",
+        "0.0 0.0 0.0",
+        "",
+    ])
+
+
+def _quantum_espresso_pp_input(material: dict[str, Any], backend_config: dict[str, Any]) -> str:
+    prefix = _safe_file_stem(str(material.get("materialId") or material.get("formula") or "qe"))
+    return "\n".join([
+        "&INPUTPP",
+        f"  prefix = '{prefix}',",
+        "  outdir = './tmp',",
+        "  plot_num = 11,",
+        "/",
+        "&PLOT",
+        "  iflag = 3,",
+        f"  fileout = '{prefix}.potential.cube',",
+        "/",
+        "",
+    ])
+
+
+def _quantum_espresso_run_script(step: dict[str, Any], backend_config: dict[str, Any]) -> str:
+    pw = str(backend_config.get("pwCommand") or "pw.x")
+    ph = str(backend_config.get("phCommand") or "ph.x")
+    pp = str(backend_config.get("ppCommand") or "pp.x")
+    calc_type = str(step.get("id") or "")
+    commands = ["set -euo pipefail", f"{pw} -in pw.scf.in > pw.scf.out"]
+    if calc_type == "dfpt-dielectric-tensor":
+        commands.append(f"{ph} -in ph.dielectric.in > ph.dielectric.out")
+    elif calc_type == "phonon-stability":
+        commands.append(f"{ph} -in ph.gamma.in > ph.gamma.out")
+    elif calc_type == "band-alignment":
+        commands.append(f"{pp} -in pp.potential.in > pp.potential.out")
+    return "#!/usr/bin/env bash\n" + "\n".join(commands) + "\n"
+
+
+def _vasp_incar(step: dict[str, Any], backend_config: dict[str, Any]) -> str:
+    calc_type = str(step.get("id") or "")
+    lines = [
+        "SYSTEM = OpenClaw Materials Lab backend adapter",
+        "ENCUT = " + str(backend_config.get("encut") or 520),
+        "EDIFF = 1E-6",
+        "PREC = Accurate",
+        "ISMEAR = 0",
+        "SIGMA = 0.05",
+    ]
+    if calc_type == "dfpt-dielectric-tensor":
+        lines.extend(["LEPSILON = .TRUE.", "IBRION = 8", "NSW = 1"])
+    elif calc_type == "phonon-stability":
+        lines.extend(["IBRION = 5", "NFREE = 2", "NSW = 1"])
+    elif calc_type == "band-alignment":
+        lines.extend(["LVTOT = .TRUE.", "LVHAR = .TRUE.", "NSW = 0"])
+    else:
+        lines.extend(["NSW = 0"])
+    return "\n".join(lines) + "\n"
+
+
+def _vasp_kpoints(backend_config: dict[str, Any]) -> str:
+    mesh = str(backend_config.get("kpoints") or "4 4 4")
+    return "\n".join(["Automatic mesh", "0", "Gamma", mesh, "0 0 0", ""])
+
+
+def _vasp_potcar_spec(material: dict[str, Any]) -> str:
+    elements = _composition_elements(material)
+    return "\n".join([f"{element}  # provide POTCAR for {element}" for element in elements] + [""])
+
+
+def _vasp_run_script(backend_config: dict[str, Any]) -> str:
+    command = str(backend_config.get("vaspCommand") or "vasp_std")
+    return "#!/usr/bin/env bash\nset -euo pipefail\n" + f"{command} > vasp.out\n"
+
+
+def _atomate2_flow_script(step: dict[str, Any], material: dict[str, Any], structure_paths: dict[str, str], backend_config: dict[str, Any]) -> str:
+    structure_ref = structure_paths.get("structureCif") or structure_paths.get("poscar") or "REPLACE_WITH_STRUCTURE"
+    return f'''#!/usr/bin/env python
+"""Generated by OpenClaw Materials Lab.
+
+This script is a backend adapter scaffold. Review resources and code settings before running.
+"""
+from pathlib import Path
+
+from pymatgen.core import Structure
+
+STRUCTURE_PATH = Path({structure_ref!r})
+MATERIAL_ID = {material.get("materialId")!r}
+CALCULATION_TYPE = {step.get("id")!r}
+
+
+def main():
+    structure = Structure.from_file(STRUCTURE_PATH)
+    print(f"Prepared atomate2/jobflow scaffold for {{MATERIAL_ID}}: {{CALCULATION_TYPE}}")
+    print(structure.composition)
+    print("TODO: connect atomate2 makers, jobflow manager, and store output parser.")
+
+
+if __name__ == "__main__":
+    main()
+'''
+
+
+def _aiida_submit_script(step: dict[str, Any], material: dict[str, Any], structure_paths: dict[str, str], backend_config: dict[str, Any]) -> str:
+    structure_ref = structure_paths.get("structureCif") or structure_paths.get("poscar") or "REPLACE_WITH_STRUCTURE"
+    return f'''#!/usr/bin/env python
+"""Generated by OpenClaw Materials Lab.
+
+This script is an AiiDA submission scaffold. Review profile/code/pseudopotential settings before running.
+"""
+from pathlib import Path
+
+STRUCTURE_PATH = Path({structure_ref!r})
+MATERIAL_ID = {material.get("materialId")!r}
+CALCULATION_TYPE = {step.get("id")!r}
+AIIDA_PROFILE = {backend_config.get("profile")!r}
+AIIDA_CODE = {backend_config.get("code")!r}
+
+
+def main():
+    print(f"Prepared AiiDA scaffold for {{MATERIAL_ID}}: {{CALCULATION_TYPE}}")
+    print(f"profile={{AIIDA_PROFILE}} code={{AIIDA_CODE}} structure={{STRUCTURE_PATH}}")
+    print("TODO: load aiida profile, create StructureData, configure builder, submit.")
+
+
+if __name__ == "__main__":
+    main()
+'''
+
+
+def _pseudopotential_manifest(material: dict[str, Any]) -> str:
+    elements = _composition_elements(material)
+    return "\n".join([f"{element}.UPF" for element in elements] + [""])
+
+
+def _structure_atoms_for_input(structure_data: Any, material: dict[str, Any]) -> list[dict[str, Any]]:
+    if isinstance(structure_data, dict):
+        try:
+            if Structure is not None:
+                structure = Structure.from_dict(structure_data)
+                return [
+                    {"element": str(site.specie.symbol), "coords": [float(value) for value in site.frac_coords]}
+                    for site in structure
+                ]
+        except Exception:
+            pass
+        sites = structure_data.get("sites") or []
+        atoms = []
+        for site in sites:
+            if not isinstance(site, dict):
+                continue
+            species = site.get("species") or site.get("label") or site.get("element")
+            if isinstance(species, list) and species:
+                symbol = str((species[0] or {}).get("element") or (species[0] or {}).get("label") or "X")
+            else:
+                symbol = str(species or "X")
+            coords = site.get("abc") or site.get("coords") or [0.0, 0.0, 0.0]
+            atoms.append({"element": symbol, "coords": [float(value) for value in coords[:3]]})
+        return atoms
+    elements = _composition_elements(material)
+    return [{"element": elements[0], "coords": [0.0, 0.0, 0.0]}] if elements else []
+
+
+def _structure_lattice_for_input(structure_data: Any) -> list[list[float]]:
+    if isinstance(structure_data, dict):
+        try:
+            if Structure is not None:
+                return [[float(value) for value in row] for row in Structure.from_dict(structure_data).lattice.matrix]
+        except Exception:
+            pass
+        lattice = structure_data.get("lattice")
+        if isinstance(lattice, dict) and isinstance(lattice.get("matrix"), list):
+            return [[float(value) for value in row[:3]] for row in lattice["matrix"][:3]]
+        if isinstance(lattice, list):
+            return [[float(value) for value in row[:3]] for row in lattice[:3]]
+    return [[8.0, 0.0, 0.0], [0.0, 8.0, 0.0], [0.0, 0.0, 8.0]]
+
+
+def _composition_elements(material: dict[str, Any]) -> list[str]:
+    elements = [str(item) for item in material.get("elements") or [] if item]
+    if elements:
+        return _unique_ordered(elements)
+    descriptors = _composition_descriptors(material)
+    elements = [str(item) for item in descriptors.get("elements") or [] if item]
+    return _unique_ordered(elements) or ["X"]
+
+
+def _unique_ordered(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    result = []
+    for value in values:
+        if value in seen:
+            continue
+        seen.add(value)
+        result.append(value)
+    return result
+
+
+def _atomic_mass(symbol: str) -> float:
+    if Element is not None:
+        try:
+            return float(Element(symbol).atomic_mass)
+        except Exception:
+            pass
+    return ATOMIC_MASS_FALLBACK.get(symbol, 1.0)
+
+
+def _external_execution_markdown(manifest: dict[str, Any]) -> str:
+    backend_label = {
+        "quantum-espresso": "Quantum ESPRESSO",
+        "vasp": "VASP",
+        "atomate2": "atomate2/jobflow",
+        "aiida": "AiiDA",
+    }.get(str(manifest.get("backend")), str(manifest.get("backend")))
+    lines = [
+        f"# Research Backend Preparation: {backend_label}",
+        "",
+        "## Summary",
+        "",
+        f"- Backend: `{manifest.get('backend')}`",
+        f"- Execution mode: `{manifest.get('executionMode')}`",
+        f"- Allow blocked steps: `{manifest.get('allowBlockedSteps')}`",
+        f"- Prepared calculations: {manifest.get('preparedCalculations')}",
+        f"- Submitted calculations: {manifest.get('submittedCalculations')}",
+        f"- Skipped calculations: {manifest.get('skippedCalculations')}",
+        "- Parsed property updates: `0`",
+        "",
+        "## Prepared Steps",
+        "",
+        "| Calculation | Material | Type | Inputs |",
+        "| --- | --- | --- | ---: |",
+    ]
+    for step in manifest.get("prepared") or []:
+        lines.append(
+            f"| {step.get('calculationId')} | {step.get('materialId')} | {step.get('calculationType')} | {len(step.get('inputPaths') or [])} |"
+        )
+    lines.extend([
+        "",
+        "## Notes",
+        "",
+        "- This adapter prepares reproducible backend inputs and optional submission scripts.",
+        "- It does not mark candidates as property-backed until completed outputs are parsed into propertyUpdates.",
+        "- Review pseudopotentials, k-points, cutoffs, scheduler resources, and code licenses before submission.",
+        "",
+        "## Warnings",
+        "",
+        *([f"- {warning}" for warning in manifest.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def _run_local_surrogate_step(step: dict[str, Any], candidate: dict[str, Any], plan: dict[str, Any], *, api_key: str | None) -> dict[str, Any]:

@@ -232,19 +232,26 @@ export interface PlanResearchLoopResult {
 export interface ExecuteResearchPlanPayload {
   planPath?: string;
   plan?: Record<string, unknown>;
-  backend?: "local-surrogate";
+  backend?: "local-surrogate" | "quantum-espresso" | "vasp" | "atomate2" | "aiida";
+  executionMode?: "prepare" | "submit";
   maxSteps?: number;
   allowBlockedSurrogate?: boolean;
+  allowExecution?: boolean;
+  backendConfig?: Record<string, unknown>;
   artifactDir: string;
 }
 
 export interface ExecuteResearchPlanResult {
   runId: string;
   backend: string;
+  statusSummary?: string;
   manifestPath: string;
   reportPath: string;
   resultPaths: string[];
+  inputPaths?: string[];
   completedCalculations: number;
+  preparedCalculations?: number;
+  submittedCalculations?: number;
   skippedCalculations: number;
   propertyUpdates: ComparedCandidate[];
   rerankingPayload?: Record<string, unknown>;

@@ -1,0 +1,35 @@
+{
+  "backend": "vasp",
+  "calculationId": "mp-mock-hfo2-band-alignment",
+  "calculationType": "band-alignment",
+  "costClass": "medium",
+  "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/run.sh",
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/POSCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/INCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/KPOINTS",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/POTCAR.spec",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/run.sh"
+  ],
+  "label": "Band offsets",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "vasp",
+    "generatedAt": 1777806619,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/step-manifest.json",
+  "structurePaths": {
+    "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/POSCAR",
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-band-alignment/structure.json"
+  },
+  "writesProperties": [
+    "bandOffsetElectronEv",
+    "bandOffsetHoleEv"
+  ]
+}

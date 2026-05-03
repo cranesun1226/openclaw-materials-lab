@@ -1,0 +1,1 @@
+Requires atomate2, jobflow, pymatgen, and a configured calculation backend.

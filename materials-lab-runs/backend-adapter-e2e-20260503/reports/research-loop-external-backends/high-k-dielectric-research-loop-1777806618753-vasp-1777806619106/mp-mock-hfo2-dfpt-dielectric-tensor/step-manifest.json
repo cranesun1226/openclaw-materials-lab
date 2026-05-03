@@ -1,0 +1,35 @@
+{
+  "backend": "vasp",
+  "calculationId": "mp-mock-hfo2-dfpt-dielectric-tensor",
+  "calculationType": "dfpt-dielectric-tensor",
+  "costClass": "expensive",
+  "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/run.sh",
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/POSCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/INCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/KPOINTS",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/POTCAR.spec",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/run.sh"
+  ],
+  "label": "DFPT dielectric tensor",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "vasp",
+    "generatedAt": 1777806619,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/step-manifest.json",
+  "structurePaths": {
+    "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/POSCAR",
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-vasp-1777806619106/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json"
+  },
+  "writesProperties": [
+    "dielectricTotal",
+    "dielectricElectronic"
+  ]
+}

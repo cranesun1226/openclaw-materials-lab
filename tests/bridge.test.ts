@@ -95,5 +95,23 @@ describe("Python bridge", () => {
     expect(execution.data.completedCalculations).toBeGreaterThan(0);
     expect(execution.data.propertyUpdates[0]?.propertyProvenance).toBeDefined();
     expect(await readFile(execution.data.reportPath, "utf8")).toContain("local-surrogate");
+
+    const externalPreparation = await bridge.executeResearchPlan({
+      planPath: result.data.manifestPath,
+      artifactDir: path.join(tempDir, "reports", "research-loop-external-backends"),
+      backend: "quantum-espresso",
+      executionMode: "prepare",
+      maxSteps: 2,
+      backendConfig: { pseudoDir: "./pseudo", kpoints: "2 2 2 0 0 0" },
+    });
+
+    expect(externalPreparation.data.completedCalculations).toBe(0);
+    expect(externalPreparation.data.preparedCalculations).toBeGreaterThan(0);
+    expect(externalPreparation.data.inputPaths?.some((item) => item.endsWith("pw.scf.in"))).toBe(true);
+    expect(await readFile(externalPreparation.data.reportPath, "utf8")).toContain("Quantum ESPRESSO");
+    const scfInput = externalPreparation.data.inputPaths?.find((item) => item.endsWith("pw.scf.in"));
+    const scfText = await readFile(scfInput ?? "", "utf8");
+    expect(scfText).toContain("ATOMIC_SPECIES");
+    expect(scfText).toContain("Hf 178.490000 Hf.UPF");
   });
 });

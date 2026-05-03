@@ -1,0 +1,1 @@
+Requires a configured AiiDA profile, code, computer, pseudopotential family, and plugin stack.

@@ -12,9 +12,20 @@ const ExecuteResearchPlanSchema = Type.Object(
   {
     planPath: Type.Optional(Type.String({ minLength: 1 })),
     plan: Type.Optional(Type.Record(Type.String(), Type.Any())),
-    backend: Type.Optional(Type.Literal("local-surrogate")),
+    backend: Type.Optional(
+      Type.Union([
+        Type.Literal("local-surrogate"),
+        Type.Literal("quantum-espresso"),
+        Type.Literal("vasp"),
+        Type.Literal("atomate2"),
+        Type.Literal("aiida"),
+      ]),
+    ),
+    executionMode: Type.Optional(Type.Union([Type.Literal("prepare"), Type.Literal("submit")])),
     maxSteps: Type.Optional(Type.Number({ minimum: 1, maximum: 500 })),
     allowBlockedSurrogate: Type.Optional(Type.Boolean()),
+    allowExecution: Type.Optional(Type.Boolean()),
+    backendConfig: Type.Optional(Type.Record(Type.String(), Type.Any())),
   },
   { additionalProperties: false },
 );
@@ -48,8 +59,11 @@ export function createMaterialsExecuteResearchPlanTool(
         backend: params.backend ?? "local-surrogate",
         ...(planPath ? { planPath } : {}),
         ...(params.plan ? { plan: params.plan } : {}),
+        ...(params.executionMode ? { executionMode: params.executionMode } : {}),
         ...(typeof params.maxSteps === "number" ? { maxSteps: params.maxSteps } : {}),
         ...(typeof params.allowBlockedSurrogate === "boolean" ? { allowBlockedSurrogate: params.allowBlockedSurrogate } : {}),
+        ...(typeof params.allowExecution === "boolean" ? { allowExecution: params.allowExecution } : {}),
+        ...(params.backendConfig ? { backendConfig: params.backendConfig } : {}),
       });
 
       return toToolResponse(payloadFromBridge(artifactService, bridgeResult));

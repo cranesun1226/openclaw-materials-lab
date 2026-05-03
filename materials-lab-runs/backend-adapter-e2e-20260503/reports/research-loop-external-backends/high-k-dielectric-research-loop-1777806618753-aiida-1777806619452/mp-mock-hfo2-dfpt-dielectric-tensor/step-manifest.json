@@ -1,0 +1,33 @@
+{
+  "backend": "aiida",
+  "calculationId": "mp-mock-hfo2-dfpt-dielectric-tensor",
+  "calculationType": "dfpt-dielectric-tensor",
+  "costClass": "expensive",
+  "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/aiida_submit.py",
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/POSCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/aiida_submit.py",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/aiida-profile-note.txt"
+  ],
+  "label": "DFPT dielectric tensor",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "aiida",
+    "generatedAt": 1777806619,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/step-manifest.json",
+  "structurePaths": {
+    "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/POSCAR",
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-aiida-1777806619452/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json"
+  },
+  "writesProperties": [
+    "dielectricTotal",
+    "dielectricElectronic"
+  ]
+}

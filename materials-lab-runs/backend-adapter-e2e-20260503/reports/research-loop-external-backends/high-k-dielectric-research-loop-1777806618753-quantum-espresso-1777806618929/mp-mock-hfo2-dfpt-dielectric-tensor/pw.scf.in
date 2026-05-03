@@ -1,0 +1,28 @@
+&CONTROL
+  calculation = 'scf',
+  prefix = 'mp-mock-hfo2',
+  outdir = './tmp',
+  pseudo_dir = './pseudo',
+/
+&SYSTEM
+  ibrav = 0,
+  ecutwfc = 60.0,
+  ecutrho = 480.0,
+  nat = 2,
+  ntyp = 2,
+/
+&ELECTRONS
+  conv_thr = 1.0d-8,
+/
+ATOMIC_SPECIES
+  Hf 178.490000 Hf.UPF
+  O 15.999400 O.UPF
+CELL_PARAMETERS angstrom
+  5.1200000000 0.0000000000 0.0000000000
+  0.0000000000 5.1700000000 0.0000000000
+  0.0000000000 0.0000000000 5.2900000000
+ATOMIC_POSITIONS crystal
+  Hf 0.2800000000 0.0400000000 0.2100000000
+  O 0.0700000000 0.3300000000 0.3500000000
+K_POINTS automatic
+3 3 3 0 0 0

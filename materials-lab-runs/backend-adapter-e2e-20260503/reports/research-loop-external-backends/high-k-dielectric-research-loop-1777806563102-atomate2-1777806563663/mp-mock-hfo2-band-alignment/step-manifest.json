@@ -1,0 +1,33 @@
+{
+  "backend": "atomate2",
+  "calculationId": "mp-mock-hfo2-band-alignment",
+  "calculationType": "band-alignment",
+  "costClass": "medium",
+  "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/atomate2_flow.py",
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/POSCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/atomate2_flow.py",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/requirements-note.txt"
+  ],
+  "label": "Band offsets",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "atomate2",
+    "generatedAt": 1777806563,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/step-manifest.json",
+  "structurePaths": {
+    "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/POSCAR",
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-atomate2-1777806563663/mp-mock-hfo2-band-alignment/structure.json"
+  },
+  "writesProperties": [
+    "bandOffsetElectronEv",
+    "bandOffsetHoleEv"
+  ]
+}

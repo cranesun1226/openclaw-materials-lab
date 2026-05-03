@@ -1,0 +1,9 @@
+SYSTEM = OpenClaw Materials Lab backend adapter
+ENCUT = 520
+EDIFF = 1E-6
+PREC = Accurate
+ISMEAR = 0
+SIGMA = 0.05
+LEPSILON = .TRUE.
+IBRION = 8
+NSW = 1

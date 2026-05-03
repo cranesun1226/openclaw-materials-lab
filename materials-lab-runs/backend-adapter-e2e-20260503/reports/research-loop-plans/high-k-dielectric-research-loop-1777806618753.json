@@ -1,0 +1,214 @@
+{
+  "approvalGates": [
+    {
+      "blocks": [
+        "mp-mock-hfo2-structure-preflight",
+        "mp-mock-hfo2-dfpt-dielectric-tensor",
+        "mp-mock-hfo2-band-alignment"
+      ],
+      "gateId": "gate-0-human-plan-review",
+      "prompt": "Review objective, selected candidates, budget, and stop criteria before any calculation is executed.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-mock-hfo2-dfpt-dielectric-tensor",
+        "mp-mock-hfo2-band-alignment"
+      ],
+      "budgetCheck": {
+        "computeBudgetUsd": null,
+        "estimatedWallTimeHours": 18.05,
+        "maxWallTimeHours": 24.0,
+        "plannedCalculations": 3
+      },
+      "gateId": "gate-1-budget-confirmation",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-mock-hfo2-dfpt-dielectric-tensor"
+      ],
+      "gateId": "gate-2-expensive-method-approval",
+      "prompt": "Approve expensive DFPT/AIMD/phonon/defect calculations explicitly.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "update-shortlist",
+        "export-final-report"
+      ],
+      "gateId": "gate-3-rerank-acceptance",
+      "prompt": "Accept parsed property results before they replace the proxy shortlist.",
+      "required": true,
+      "status": "pending"
+    }
+  ],
+  "autonomyBoundary": {
+    "allowedActionsBeforeApproval": [
+      "write-plan-artifacts",
+      "validate-input-artifacts"
+    ],
+    "approvalPolicy": "approval-required",
+    "blockedActionsBeforeApproval": [
+      "run-dft",
+      "submit-hpc-job",
+      "call-paid-compute-service",
+      "overwrite-candidate-ranking"
+    ],
+    "canExecuteWithoutApproval": false
+  },
+  "budget": {
+    "allowExpensiveCalculations": false,
+    "computeBudgetUsd": null,
+    "maxCalculations": 4,
+    "maxCandidates": 1,
+    "maxLoopIterations": 2,
+    "maxWallTimeHours": 24.0
+  },
+  "calculationQueue": [
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-mock-hfo2-structure-preflight",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.05,
+      "formula": "HfO2",
+      "id": "structure-preflight",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-mock-hfo2",
+      "method": "fetch_structure + structural sanity checks",
+      "priority": "required-preflight",
+      "rationale": "Property calculations need a traceable, normalized input structure.",
+      "status": "planned",
+      "writesProperties": [
+        "structurePath",
+        "cifPath",
+        "structureQuality"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "blockedReason": "budget.allowExpensiveCalculations is false; explicit approval is required before execution.",
+      "calculationId": "mp-mock-hfo2-dfpt-dielectric-tensor",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 12.0,
+      "formula": "HfO2",
+      "id": "dfpt-dielectric-tensor",
+      "label": "DFPT dielectric tensor",
+      "materialId": "mp-mock-hfo2",
+      "method": "DFPT electronic + ionic dielectric calculation",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for dielectricTotal, dielectricElectronic.",
+      "status": "blocked-pending-expensive-approval",
+      "writesProperties": [
+        "dielectricTotal",
+        "dielectricElectronic"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-mock-hfo2-band-alignment",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 6.0,
+      "formula": "HfO2",
+      "id": "band-alignment",
+      "label": "Band offsets",
+      "materialId": "mp-mock-hfo2",
+      "method": "absolute band alignment against target channel",
+      "priority": "property",
+      "rationale": "Promotes proxy evidence into property-backed evidence for bandOffsetElectronEv, bandOffsetHoleEv.",
+      "status": "planned",
+      "writesProperties": [
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv"
+      ]
+    }
+  ],
+  "executionStatus": "planned-not-started",
+  "loopPolicy": {
+    "afterEachIteration": [
+      "parse calculation artifacts into candidate property fields",
+      "rerun materials_compare_candidates with evidenceWeight enabled",
+      "compare domainCoverage against previous iteration",
+      "stop, continue, or request human review based on stopCriteria"
+    ],
+    "maxIterations": 2
+  },
+  "mode": "property-backed",
+  "objective": "Validate external backend adapter preparation for high-k dielectric HfO2.",
+  "planId": "high-k-dielectric-research-loop-1777806618753",
+  "preset": "high-k-dielectric",
+  "propertySchema": [
+    "dielectricTotal",
+    "dielectricElectronic",
+    "bandOffsetElectronEv",
+    "bandOffsetHoleEv",
+    "interfaceReactionEnergyEv",
+    "phononStability"
+  ],
+  "rerankingPolicy": {
+    "criteriaPatch": {
+      "evidenceWeight": 0.2,
+      "preset": "high-k-dielectric",
+      "screeningLevel": "property-backed-screen"
+    },
+    "promoteWhen": [
+      "domainEvidence.sourceLevel is mixed-property-proxy or property-backed",
+      "domainEvidence.missingCount decreases versus previous iteration",
+      "no fail gate appears in a required safety/stability criterion"
+    ],
+    "tool": "materials_compare_candidates"
+  },
+  "selectedCandidates": [
+    {
+      "bandGapEv": null,
+      "densityGcm3": null,
+      "domainEvidenceScore": null,
+      "elements": [],
+      "energyAboveHullEv": null,
+      "evidenceTier": "proxy-shortlist",
+      "family": null,
+      "formula": "HfO2",
+      "materialId": "mp-mock-hfo2",
+      "materialsProjectUrl": null,
+      "missingProperties": [
+        "dielectricTotal",
+        "dielectricElectronic",
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv"
+      ],
+      "nextCalculations": [
+        "dfpt-dielectric-tensor",
+        "band-alignment"
+      ],
+      "plannedCalculations": [
+        "mp-mock-hfo2-structure-preflight",
+        "mp-mock-hfo2-dfpt-dielectric-tensor",
+        "mp-mock-hfo2-band-alignment"
+      ],
+      "rank": 1,
+      "score": 0.92,
+      "sites": null,
+      "source": "mock",
+      "sourceLevel": "proxy-only",
+      "spacegroup": null,
+      "volume": null
+    }
+  ],
+  "stopCriteria": [
+    "at least one candidate reaches domainEvidence.tier == research-shortlist",
+    "domainCoverage.sourceLevelCounts.property-backed is nonzero",
+    "budget.maxCalculations or budget.maxWallTimeHours is exhausted",
+    "all candidates retain fail gates after required property calculations",
+    "human reviewer stops the high-k-dielectric loop"
+  ],
+  "warnings": [
+    "Expensive calculations are present but blocked until allowExpensiveCalculations and human approval are explicit.",
+    "Selected candidates still have 4 missing research-grade property field(s)."
+  ]
+}

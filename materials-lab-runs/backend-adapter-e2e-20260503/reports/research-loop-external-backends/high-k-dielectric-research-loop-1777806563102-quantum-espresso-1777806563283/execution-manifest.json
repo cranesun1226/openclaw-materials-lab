@@ -1,0 +1,122 @@
+{
+  "allowBlockedSteps": false,
+  "backend": "quantum-espresso",
+  "completedCalculations": 0,
+  "executionMode": "prepare",
+  "generatedAt": 1777806563,
+  "planId": "high-k-dielectric-research-loop-1777806563102",
+  "prepared": [
+    {
+      "backend": "quantum-espresso",
+      "calculationId": "mp-mock-hfo2-structure-preflight",
+      "calculationType": "structure-preflight",
+      "costClass": "metadata",
+      "executionScript": null,
+      "formula": "HfO2",
+      "inputPaths": [
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-structure-preflight/structure.json",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-structure-preflight/POSCAR",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-structure-preflight/preflight-note.md"
+      ],
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-mock-hfo2",
+      "provenance": {
+        "backend": "quantum-espresso",
+        "generatedAt": 1777806563,
+        "parsedPropertiesAvailable": false,
+        "requiresExternalCode": true,
+        "stage": "input-preparation"
+      },
+      "status": "prepared",
+      "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-structure-preflight/step-manifest.json",
+      "structurePaths": {
+        "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-structure-preflight/POSCAR",
+        "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-structure-preflight/structure.json"
+      },
+      "writesProperties": [
+        "structurePath",
+        "cifPath",
+        "structureQuality"
+      ]
+    },
+    {
+      "backend": "quantum-espresso",
+      "calculationId": "mp-mock-hfo2-dfpt-dielectric-tensor",
+      "calculationType": "dfpt-dielectric-tensor",
+      "costClass": "expensive",
+      "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/run.sh",
+      "formula": "HfO2",
+      "inputPaths": [
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/POSCAR",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/pw.scf.in",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/ph.dielectric.in",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/PSEUDOPOTENTIALS.required",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/run.sh"
+      ],
+      "label": "DFPT dielectric tensor",
+      "materialId": "mp-mock-hfo2",
+      "provenance": {
+        "backend": "quantum-espresso",
+        "generatedAt": 1777806563,
+        "parsedPropertiesAvailable": false,
+        "requiresExternalCode": true,
+        "stage": "input-preparation"
+      },
+      "status": "prepared",
+      "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/step-manifest.json",
+      "structurePaths": {
+        "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/POSCAR",
+        "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-dfpt-dielectric-tensor/structure.json"
+      },
+      "writesProperties": [
+        "dielectricTotal",
+        "dielectricElectronic"
+      ]
+    },
+    {
+      "backend": "quantum-espresso",
+      "calculationId": "mp-mock-hfo2-band-alignment",
+      "calculationType": "band-alignment",
+      "costClass": "medium",
+      "executionScript": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/run.sh",
+      "formula": "HfO2",
+      "inputPaths": [
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/structure.json",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/POSCAR",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/pw.scf.in",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/pp.potential.in",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/PSEUDOPOTENTIALS.required",
+        "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/run.sh"
+      ],
+      "label": "Band offsets",
+      "materialId": "mp-mock-hfo2",
+      "provenance": {
+        "backend": "quantum-espresso",
+        "generatedAt": 1777806563,
+        "parsedPropertiesAvailable": false,
+        "requiresExternalCode": true,
+        "stage": "input-preparation"
+      },
+      "status": "prepared",
+      "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/step-manifest.json",
+      "structurePaths": {
+        "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/POSCAR",
+        "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283/mp-mock-hfo2-band-alignment/structure.json"
+      },
+      "writesProperties": [
+        "bandOffsetElectronEv",
+        "bandOffsetHoleEv"
+      ]
+    }
+  ],
+  "preparedCalculations": 3,
+  "preset": "high-k-dielectric",
+  "propertyUpdates": [],
+  "runId": "high-k-dielectric-research-loop-1777806563102-quantum-espresso-1777806563283",
+  "skipped": [],
+  "skippedCalculations": 0,
+  "submitted": [],
+  "submittedCalculations": 0,
+  "warnings": []
+}

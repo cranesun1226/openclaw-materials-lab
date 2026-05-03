@@ -1,0 +1,33 @@
+{
+  "backend": "quantum-espresso",
+  "calculationId": "mp-mock-hfo2-structure-preflight",
+  "calculationType": "structure-preflight",
+  "costClass": "metadata",
+  "executionScript": null,
+  "formula": "HfO2",
+  "inputPaths": [
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-quantum-espresso-1777806618929/mp-mock-hfo2-structure-preflight/structure.json",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-quantum-espresso-1777806618929/mp-mock-hfo2-structure-preflight/POSCAR",
+    "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-quantum-espresso-1777806618929/mp-mock-hfo2-structure-preflight/preflight-note.md"
+  ],
+  "label": "Structure fetch and normalization preflight",
+  "materialId": "mp-mock-hfo2",
+  "provenance": {
+    "backend": "quantum-espresso",
+    "generatedAt": 1777806618,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-quantum-espresso-1777806618929/mp-mock-hfo2-structure-preflight/step-manifest.json",
+  "structurePaths": {
+    "poscar": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-quantum-espresso-1777806618929/mp-mock-hfo2-structure-preflight/POSCAR",
+    "structureJson": "materials-lab-runs/backend-adapter-e2e-20260503/reports/research-loop-external-backends/high-k-dielectric-research-loop-1777806618753-quantum-espresso-1777806618929/mp-mock-hfo2-structure-preflight/structure.json"
+  },
+  "writesProperties": [
+    "structurePath",
+    "cifPath",
+    "structureQuality"
+  ]
+}
