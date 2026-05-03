@@ -37,7 +37,12 @@ const IngestEvidenceSchema = Type.Object(
         Type.Literal("auto"),
         Type.Literal("quantum-espresso"),
         Type.Literal("vasp"),
+        Type.Literal("lammps"),
+        Type.Literal("md"),
         Type.Literal("literature-json"),
+        Type.Literal("literature-text"),
+        Type.Literal("literature-markdown"),
+        Type.Literal("literature-pdf"),
         Type.Literal("experiment-json"),
         Type.Literal("evidence-jsonl"),
         Type.Literal("csv"),
@@ -61,7 +66,7 @@ export function createMaterialsIngestEvidenceTool(context: MaterialsPluginContex
     name: "materials_ingest_evidence",
     label: "Ingest Evidence",
     description:
-      "Parse QE/VASP/literature/experiment artifacts into evidence ledger rows for claim evaluation.",
+      "Parse QE/VASP/MD/literature/experiment artifacts into evidence ledger rows for claim evaluation.",
     parameters: IngestEvidenceSchema,
     async execute(_callId, rawParams) {
       const params = rawParams as MaterialsIngestEvidenceParams;

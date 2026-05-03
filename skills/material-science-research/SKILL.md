@@ -35,6 +35,7 @@ Use `materials_plan_research_loop` when the user asks for an open-ended research
 - If only the topic is known, pass `researchGoal` and let the bounded autonomous discovery compiler create the database query log, candidate-pool JSONL, evidence-ledger JSONL, and candidate-backed protocol.
 - Use `candidateGeneration.allowDevelopmentFixtures: true` only for smoke tests; live research should use Materials Project or other database evidence.
 - Treat the output as an evidence contract: candidate generation, literature review, database search, validation matrix, claim policy, and approval gates.
+- Inspect `methodRegistry` and `literatureEvidencePipeline` before execution; they describe domain methods, PDF/text/table extraction, parser coverage, and citation provenance expectations.
 - Do not present research-grade discovery claims unless the compiled claim policy is satisfied by parsed evidence artifacts.
 
 ### 2.1 Evaluate the claim gate
@@ -44,15 +45,24 @@ Use `materials_evaluate_research_claim` after evidence has been imported or pars
 - Pass the `planPath`, `evidenceLedgerPath`, and target `candidateId`.
 - If the user provides verified external evidence, pass it as `evidenceRows` with `sourceType`, `status`, `propertyValues`, and an artifact/citation trace.
 - Present the generated claim-review result instead of making your own unsupported claim.
+- Check the audit certificate, uncertainty score, and conflict summary. Numeric or explicit evidence conflicts block research-grade claims until resolved.
 - If the review says `researchGradeClaimAllowed: false`, report the missing gates and next evidence needed.
 
 ### 2.2 Ingest parsed evidence
 
 Use `materials_ingest_evidence` when backend outputs or literature/experiment tables are available.
 
-- For QE/VASP outputs, pass `artifactPaths`, `planPath`, and `candidateId`; use `parser: "auto"` unless a specific parser is known.
-- For literature/experiment data, pass JSON, JSONL, or CSV files with evidence requirement IDs, statuses, property values, citations, and artifact/source traces.
+- For QE/VASP/MD outputs, pass `artifactPaths`, `planPath`, and `candidateId`; use `parser: "auto"` unless a specific parser is known. Supported parsed evidence includes total energy, band/DOS metadata, dielectric, surface/adsorption, phonon, AIMD, and LAMMPS-style thermo logs.
+- For literature/experiment data, pass JSON, JSONL, CSV, markdown/text, or PDF files with evidence requirement IDs, statuses, property values, citations, and artifact/source traces.
 - Re-run `materials_evaluate_research_claim` after ingestion so claim status is based on the merged ledger.
+
+### 2.3 Monitor backend execution
+
+Use `materials_execute_research_plan` with `executionMode: "monitor"` after a `prepare` or `submit` run has produced an `execution-manifest.json`.
+
+- Pass `executionManifestPath`, `planPath`, and the backend name.
+- Set `backendConfig.parseOutputs: true` to parse discovered outputs into an evidence ledger.
+- Set `backendConfig.claimReview: true` only when you want the monitor step to emit claim-review audit artifacts immediately.
 
 ### 3. Define evaluation criteria
 

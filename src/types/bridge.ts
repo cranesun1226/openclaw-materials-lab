@@ -314,6 +314,9 @@ export interface EvaluateResearchClaimResult {
   missingEvidence: Array<Record<string, unknown>>;
   satisfiedEvidence: Array<Record<string, unknown>>;
   blockingEvidence: Array<Record<string, unknown>>;
+  conflictingEvidence?: Array<Record<string, unknown>>;
+  uncertaintySummary?: Record<string, unknown>;
+  auditCertificate?: Record<string, unknown>;
   evidenceRowsReviewed: number;
 }
 
@@ -321,7 +324,19 @@ export interface IngestEvidencePayload {
   planPath?: string;
   plan?: Record<string, unknown>;
   candidateId?: string;
-  parser?: "auto" | "quantum-espresso" | "vasp" | "literature-json" | "experiment-json" | "evidence-jsonl" | "csv";
+  parser?:
+    | "auto"
+    | "quantum-espresso"
+    | "vasp"
+    | "lammps"
+    | "md"
+    | "literature-json"
+    | "literature-text"
+    | "literature-markdown"
+    | "literature-pdf"
+    | "experiment-json"
+    | "evidence-jsonl"
+    | "csv";
   artifactPaths?: string[];
   evidenceRows?: EvidenceLedgerInput[];
   evidenceRequirementId?: string;
@@ -347,7 +362,8 @@ export interface ExecuteResearchPlanPayload {
   planPath?: string;
   plan?: Record<string, unknown>;
   backend?: "dev-smoke" | "quantum-espresso" | "vasp" | "atomate2" | "aiida";
-  executionMode?: "prepare" | "submit";
+  executionMode?: "prepare" | "submit" | "monitor";
+  executionManifestPath?: string;
   maxSteps?: number;
   allowBlockedDevSmoke?: boolean;
   allowExecution?: boolean;
@@ -369,6 +385,9 @@ export interface ExecuteResearchPlanResult {
   skippedCalculations: number;
   propertyUpdates: ComparedCandidate[];
   rerankingPayload?: Record<string, unknown>;
+  parsedEvidenceRows?: number;
+  evidenceLedgerPath?: string;
+  claimReviews?: Array<Record<string, unknown>>;
 }
 
 export interface AseRelaxPayload {

@@ -84,6 +84,8 @@ describe("Python bridge", () => {
     expect(result.data.plan.protocolVersion).toBe("dynamic-research-protocol-v1");
     expect(result.data.plan.preset).toBe("dynamic");
     expect(result.data.plan.evidenceSchema).toBeDefined();
+    expect(result.data.plan.methodRegistry).toBeDefined();
+    expect(result.data.plan.literatureEvidencePipeline).toBeDefined();
     expect(result.data.plan.calculationQueue).toBeDefined();
     expect(result.artifacts).toContain(result.data.manifestPath);
     expect(await readFile(result.data.reportPath, "utf8")).toContain("Approval Gates");
@@ -118,6 +120,25 @@ describe("Python bridge", () => {
     const scfText = await readFile(scfInput ?? "", "utf8");
     expect(scfText).toContain("ATOMIC_SPECIES");
     expect(scfText).toContain("Hf 178.490000 Hf.UPF");
+
+    await writeFile(
+      path.join(path.dirname(scfInput ?? ""), "pw.scf.out"),
+      ["!    total energy              =     -20.000000 Ry", "JOB DONE.", ""].join("\n"),
+      "utf8",
+    );
+    const monitored = await bridge.executeResearchPlan({
+      planPath: result.data.manifestPath,
+      artifactDir: path.join(tempDir, "reports", "research-loop-monitor"),
+      backend: "quantum-espresso",
+      executionMode: "monitor",
+      executionManifestPath: externalPreparation.data.manifestPath,
+      backendConfig: { parseOutputs: true },
+    });
+
+    expect(monitored.data.completedCalculations).toBeGreaterThan(0);
+    expect(monitored.data.parsedEvidenceRows).toBeGreaterThan(0);
+    expect(monitored.data.evidenceLedgerPath).toBeDefined();
+    expect(await readFile(monitored.data.reportPath, "utf8")).toContain("Backend Monitor");
   });
 
   it("compiles a dynamic research protocol before candidates exist", async () => {
@@ -356,5 +377,122 @@ describe("Python bridge", () => {
 
     expect(claim.data.claimStatus.researchGradeClaimAllowed).toBe(true);
     expect(claim.data.missingEvidence).toEqual([]);
+  });
+
+  it("parses literature, VASP, and MD-style evidence and blocks conflicted claims", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-expanded-evidence-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    const outputDir = path.join(tempDir, "reports", "expanded-output");
+    await mkdir(outputDir, { recursive: true });
+    const outcar = path.join(outputDir, "OUTCAR");
+    const literature = path.join(outputDir, "literature-review.md");
+    await writeFile(
+      outcar,
+      [
+        "free  energy   TOTEN  =      -10.500000 eV",
+        "E-fermi : 5.4321",
+        "band gap: 1.20 eV",
+        "surface energy = 1.50 J/m^2",
+        "adsorption energy = -0.42 eV",
+        "freq ( 1) = 18.0 [cm-1]",
+        "freq ( 2) = -12.0 [cm-1]",
+        "temperature = 300 K",
+        "temperature = 310 K",
+        "diffusion coefficient = 1.0e-6 cm^2/s",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    await writeFile(
+      literature,
+      [
+        "Catalyst benchmark evidence for mp-surface",
+        "DOI: 10.1234/example.materials.2026",
+        "mp-surface reported overpotential of 0.31 V and adsorption energy = -0.20 eV.",
+        "| material | property | value |",
+        "| mp-surface | overpotentialV | 0.31 |",
+        "",
+      ].join("\n"),
+      "utf8",
+    );
+    const plan = {
+      planId: "expanded-evidence-plan",
+      selectedCandidates: [{ materialId: "mp-surface", formula: "NiO" }],
+      claimPolicy: {
+        requiredEvidenceRequirementIds: ["surface-activity"],
+      },
+      evidenceSchema: [
+        {
+          id: "surface-activity",
+          label: "Surface activity",
+          propertyKeys: ["adsorptionEnergyEv"],
+          evidenceTypes: ["dft"],
+          requiredForClaim: true,
+        },
+      ],
+    };
+
+    const vasp = await bridge.ingestEvidence({
+      artifactDir: path.join(tempDir, "reports", "evidence-ingestion"),
+      plan,
+      candidateId: "mp-surface",
+      parser: "vasp",
+      artifactPaths: [outcar],
+    });
+    expect(vasp.data.evidenceRows.some((row) => row.propertyValues?.surfaceEnergyJm2 === 1.5)).toBe(true);
+    expect(vasp.data.evidenceRows.some((row) => row.propertyValues?.imaginaryModeCount === 1)).toBe(true);
+    expect(vasp.data.evidenceRows.some((row) => row.propertyValues?.averageTemperatureK === 305)).toBe(true);
+
+    const lit = await bridge.ingestEvidence({
+      artifactDir: path.join(tempDir, "reports", "literature-ingestion"),
+      plan,
+      candidateId: "mp-surface",
+      parser: "literature-markdown",
+      artifactPaths: [literature],
+      evidenceLedgerPath: vasp.data.evidenceLedgerPath,
+    });
+    expect(lit.data.evidenceRows[0]?.citation).toContain("10.1234/example.materials.2026");
+
+    const claim = await bridge.evaluateResearchClaim({
+      artifactDir: path.join(tempDir, "reports", "claim-reviews"),
+      plan,
+      candidateId: "mp-surface",
+      evidenceRows: [
+        {
+          candidateId: "mp-surface",
+          evidenceRequirementId: "surface-activity",
+          status: "parsed-property",
+          sourceType: "parsed-calculation",
+          source: "vasp",
+          confidence: "parsed-output",
+          propertyValues: { adsorptionEnergyEv: -0.20 },
+          artifactPath: outcar,
+        },
+        {
+          candidateId: "mp-surface",
+          evidenceRequirementId: "surface-activity",
+          status: "parsed-property",
+          sourceType: "parsed-calculation",
+          source: "vasp-repeat",
+          confidence: "parsed-output",
+          propertyValues: { adsorptionEnergyEv: -0.80 },
+          artifactPath: outcar,
+        },
+      ],
+    });
+
+    expect(claim.data.claimStatus.researchGradeClaimAllowed).toBe(false);
+    expect(claim.data.uncertaintySummary?.materialConflicts).toBeDefined();
+    expect(claim.data.auditCertificate?.decision).toBe("block");
+    expect(await readFile(claim.data.reportPath, "utf8")).toContain("Audit Certificate");
   });
 });

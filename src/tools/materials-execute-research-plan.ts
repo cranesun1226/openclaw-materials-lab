@@ -21,7 +21,8 @@ const ExecuteResearchPlanSchema = Type.Object(
         Type.Literal("aiida"),
       ]),
     ),
-    executionMode: Type.Optional(Type.Union([Type.Literal("prepare"), Type.Literal("submit")])),
+    executionMode: Type.Optional(Type.Union([Type.Literal("prepare"), Type.Literal("submit"), Type.Literal("monitor")])),
+    executionManifestPath: Type.Optional(Type.String({ minLength: 1 })),
     maxSteps: Type.Optional(Type.Number({ minimum: 1, maximum: 500 })),
     allowBlockedDevSmoke: Type.Optional(Type.Boolean()),
     allowExecution: Type.Optional(Type.Boolean()),
@@ -49,6 +50,9 @@ export function createMaterialsExecuteResearchPlanTool(
       const planPath = params.planPath
         ? ensureWithinRoot(workspacePaths.workspaceRoot, params.planPath, "planPath")
         : undefined;
+      const executionManifestPath = params.executionManifestPath
+        ? ensureWithinRoot(workspacePaths.workspaceRoot, params.executionManifestPath, "executionManifestPath")
+        : undefined;
       const artifactDir = ensureWithinRoot(
         workspacePaths.reportsDir,
         path.join(workspacePaths.reportsDir, "research-loop-executions"),
@@ -60,6 +64,7 @@ export function createMaterialsExecuteResearchPlanTool(
         ...(planPath ? { planPath } : {}),
         ...(params.plan ? { plan: params.plan } : {}),
         ...(params.executionMode ? { executionMode: params.executionMode } : {}),
+        ...(executionManifestPath ? { executionManifestPath } : {}),
         ...(typeof params.maxSteps === "number" ? { maxSteps: params.maxSteps } : {}),
         ...(typeof params.allowBlockedDevSmoke === "boolean" ? { allowBlockedDevSmoke: params.allowBlockedDevSmoke } : {}),
         ...(typeof params.allowExecution === "boolean" ? { allowExecution: params.allowExecution } : {}),

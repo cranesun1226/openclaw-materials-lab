@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import os
 import re
@@ -39,6 +40,11 @@ try:
     from pymatgen.io.vasp import Poscar  # type: ignore
 except Exception:  # pragma: no cover - optional runtime dependency
     Poscar = None
+
+try:
+    from pypdf import PdfReader  # type: ignore
+except Exception:  # pragma: no cover - optional runtime dependency
+    PdfReader = None
 
 
 ATOMIC_MASS_FALLBACK = {
@@ -437,6 +443,9 @@ def handle_evaluate_research_claim(*, request_id: str, payload: dict[str, Any]) 
         "missingEvidence": review["missingEvidence"],
         "satisfiedEvidence": review["satisfiedEvidence"],
         "blockingEvidence": review["blockingEvidence"],
+        "conflictingEvidence": review["conflictingEvidence"],
+        "uncertaintySummary": review["uncertaintySummary"],
+        "auditCertificate": review["auditCertificate"],
         "evidenceRowsReviewed": review["evidenceRowsReviewed"],
     }
     warnings = list(review.get("warnings") or [])
@@ -554,6 +563,7 @@ def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], ap
         raise WorkerError("INVALID_PARAMS", "execute_research_plan requires a plan with calculationQueue.")
 
     max_steps = int(payload.get("maxSteps") or len(plan["calculationQueue"]))
+    execution_mode = str(payload.get("executionMode") or "prepare").strip().lower()
     if backend == "dev-smoke":
         allow_blocked_dev_smoke = ensure_bool(payload.get("allowBlockedDevSmoke"), field="allowBlockedDevSmoke", default=False)
         execution = _execute_dev_smoke_plan(
@@ -570,9 +580,10 @@ def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], ap
             api_key=api_key,
             backend=backend,
             max_steps=max_steps,
-            execution_mode=str(payload.get("executionMode") or "prepare").strip().lower(),
+            execution_mode=execution_mode,
             allow_execution=ensure_bool(payload.get("allowExecution"), field="allowExecution", default=False),
             backend_config=ensure_dict(payload.get("backendConfig") or {}, field="backendConfig"),
+            execution_manifest_path=ensure_string(payload.get("executionManifestPath"), field="executionManifestPath", required=False),
         )
     else:
         raise WorkerError(
@@ -728,6 +739,11 @@ def _parse_evidence_artifact(
         return _parse_quantum_espresso_evidence(path, plan, candidate_id, evidence_requirement_id, default_status, source_label), [], parser_used
     if parser_used == "vasp":
         return _parse_vasp_evidence(path, plan, candidate_id, evidence_requirement_id, default_status, source_label), [], parser_used
+    if parser_used in {"lammps", "md"}:
+        return _parse_md_evidence(path, plan, candidate_id, evidence_requirement_id, default_status, source_label, parser_used), [], parser_used
+    if parser_used in {"literature-text", "literature-pdf", "literature-markdown"}:
+        rows, warnings = _parse_literature_text_evidence(path, plan, candidate_id, evidence_requirement_id, default_status, source_label, parser_used)
+        return rows, warnings, parser_used
     if parser_used in {"literature-json", "experiment-json", "evidence-jsonl"}:
         return _parse_structured_evidence(path, parser_used, candidate_id, default_status, source_label), [], parser_used
     if parser_used == "csv":
@@ -744,6 +760,16 @@ def _resolve_evidence_parser(path: Path, parser: str) -> str:
         return "vasp"
     if name.endswith((".out", ".pwout")) or "qe" in name or "espresso" in name or "pw.scf" in name or "ph." in name:
         return "quantum-espresso"
+    if name in {"log.lammps", "lammps.log"} or "lammps" in name:
+        return "lammps"
+    if "aimd" in name or "md.log" in name or name.endswith(".lammpstrj"):
+        return "md"
+    if suffix == ".pdf":
+        return "literature-pdf"
+    if suffix in {".md", ".markdown"} and any(token in name for token in ["literature", "citation", "paper", "abstract", "review"]):
+        return "literature-markdown"
+    if suffix == ".txt" and any(token in name for token in ["literature", "citation", "paper", "abstract", "review"]):
+        return "literature-text"
     if suffix == ".csv":
         return "csv"
     if suffix == ".jsonl":
@@ -819,6 +845,10 @@ def _parse_quantum_espresso_evidence(
             claim="Quantum ESPRESSO/DFPT output parsed dielectric evidence.",
             property_values={"dielectricTotal": dielectric},
         ))
+    rows.extend(_parse_electronic_structure_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "quantum-espresso"))
+    rows.extend(_parse_surface_energy_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "quantum-espresso"))
+    rows.extend(_parse_phonon_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "quantum-espresso"))
+    rows.extend(_parse_aimd_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "quantum-espresso"))
     return rows
 
 
@@ -873,7 +903,382 @@ def _parse_vasp_evidence(
             claim="VASP-derived output parsed adsorption-energy evidence.",
             property_values={"adsorptionEnergyEv": adsorption},
         ))
+    rows.extend(_parse_electronic_structure_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "vasp"))
+    rows.extend(_parse_surface_energy_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "vasp"))
+    rows.extend(_parse_phonon_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "vasp"))
+    rows.extend(_parse_aimd_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or "vasp"))
     return rows
+
+
+def _parse_electronic_structure_rows(
+    text: str,
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source: str,
+) -> list[dict[str, Any]]:
+    values: dict[str, Any] = {}
+    fermi = _last_float_match(text, r"(?:Fermi energy is|E-fermi\s*:)\s*([-+]?\d+(?:\.\d+)?)\s*(?:ev|eV)?")
+    dos_fermi = _last_float_match(text, r"(?:DOS at Fermi|N\(E_F\)|dos\(e_f\))\s*[:=]\s*([-+]?\d+(?:\.\d+)?)")
+    cbm = _last_float_match(text, r"\bCBM\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*eV")
+    vbm = _last_float_match(text, r"\bVBM\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*eV")
+    if fermi is not None:
+        values["fermiEnergyEv"] = fermi
+    if dos_fermi is not None:
+        values["dosAtFermi"] = dos_fermi
+    if cbm is not None:
+        values["cbmEv"] = cbm
+    if vbm is not None:
+        values["vbmEv"] = vbm
+    if not values:
+        return []
+    requirement_id = evidence_requirement_id or _infer_requirement_for_properties(
+        plan,
+        ["fermiEnergyEv", "dosAtFermi", "cbmEv", "vbmEv", "bandGapEv"],
+        "electronic-structure",
+    )
+    return [_parsed_evidence_row(
+        plan=plan,
+        candidate_id=candidate_id,
+        evidence_requirement_id=requirement_id,
+        artifact_path=str(path),
+        source_type="parsed-calculation",
+        source=source,
+        status=default_status or "parsed-property",
+        claim="Electronic-structure output parsed band/DOS provenance.",
+        property_values=values,
+    )]
+
+
+def _parse_surface_energy_rows(
+    text: str,
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source: str,
+) -> list[dict[str, Any]]:
+    surface_energy = _last_float_match(text, r"surface\s+energy\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*(?:J/m\^?2|J m-2)")
+    surface_energy_ev_a2 = _last_float_match(text, r"surface\s+energy\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*(?:eV/A\^?2|eV Angstrom-2)")
+    cleavage = _last_float_match(text, r"cleavage\s+energy\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*(?:J/m\^?2|J m-2)")
+    values: dict[str, Any] = {}
+    if surface_energy is not None:
+        values["surfaceEnergyJm2"] = surface_energy
+    if surface_energy_ev_a2 is not None:
+        values["surfaceEnergyEvA2"] = surface_energy_ev_a2
+    if cleavage is not None:
+        values["cleavageEnergyJm2"] = cleavage
+    if not values:
+        return []
+    requirement_id = evidence_requirement_id or _infer_requirement_for_properties(
+        plan,
+        ["surfaceEnergyJm2", "surfaceEnergyEvA2", "cleavageEnergyJm2", "surfaceStability"],
+        "surface-activity",
+    )
+    return [_parsed_evidence_row(
+        plan=plan,
+        candidate_id=candidate_id,
+        evidence_requirement_id=requirement_id,
+        artifact_path=str(path),
+        source_type="parsed-calculation",
+        source=source,
+        status=default_status or "parsed-property",
+        claim="Surface-energy output parsed surface stability/activity evidence.",
+        property_values=values,
+    )]
+
+
+def _parse_phonon_rows(
+    text: str,
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source: str,
+) -> list[dict[str, Any]]:
+    frequencies = [float(item) for item in re.findall(
+        r"(?:freq\s*\([^)]*\)\s*=|f/i=|THz\s*)\s*([-+]?\d+(?:\.\d+)?)\s*(?:\[?cm-1\]?|cm\^-1|THz)?",
+        text,
+        flags=re.IGNORECASE,
+    )]
+    if not frequencies:
+        frequencies = [float(item) for item in re.findall(r"phonon\s+frequency\s*[:=]\s*([-+]?\d+(?:\.\d+)?)", text, flags=re.IGNORECASE)]
+    if not frequencies:
+        return []
+    min_frequency = min(frequencies)
+    imaginary_count = sum(1 for value in frequencies if value < -5e-3)
+    requirement_id = evidence_requirement_id or _infer_requirement_for_properties(
+        plan,
+        ["phononStability", "imaginaryModeCount", "minPhononFrequencyCm1", "latticeThermalConductivityWmK"],
+        "phonon-stability",
+    )
+    status = default_status or ("parsed-property" if imaginary_count == 0 else "conflicting-evidence")
+    return [_parsed_evidence_row(
+        plan=plan,
+        candidate_id=candidate_id,
+        evidence_requirement_id=requirement_id,
+        artifact_path=str(path),
+        source_type="parsed-calculation",
+        source=source,
+        status=status,
+        claim="Phonon output parsed dynamic-stability evidence.",
+        property_values={
+            "phononStability": imaginary_count == 0,
+            "imaginaryModeCount": imaginary_count,
+            "minPhononFrequencyCm1": min_frequency,
+            "phononModeCount": len(frequencies),
+        },
+    )]
+
+
+def _parse_aimd_rows(
+    text: str,
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source: str,
+) -> list[dict[str, Any]]:
+    temperatures = [float(item) for item in re.findall(r"(?:temperature|T=)\s*[:=]?\s*([-+]?\d+(?:\.\d+)?)\s*K?", text, flags=re.IGNORECASE)]
+    diffusion = _last_float_match(text, r"(?:diffusion\s+coefficient|D_?self|D=)\s*[:=]\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*(?:cm\^?2/s|m\^?2/s)?")
+    msd = _last_float_match(text, r"(?:MSD|mean\s+square\s+displacement)\s*[:=]\s*([-+]?\d+(?:\.\d+)?)")
+    drift = _last_float_match(text, r"(?:total\s+drift|energy\s+drift)\s*[:=]\s*([-+]?\d+(?:\.\d+)?)\s*(?:eV|Ry)?")
+    values: dict[str, Any] = {}
+    if temperatures:
+        values["averageTemperatureK"] = sum(temperatures) / len(temperatures)
+        values["temperatureSamples"] = len(temperatures)
+    if diffusion is not None:
+        values["diffusionCoefficient"] = diffusion
+    if msd is not None:
+        values["meanSquaredDisplacement"] = msd
+    if drift is not None:
+        values["energyDrift"] = drift
+    if not values:
+        return []
+    requirement_id = evidence_requirement_id or _infer_requirement_for_properties(
+        plan,
+        ["diffusionCoefficient", "meanSquaredDisplacement", "averageTemperatureK", "operandoStability", "ionicConductivityScm"],
+        "operando-stability",
+    )
+    return [_parsed_evidence_row(
+        plan=plan,
+        candidate_id=candidate_id,
+        evidence_requirement_id=requirement_id,
+        artifact_path=str(path),
+        source_type="md" if "diffusionCoefficient" in values or "meanSquaredDisplacement" in values else "parsed-calculation",
+        source=source,
+        status=default_status or "parsed-property",
+        claim="AIMD/MD output parsed finite-temperature stability or transport evidence.",
+        property_values=values,
+    )]
+
+
+def _parse_md_evidence(
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source_label: str | None,
+    parser_used: str,
+) -> list[dict[str, Any]]:
+    text = path.read_text("utf-8", errors="replace")
+    rows = _parse_aimd_rows(text, path, plan, candidate_id, evidence_requirement_id, default_status, source_label or parser_used)
+    if not rows:
+        thermo_values = _parse_lammps_thermo_values(text)
+        if thermo_values:
+            rows.append(_parsed_evidence_row(
+                plan=plan,
+                candidate_id=candidate_id,
+                evidence_requirement_id=evidence_requirement_id or _infer_requirement_for_properties(
+                    plan,
+                    ["averageTemperatureK", "averagePressure", "totalEnergyDrift", "operandoStability"],
+                    "operando-stability",
+                ),
+                artifact_path=str(path),
+                source_type="md",
+                source=source_label or parser_used,
+                status=default_status or "parsed-property",
+                claim="MD log parsed thermo trajectory evidence.",
+                property_values=thermo_values,
+            ))
+    return rows
+
+
+def _parse_lammps_thermo_values(text: str) -> dict[str, Any]:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    for index, line in enumerate(lines):
+        headers = line.split()
+        lower = [item.lower() for item in headers]
+        if "step" not in lower or not any(item in lower for item in ["temp", "temperature"]):
+            continue
+        samples: list[dict[str, float]] = []
+        for data_line in lines[index + 1:]:
+            parts = data_line.split()
+            if len(parts) < len(headers):
+                break
+            try:
+                samples.append({header: float(value) for header, value in zip(lower, parts)})
+            except Exception:
+                break
+        if not samples:
+            continue
+        values: dict[str, Any] = {"thermoSamples": len(samples)}
+        for key, output_key in [("temp", "averageTemperatureK"), ("press", "averagePressure"), ("etotal", "averageTotalEnergy")]:
+            collected = [sample[key] for sample in samples if key in sample]
+            if collected:
+                values[output_key] = sum(collected) / len(collected)
+                if key == "etotal":
+                    values["totalEnergyDrift"] = collected[-1] - collected[0]
+        return values
+    return {}
+
+
+def _parse_literature_text_evidence(
+    path: Path,
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    default_status: str | None,
+    source_label: str | None,
+    parser_used: str,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    text, warnings = _read_literature_text(path, parser_used)
+    if not text.strip():
+        return [], warnings or [f"No extractable literature text found in {path}."]
+    citations = _extract_citation_provenance(text, path)
+    candidates = _candidate_mentions_from_text(text, plan, candidate_id)
+    property_values = _extract_literature_property_values(text)
+    table_like_lines = _count_table_like_lines(text)
+    rows: list[dict[str, Any]] = []
+    generated_at = int(time.time())
+    for target_candidate in candidates or [candidate_id]:
+        requirement_id = evidence_requirement_id or _infer_requirement_for_properties(
+            plan,
+            list(property_values.keys()) or ["literatureBaseline"],
+            "literature-benchmark",
+        )
+        row = _normalize_evidence_row({
+            "ledgerVersion": "evidence-ledger-v1",
+            "evidenceId": _safe_file_stem(f"{target_candidate or 'candidate'}-{requirement_id}-{path.stem}").lower(),
+            "candidateId": target_candidate,
+            "formula": _candidate_formula_for_plan(plan, target_candidate),
+            "evidenceRequirementId": requirement_id,
+            "claim": "Literature artifact parsed into citation-provenance evidence.",
+            "status": default_status or "literature-supported",
+            "sourceType": "literature",
+            "source": source_label or path.name,
+            "confidence": "citation-provenance" if citations.get("doi") or citations.get("url") else "literature-text-extraction",
+            "propertyValues": {
+                **property_values,
+                "citationCount": len(citations.get("references") or []),
+                "tableLikeLineCount": table_like_lines,
+                "literatureBaseline": True,
+            },
+            "artifactPath": str(path),
+            "sourcePath": str(path),
+            "citation": citations.get("primaryCitation"),
+            "citationProvenance": citations,
+            "generatedAt": generated_at,
+        }, candidate_id=target_candidate)
+        rows.append(row)
+    return rows, warnings
+
+
+def _read_literature_text(path: Path, parser_used: str) -> tuple[str, list[str]]:
+    warnings: list[str] = []
+    if parser_used == "literature-pdf":
+        if PdfReader is None:
+            warnings.append("pypdf is not installed; PDF text extraction used a lossy fallback.")
+            return path.read_bytes().decode("utf-8", errors="replace"), warnings
+        try:
+            reader = PdfReader(str(path))
+            pages = [page.extract_text() or "" for page in reader.pages[:50]]
+            return "\n".join(pages), warnings
+        except Exception as exc:
+            warnings.append(f"PDF text extraction failed: {exc}")
+            return "", warnings
+    return path.read_text("utf-8", errors="replace"), warnings
+
+
+def _extract_citation_provenance(text: str, path: Path) -> dict[str, Any]:
+    doi_matches = sorted(set(re.findall(r"\b10\.\d{4,9}/[-._;()/:A-Z0-9]+", text, flags=re.IGNORECASE)))
+    arxiv_matches = sorted(set(re.findall(r"\barXiv:\s*([0-9]{4}\.[0-9]{4,5}(?:v\d+)?)", text, flags=re.IGNORECASE)))
+    urls = sorted(set(re.findall(r"https?://[^\s)>\]]+", text)))
+    nonempty = [line.strip() for line in text.splitlines() if line.strip()]
+    title = next((line for line in nonempty if 12 <= len(line) <= 220), path.stem)
+    references = []
+    for value in doi_matches:
+        references.append({"type": "doi", "value": value})
+    for value in arxiv_matches:
+        references.append({"type": "arxiv", "value": value})
+    for value in urls[:10]:
+        references.append({"type": "url", "value": value})
+    primary = doi_matches[0] if doi_matches else f"arXiv:{arxiv_matches[0]}" if arxiv_matches else urls[0] if urls else title
+    return {
+        "titleOrFirstLine": title,
+        "doi": doi_matches[0] if doi_matches else None,
+        "arxiv": arxiv_matches[0] if arxiv_matches else None,
+        "url": urls[0] if urls else None,
+        "primaryCitation": primary,
+        "references": references,
+    }
+
+
+def _candidate_mentions_from_text(text: str, plan: dict[str, Any], candidate_id: str | None) -> list[str]:
+    if candidate_id:
+        return [candidate_id]
+    lowered = text.lower()
+    matches: list[str] = []
+    for candidate in plan.get("selectedCandidates") or []:
+        if not isinstance(candidate, dict):
+            continue
+        material_id = str(candidate.get("materialId") or "")
+        formula = str(candidate.get("formula") or "")
+        if material_id and material_id.lower() in lowered:
+            matches.append(material_id)
+        elif formula and formula.lower() in lowered and material_id:
+            matches.append(material_id)
+    return _unique_ordered(matches)
+
+
+def _extract_literature_property_values(text: str) -> dict[str, Any]:
+    patterns = {
+        "bandGapEv": r"band\s+gap\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*eV",
+        "dielectricTotal": r"(?:dielectric\s+constant|relative\s+permittivity|k\s*value)\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)",
+        "ionicConductivityScm": r"ionic\s+conductivity\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)\s*S/?cm",
+        "adsorptionEnergyEv": r"adsorption\s+energy\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*eV",
+        "overpotentialV": r"overpotential\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*V",
+        "capacityMahG": r"capacity\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*mAh/?g",
+        "voltageV": r"voltage\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*V",
+        "seebeckUvK": r"Seebeck\s*(?:coefficient)?\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*(?:uV/K|µV/K)",
+        "zt": r"\bZT\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)",
+        "criticalTemperatureK": r"(?:critical\s+temperature|T_c|Tc)\s*(?:of|=|:)?\s*([-+]?\d+(?:\.\d+)?)\s*K",
+    }
+    values: dict[str, Any] = {}
+    for key, pattern in patterns.items():
+        value = _last_float_match(text, pattern)
+        if value is not None:
+            values[key] = value
+    if any(word in text.lower() for word in ["contradict", "failed to reproduce", "unstable", "decomposes"]):
+        values["negativeEvidenceMentioned"] = True
+    return values
+
+
+def _count_table_like_lines(text: str) -> int:
+    count = 0
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.count("|") >= 2 or stripped.count(",") >= 3 or stripped.count("\t") >= 2:
+            count += 1
+    return count
 
 
 def _parse_structured_evidence(
@@ -1218,6 +1623,13 @@ def _evaluate_research_claim(
             })
     blocking = [_row_ref(row) for row in candidate_rows if _row_blocks_claim(row)]
     conflicts = [_row_ref(row) for row in candidate_rows if _row_conflicts(row)]
+    uncertainty_summary = _uncertainty_and_conflict_summary(
+        plan=plan,
+        candidate_id=candidate_id,
+        rows=candidate_rows,
+        requirements=required,
+    )
+    material_conflicts = uncertainty_summary.get("materialConflicts") or []
     artifact_warnings = _artifact_trace_warnings(candidate_rows)
     warnings.extend(artifact_warnings)
     current_level = _claim_level_from_evaluation(
@@ -1226,24 +1638,44 @@ def _evaluate_research_claim(
         blocking=blocking,
         candidate_rows=candidate_rows,
     )
+    if material_conflicts and current_level == "research-grade-candidate":
+        current_level = "property-backed-shortlist"
     research_grade_allowed = (
         requested_claim_level == "research-grade-candidate"
         and current_level == "research-grade-candidate"
         and not missing
         and not blocking
         and not conflicts
+        and not material_conflicts
+        and float(uncertainty_summary.get("overallConfidenceScore") or 0.0) >= 0.72
     )
+    blocked_by = [item["evidenceRequirementId"] for item in missing] + [item["evidenceId"] for item in blocking]
+    blocked_by.extend(item.get("propertyKey") or item.get("reason") for item in material_conflicts if isinstance(item, dict))
     claim_status = {
         "requestedLevel": requested_claim_level,
         "currentLevel": current_level,
         "researchGradeClaimAllowed": research_grade_allowed,
-        "blockedBy": [item["evidenceRequirementId"] for item in missing] + [item["evidenceId"] for item in blocking],
+        "blockedBy": [str(item) for item in blocked_by if item],
         "reason": (
             "All required evidence gates are satisfied by traceable evidence rows."
             if research_grade_allowed
             else "Research-grade claim remains blocked until missing/conflicting evidence gates are closed."
         ),
     }
+    audit_certificate = _claim_audit_certificate(
+        plan=plan,
+        candidate_id=candidate_id,
+        requested_claim_level=requested_claim_level,
+        rows=candidate_rows,
+        claim_status=claim_status,
+        satisfied=satisfied,
+        missing=missing,
+        blocking=blocking,
+        conflicts=conflicts,
+        uncertainty_summary=uncertainty_summary,
+        ledger_path=ledger_path,
+        merged_ledger_path=merged_ledger_path,
+    )
     return {
         "evaluationVersion": "claim-policy-evaluator-v1",
         "generatedAt": int(time.time()),
@@ -1258,6 +1690,8 @@ def _evaluate_research_claim(
         "missingEvidence": missing,
         "blockingEvidence": blocking,
         "conflictingEvidence": conflicts,
+        "uncertaintySummary": uncertainty_summary,
+        "auditCertificate": audit_certificate,
         "evidenceRowsReviewed": len(candidate_rows),
         "warnings": warnings,
     }
@@ -1266,6 +1700,194 @@ def _evaluate_research_claim(
 def _row_candidate_matches(row: dict[str, Any], candidate_id: str) -> bool:
     row_candidate = row.get("candidateId") or row.get("materialId")
     return not row_candidate or str(row_candidate) == candidate_id
+
+
+def _uncertainty_and_conflict_summary(
+    *,
+    plan: dict[str, Any],
+    candidate_id: str,
+    rows: list[dict[str, Any]],
+    requirements: list[dict[str, Any]],
+) -> dict[str, Any]:
+    scored_rows = [
+        {**_row_ref(row), "strengthScore": _row_strength_score(row)}
+        for row in rows
+    ]
+    requirement_scores: list[dict[str, Any]] = []
+    for requirement in requirements:
+        requirement_rows = [
+            row for row in rows
+            if str(row.get("evidenceRequirementId")) == str(requirement.get("id"))
+        ]
+        scores = [_row_strength_score(row) for row in requirement_rows]
+        requirement_scores.append({
+            "evidenceRequirementId": requirement.get("id"),
+            "rowCount": len(requirement_rows),
+            "maxStrengthScore": round(max(scores), 6) if scores else 0.0,
+            "meanStrengthScore": round(sum(scores) / len(scores), 6) if scores else 0.0,
+            "uncertainty": round(1.0 - max(scores), 6) if scores else 1.0,
+        })
+    row_scores = [_row_strength_score(row) for row in rows]
+    overall = sum(row_scores) / len(row_scores) if row_scores else 0.0
+    material_conflicts = _numeric_property_conflicts(rows)
+    explicit_conflicts = [_row_ref(row) for row in rows if _row_conflicts(row)]
+    return {
+        "candidateId": candidate_id,
+        "planId": plan.get("planId"),
+        "overallConfidenceScore": round(overall, 6),
+        "overallUncertainty": round(1.0 - overall, 6),
+        "requirementScores": requirement_scores,
+        "rowScores": scored_rows,
+        "materialConflicts": material_conflicts,
+        "explicitConflictingRows": explicit_conflicts,
+        "policy": {
+            "researchGradeMinimumConfidenceScore": 0.72,
+            "numericConflictRelativeTolerance": 0.20,
+            "conflictingRowsBlockResearchGrade": True,
+        },
+    }
+
+
+def _row_strength_score(row: dict[str, Any]) -> float:
+    status = str(row.get("status") or "").lower()
+    source_type = str(row.get("sourceType") or "").lower()
+    confidence = str(row.get("confidence") or "").lower()
+    score = 0.20
+    if status in _strong_evidence_statuses(str(row.get("evidenceRequirementId") or "")):
+        score += 0.28
+    elif "proxy" in status or "hypothesis" in status:
+        score += 0.08
+    elif _row_blocks_claim(row) or _row_conflicts(row):
+        score -= 0.20
+    source_scores = {
+        "parsed-calculation": 0.28,
+        "parsed-output": 0.28,
+        "dft": 0.27,
+        "dfpt": 0.27,
+        "md": 0.25,
+        "experiment": 0.30,
+        "experimental-measurement": 0.30,
+        "workflow": 0.22,
+        "database": 0.20,
+        "materials-project": 0.20,
+        "literature": 0.20,
+        "citation": 0.20,
+        "safety": 0.18,
+        "regulatory": 0.18,
+    }
+    score += source_scores.get(source_type, 0.05)
+    if _row_has_trace(row):
+        score += 0.14
+    if row.get("citationProvenance") or row.get("citation"):
+        score += 0.05
+    if isinstance(row.get("propertyValues"), dict) and row["propertyValues"]:
+        score += 0.08
+    if "parsed" in confidence or "provenance" in confidence or "workflow" in confidence:
+        score += 0.05
+    if _row_blocks_claim(row) or _row_conflicts(row):
+        score = min(score, 0.40)
+    return max(0.0, min(score, 1.0))
+
+
+def _numeric_property_conflicts(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    values_by_key: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        if _row_blocks_claim(row):
+            continue
+        values = row.get("propertyValues") if isinstance(row.get("propertyValues"), dict) else {}
+        for key, value in values.items():
+            if isinstance(value, bool) or value is None:
+                continue
+            try:
+                numeric_value = float(value)
+            except Exception:
+                continue
+            values_by_key[str(key)].append({"value": numeric_value, "row": row})
+    conflicts: list[dict[str, Any]] = []
+    for key, items in values_by_key.items():
+        if len(items) < 2:
+            continue
+        raw_values = [item["value"] for item in items]
+        minimum = min(raw_values)
+        maximum = max(raw_values)
+        scale = max(abs(sum(raw_values) / len(raw_values)), 1e-9)
+        relative_spread = abs(maximum - minimum) / scale
+        if relative_spread <= 0.20:
+            continue
+        conflicts.append({
+            "propertyKey": key,
+            "min": minimum,
+            "max": maximum,
+            "relativeSpread": round(relative_spread, 6),
+            "reason": "numeric evidence spread exceeds tolerance",
+            "rows": [_row_ref(item["row"]) for item in items],
+        })
+    return conflicts
+
+
+def _claim_audit_certificate(
+    *,
+    plan: dict[str, Any],
+    candidate_id: str,
+    requested_claim_level: str,
+    rows: list[dict[str, Any]],
+    claim_status: dict[str, Any],
+    satisfied: list[dict[str, Any]],
+    missing: list[dict[str, Any]],
+    blocking: list[dict[str, Any]],
+    conflicts: list[dict[str, Any]],
+    uncertainty_summary: dict[str, Any],
+    ledger_path: str | None,
+    merged_ledger_path: str,
+) -> dict[str, Any]:
+    row_refs = [_row_ref(row) for row in rows]
+    return {
+        "certificateVersion": "research-claim-audit-v1",
+        "generatedAt": int(time.time()),
+        "planId": plan.get("planId"),
+        "candidateId": candidate_id,
+        "requestedClaimLevel": requested_claim_level,
+        "decision": "allow" if claim_status.get("researchGradeClaimAllowed") else "block",
+        "claimStatus": claim_status,
+        "ledgerDigest": _ledger_digest(rows),
+        "ledgerPath": ledger_path,
+        "mergedLedgerPath": merged_ledger_path,
+        "gateSummary": {
+            "satisfied": len(satisfied),
+            "missing": len(missing),
+            "blocking": len(blocking),
+            "conflicting": len(conflicts) + len(uncertainty_summary.get("materialConflicts") or []),
+        },
+        "uncertaintySummary": {
+            "overallConfidenceScore": uncertainty_summary.get("overallConfidenceScore"),
+            "overallUncertainty": uncertainty_summary.get("overallUncertainty"),
+            "materialConflictCount": len(uncertainty_summary.get("materialConflicts") or []),
+        },
+        "reviewChecklist": [
+            {
+                "item": "all-required-evidence-gates-closed",
+                "passed": not missing,
+            },
+            {
+                "item": "no-blocking-or-conflicting-evidence",
+                "passed": not blocking and not conflicts and not uncertainty_summary.get("materialConflicts"),
+            },
+            {
+                "item": "traceable-source-artifacts-or-citations",
+                "passed": all(_row_has_trace(row) for row in rows),
+            },
+            {
+                "item": "confidence-above-research-grade-threshold",
+                "passed": float(uncertainty_summary.get("overallConfidenceScore") or 0.0) >= 0.72,
+            },
+        ],
+        "evidenceRows": row_refs,
+    }
+
+
+def _ledger_digest(rows: list[dict[str, Any]]) -> str:
+    canonical = "\n".join(json.dumps(row, sort_keys=True) for row in rows)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _supporting_rows_for_requirement(requirement: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1469,6 +2091,41 @@ def _claim_evaluation_markdown(review: dict[str, Any]) -> str:
         lines.append(f"| {item.get('evidenceId')} | {item.get('evidenceRequirementId')} | {item.get('status')} |")
     if not review.get("blockingEvidence"):
         lines.append("| - | - | - |")
+    uncertainty = review.get("uncertaintySummary") or {}
+    audit = review.get("auditCertificate") or {}
+    lines.extend([
+        "",
+        "## Uncertainty And Conflicts",
+        "",
+        f"- Overall confidence score: `{uncertainty.get('overallConfidenceScore', 0)}`",
+        f"- Overall uncertainty: `{uncertainty.get('overallUncertainty', 1)}`",
+        f"- Numeric material conflicts: {len(uncertainty.get('materialConflicts') or [])}",
+        "",
+        "| Requirement | Rows | Max Strength | Uncertainty |",
+        "| --- | ---: | ---: | ---: |",
+    ])
+    for item in uncertainty.get("requirementScores") or []:
+        lines.append(
+            f"| {item.get('evidenceRequirementId')} | {item.get('rowCount')} | "
+            f"{item.get('maxStrengthScore')} | {item.get('uncertainty')} |"
+        )
+    if not uncertainty.get("requirementScores"):
+        lines.append("| - | 0 | 0 | 1 |")
+    lines.extend([
+        "",
+        "## Audit Certificate",
+        "",
+        f"- Certificate version: `{audit.get('certificateVersion', '-')}`",
+        f"- Decision: `{audit.get('decision', '-')}`",
+        f"- Ledger digest: `{audit.get('ledgerDigest', '-')}`",
+        "",
+        "| Checklist Item | Passed |",
+        "| --- | --- |",
+    ])
+    for item in audit.get("reviewChecklist") or []:
+        lines.append(f"| {item.get('item')} | `{str(item.get('passed')).lower()}` |")
+    if not audit.get("reviewChecklist"):
+        lines.append("| - | - |")
     lines.extend([
         "",
         "## Artifacts",
@@ -1601,9 +2258,18 @@ def _execute_external_backend_plan(
     execution_mode: str,
     allow_execution: bool,
     backend_config: dict[str, Any],
+    execution_manifest_path: str | None = None,
 ) -> dict[str, Any]:
-    if execution_mode not in {"prepare", "submit"}:
-        raise WorkerError("INVALID_PARAMS", "executionMode must be 'prepare' or 'submit'.")
+    if execution_mode not in {"prepare", "submit", "monitor"}:
+        raise WorkerError("INVALID_PARAMS", "executionMode must be 'prepare', 'submit', or 'monitor'.")
+    if execution_mode == "monitor":
+        return _monitor_external_backend_execution(
+            plan=plan,
+            artifact_dir=artifact_dir,
+            backend=backend,
+            backend_config=backend_config,
+            execution_manifest_path=execution_manifest_path,
+        )
     run_id = f"{plan.get('planId', 'research-plan')}-{backend}-{int(time.time() * 1000)}"
     run_dir = artifact_dir / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -1725,6 +2391,254 @@ def _execute_external_backend_plan(
     }
 
 
+def _monitor_external_backend_execution(
+    *,
+    plan: dict[str, Any],
+    artifact_dir: Path,
+    backend: str,
+    backend_config: dict[str, Any],
+    execution_manifest_path: str | None,
+) -> dict[str, Any]:
+    manifest_ref = (
+        execution_manifest_path
+        or backend_config.get("executionManifestPath")
+        or backend_config.get("manifestPath")
+    )
+    if not manifest_ref:
+        raise WorkerError(
+            "INVALID_PARAMS",
+            "executionMode=monitor requires executionManifestPath or backendConfig.executionManifestPath.",
+            hint="Pass the execution-manifest.json produced by prepare/submit.",
+        )
+    manifest_path = Path(str(manifest_ref))
+    if not manifest_path.exists():
+        raise WorkerError("EXECUTION_MANIFEST_NOT_FOUND", f"Execution manifest was not found: {manifest_path}")
+
+    prior_manifest = ensure_dict(json.loads(manifest_path.read_text("utf-8")), field="executionManifest")
+    run_id = f"{prior_manifest.get('runId', plan.get('planId', 'research-plan'))}-monitor-{int(time.time() * 1000)}"
+    run_dir = artifact_dir / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    warnings: list[str] = []
+    monitored: list[dict[str, Any]] = []
+    parsed_rows: list[dict[str, Any]] = []
+    parsed_artifacts: list[dict[str, Any]] = []
+    parse_outputs = backend_config.get("parseOutputs", True) is not False
+
+    for step in prior_manifest.get("prepared") or []:
+        if not isinstance(step, dict):
+            continue
+        step_manifest_path = Path(str(step.get("stepManifestPath") or ""))
+        step_dir = step_manifest_path.parent if step_manifest_path.exists() else Path(str(step.get("executionScript") or ".")).parent
+        outputs = _backend_output_candidates(step_dir, backend)
+        status = _backend_step_observed_status(outputs, backend)
+        record = {
+            "calculationId": step.get("calculationId"),
+            "materialId": step.get("materialId"),
+            "formula": step.get("formula"),
+            "backend": backend,
+            "status": status,
+            "stepDir": str(step_dir),
+            "outputPaths": [str(path) for path in outputs],
+            "evidenceRowsParsed": 0,
+        }
+        if parse_outputs:
+            for output_path in outputs:
+                rows, record_warnings, parser_used = _parse_evidence_artifact(
+                    path=output_path,
+                    parser=str(backend_config.get("parser") or "auto"),
+                    plan=plan,
+                    candidate_id=ensure_string(step.get("materialId"), field="materialId", required=False),
+                    evidence_requirement_id=ensure_string(step.get("evidenceRequirementId"), field="evidenceRequirementId", required=False),
+                    default_status=ensure_string(backend_config.get("defaultStatus"), field="defaultStatus", required=False),
+                    source_label=ensure_string(backend_config.get("sourceLabel"), field="sourceLabel", required=False) or backend,
+                )
+                if rows:
+                    parsed_rows.extend(rows)
+                    parsed_artifacts.append({
+                        "path": str(output_path),
+                        "parser": parser_used,
+                        "evidenceRows": len(rows),
+                    })
+                    record["evidenceRowsParsed"] = int(record["evidenceRowsParsed"]) + len(rows)
+                warnings.extend(record_warnings)
+        monitored.append(record)
+
+    evidence_ledger_path = ensure_string(backend_config.get("evidenceLedgerPath"), field="evidenceLedgerPath", required=False)
+    output_ledger_path = Path(str(backend_config.get("outputLedgerPath") or run_dir / "monitor-evidence-ledger.jsonl"))
+    prior_rows = _read_evidence_ledger(evidence_ledger_path) if evidence_ledger_path and Path(evidence_ledger_path).exists() else []
+    merged_rows = _dedupe_evidence_rows([*prior_rows, *parsed_rows])
+    output_ledger_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in merged_rows), encoding="utf-8")
+
+    claim_reviews: list[dict[str, Any]] = []
+    if backend_config.get("claimReview") is True and merged_rows:
+        for candidate_id in _candidate_ids_for_claim_review(plan, merged_rows):
+            review = _evaluate_research_claim(
+                plan=plan,
+                candidate_id=candidate_id,
+                rows=merged_rows,
+                requested_claim_level=str(backend_config.get("requestedClaimLevel") or "research-grade-candidate"),
+                ledger_path=evidence_ledger_path,
+                merged_ledger_path=str(output_ledger_path),
+            )
+            review_path = run_dir / f"{_safe_file_stem(candidate_id)}-claim-review.json"
+            report_path = run_dir / f"{_safe_file_stem(candidate_id)}-claim-review.md"
+            review_path.write_text(json.dumps(review, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            report_path.write_text(_claim_evaluation_markdown(review), encoding="utf-8")
+            claim_reviews.append({
+                "candidateId": candidate_id,
+                "claimStatus": review["claimStatus"],
+                "reviewPath": str(review_path),
+                "reportPath": str(report_path),
+            })
+
+    completed = sum(1 for item in monitored if item.get("status") == "completed")
+    failed = sum(1 for item in monitored if item.get("status") == "failed")
+    manifest = {
+        "runId": run_id,
+        "backend": backend,
+        "executionMode": "monitor",
+        "sourceExecutionManifestPath": str(manifest_path),
+        "planId": plan.get("planId"),
+        "generatedAt": int(time.time()),
+        "monitoredCalculations": len(monitored),
+        "completedCalculations": completed,
+        "failedCalculations": failed,
+        "parsedEvidenceRows": len(parsed_rows),
+        "evidenceLedgerPath": str(output_ledger_path),
+        "monitored": monitored,
+        "parsedArtifacts": parsed_artifacts,
+        "claimReviews": claim_reviews,
+        "warnings": warnings,
+    }
+    monitor_manifest_path = run_dir / "monitor-manifest.json"
+    monitor_report_path = run_dir / "monitor-report.md"
+    monitor_manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    monitor_report_path.write_text(_monitor_execution_markdown(manifest), encoding="utf-8")
+    result_paths = [
+        str(monitor_manifest_path),
+        str(monitor_report_path),
+        str(output_ledger_path),
+        *[item["reviewPath"] for item in claim_reviews],
+        *[item["reportPath"] for item in claim_reviews],
+    ]
+    return {
+        "runId": run_id,
+        "backend": backend,
+        "statusSummary": f"Monitored {backend} backend",
+        "manifestPath": str(monitor_manifest_path),
+        "reportPath": str(monitor_report_path),
+        "resultPaths": result_paths,
+        "inputPaths": [],
+        "completedCalculations": completed,
+        "preparedCalculations": int(prior_manifest.get("preparedCalculations") or len(prior_manifest.get("prepared") or [])),
+        "submittedCalculations": int(prior_manifest.get("submittedCalculations") or 0),
+        "skippedCalculations": int(prior_manifest.get("skippedCalculations") or 0),
+        "propertyUpdates": [],
+        "parsedEvidenceRows": len(parsed_rows),
+        "evidenceLedgerPath": str(output_ledger_path),
+        "claimReviews": claim_reviews,
+        "warnings": warnings,
+    }
+
+
+def _backend_output_candidates(step_dir: Path, backend: str) -> list[Path]:
+    if not step_dir.exists():
+        return []
+    names_by_backend = {
+        "quantum-espresso": ["pw.scf.out", "ph.dielectric.out", "ph.gamma.out", "pp.potential.out", "bands.out", "dos.out"],
+        "vasp": ["OUTCAR", "vasprun.xml", "vasp.out", "OSZICAR", "DOSCAR", "EIGENVAL"],
+        "atomate2": ["taskdoc.json", "jobflow_output.json", "vasprun.xml", "OUTCAR"],
+        "aiida": ["aiida.out", "retrieved/pw.scf.out", "retrieved/aiida.out"],
+    }
+    candidates: list[Path] = []
+    for name in names_by_backend.get(backend, []):
+        path = step_dir / name
+        if path.exists() and path.is_file():
+            candidates.append(path)
+    for path in step_dir.glob("*.out"):
+        if path.is_file() and path not in candidates:
+            candidates.append(path)
+    for path in step_dir.glob("*.xml"):
+        if path.is_file() and path not in candidates:
+            candidates.append(path)
+    return candidates
+
+
+def _backend_step_observed_status(outputs: list[Path], backend: str) -> str:
+    if not outputs:
+        return "waiting-for-outputs"
+    combined = "\n".join(path.read_text("utf-8", errors="replace")[-5000:] for path in outputs if path.exists())
+    lowered = combined.lower()
+    if any(marker in lowered for marker in ["error", "traceback", "segmentation fault", "fatal"]):
+        return "failed"
+    if backend == "quantum-espresso" and "job done" in lowered:
+        return "completed"
+    if backend == "vasp" and any(marker in combined for marker in ["TOTEN", "Voluntary context switches", "</modeling>"]):
+        return "completed"
+    return "outputs-detected"
+
+
+def _candidate_ids_for_claim_review(plan: dict[str, Any], rows: list[dict[str, Any]]) -> list[str]:
+    ids = [
+        str(candidate.get("materialId"))
+        for candidate in plan.get("selectedCandidates") or []
+        if isinstance(candidate, dict) and candidate.get("materialId")
+    ]
+    for row in rows:
+        candidate_id = row.get("candidateId") or row.get("materialId")
+        if candidate_id and str(candidate_id) not in ids:
+            ids.append(str(candidate_id))
+    return ids[:10]
+
+
+def _monitor_execution_markdown(manifest: dict[str, Any]) -> str:
+    lines = [
+        f"# Backend Monitor: {manifest.get('backend')}",
+        "",
+        "## Summary",
+        "",
+        f"- Source execution manifest: {manifest.get('sourceExecutionManifestPath')}",
+        f"- Monitored calculations: {manifest.get('monitoredCalculations')}",
+        f"- Completed calculations: {manifest.get('completedCalculations')}",
+        f"- Failed calculations: {manifest.get('failedCalculations')}",
+        f"- Parsed evidence rows: {manifest.get('parsedEvidenceRows')}",
+        f"- Evidence ledger: {manifest.get('evidenceLedgerPath')}",
+        "",
+        "## Calculations",
+        "",
+        "| Calculation | Material | Status | Outputs | Parsed Rows |",
+        "| --- | --- | --- | ---: | ---: |",
+    ]
+    for item in manifest.get("monitored") or []:
+        lines.append(
+            f"| {item.get('calculationId')} | {item.get('materialId') or '-'} | {item.get('status')} | "
+            f"{len(item.get('outputPaths') or [])} | {item.get('evidenceRowsParsed')} |"
+        )
+    lines.extend([
+        "",
+        "## Claim Reviews",
+        "",
+        "| Candidate | Current Level | Research-grade Allowed |",
+        "| --- | --- | --- |",
+    ])
+    for item in manifest.get("claimReviews") or []:
+        status = item.get("claimStatus") or {}
+        lines.append(
+            f"| {item.get('candidateId')} | {status.get('currentLevel')} | "
+            f"{str(status.get('researchGradeClaimAllowed')).lower()} |"
+        )
+    if not manifest.get("claimReviews"):
+        lines.append("| - | - | - |")
+    lines.extend([
+        "",
+        "## Warnings",
+        "",
+        *([f"- {warning}" for warning in manifest.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
+
+
 def _prepare_external_backend_step(
     *,
     backend: str,
@@ -1763,6 +2677,7 @@ def _prepare_external_backend_step(
         "materialId": material.get("materialId"),
         "formula": material.get("formula"),
         "calculationType": step.get("id"),
+        "evidenceRequirementId": step.get("evidenceRequirementId"),
         "label": step.get("label"),
         "costClass": step.get("costClass"),
         "writesProperties": step.get("writesProperties") or [],
@@ -2461,8 +3376,10 @@ def _build_research_loop_plan(
         "budget": budget,
         "candidateGenerationPlan": protocol["candidateGenerationPlan"],
         "literatureReviewPlan": protocol["literatureReviewPlan"],
+        "literatureEvidencePipeline": protocol["literatureEvidencePipeline"],
         "databaseSearchPlan": protocol["databaseSearchPlan"],
         "evidenceSchema": protocol["evidenceSchema"],
+        "methodRegistry": protocol["methodRegistry"],
         "capabilityPlan": protocol["capabilityPlan"],
         "claimPolicy": protocol["claimPolicy"],
         "validationMatrix": protocol["validationMatrix"],
@@ -2728,6 +3645,20 @@ def _topic_seed_search_payloads(protocol: dict[str, Any], criteria: dict[str, An
             {"elementsAll": ["Sb", "Te"]},
             {"elementsAll": ["Mg", "Si"]},
             {"elementsAll": ["Sn", "Se"]},
+        ]
+    elif topic_id == "superconductor":
+        seeds = [
+            {"elementsAll": ["Mg", "B"]},
+            {"elementsAll": ["Nb", "N"]},
+            {"elementsAll": ["Y", "Ba", "Cu", "O"]},
+            {"elementsAll": ["Fe", "Se"]},
+        ]
+    elif topic_id == "alloy":
+        seeds = [
+            {"elementsAll": ["Fe", "Ni"]},
+            {"elementsAll": ["Al", "Ti"]},
+            {"elementsAll": ["Co", "Cr", "Fe", "Ni"]},
+            {"elementsAll": ["Ni", "Ti"]},
         ]
     elif topic_id == "catalyst":
         seeds = [
@@ -3066,8 +3997,10 @@ def _compile_dynamic_research_protocol(
         "topic": topic,
         "candidateGenerationPlan": candidate_generation,
         "literatureReviewPlan": _literature_review_plan(research_goal, topic, protocol_inputs, evidence_schema),
+        "literatureEvidencePipeline": _literature_evidence_pipeline(research_goal, topic, protocol_inputs, evidence_schema),
         "databaseSearchPlan": _database_search_plan(research_goal, topic, protocol_inputs, evidence_schema),
         "evidenceSchema": evidence_schema,
+        "methodRegistry": _domain_method_registry(topic, evidence_schema),
         "capabilityPlan": _capability_plan(evidence_schema),
         "claimPolicy": _claim_policy(evidence_schema),
         "validationMatrix": _validation_matrix(evidence_schema),
@@ -3081,6 +4014,8 @@ def _infer_protocol_topic(text: str, research_goal: str) -> dict[str, Any]:
         ("dielectric", "Dielectric / gate insulator", ["dielectric", "high-k", "gate oxide", "insulator", "breakdown"]),
         ("photovoltaic-absorber", "Photovoltaic absorber", ["photovoltaic", "solar", "absorber", "optoelectronic", "band edge"]),
         ("thermoelectric", "Thermoelectric material", ["thermoelectric", "seebeck", "power factor", "zt", "thermal conductivity"]),
+        ("superconductor", "Superconductor", ["superconductor", "superconducting", "critical temperature", "tc ", "t_c", "meissner"]),
+        ("alloy", "Alloy / structural chemistry", ["alloy", "high entropy", "hea", "solid solution", "phase diagram", "intermetallic"]),
         ("catalyst", "Catalyst / surface material", ["catalyst", "catalytic", "orr", "oer", "her", "co2 reduction", "adsorption"]),
         ("mechanical-material", "Mechanical / structural material", ["mechanical", "elastic", "modulus", "toughness", "hardness", "strength"]),
         ("thermal-material", "Thermal management material", ["thermal barrier", "heat spreader", "thermal conductivity", "thermal expansion"]),
@@ -3156,6 +4091,14 @@ def _inferred_topic_requirements(text: str, topic: dict[str, Any], validation_me
         "thermoelectric": [
             ("transport-coefficients", "Transport coefficients", ["seebeckUvK", "powerFactorUwCmK2", "carrierConcentrationCm3"], ["dft", "workflow", "experiment"], "Seebeck, conductivity/power factor, and carrier concentration dependence.", "Transport sweep required across relevant carrier concentration and temperature."),
             ("lattice-thermal", "Lattice thermal conductivity", ["latticeThermalConductivityWmK"], ["dfpt", "md", "experiment"], "Lattice thermal conductivity or phonon scattering evidence.", "Thermal conductivity evidence must be parsed or literature-backed."),
+        ],
+        "superconductor": [
+            ("superconducting-transition", "Superconducting transition", ["criticalTemperatureK", "criticalFieldT", "meissnerEvidence"], ["literature", "dfpt", "experiment"], "Critical temperature, field, and independent superconducting signatures.", "Tc must be traceable and supported by either experiment or an accepted electron-phonon/DFPT workflow."),
+            ("electron-phonon-phonon-stability", "Electron-phonon and phonon stability", ["electronPhononCoupling", "logAveragePhononFrequencyK", "phononStability"], ["dfpt", "workflow"], "Electron-phonon coupling, phonon spectrum, and dynamic stability.", "Imaginary modes and weak coupling must be explicitly recorded before promotion."),
+        ],
+        "alloy": [
+            ("phase-diagram-stability", "Phase diagram and competing phases", ["phaseStability", "mixingEnthalpyEvAtom", "phaseFraction"], ["database", "dft", "experiment"], "Phase stability, miscibility, and competing intermetallic phases.", "Target composition must be tied to a phase diagram or computed convex hull."),
+            ("mechanical-processing-window", "Mechanical and processing window", ["yieldStrengthMpa", "ductilityPct", "hardnessGpa", "processingTemperatureK"], ["literature", "experiment", "dft"], "Mechanical response and feasible processing conditions.", "Processing route and at least one mechanical evidence source are required."),
         ],
         "catalyst": [
             ("surface-activity", "Surface activity and selectivity", ["adsorptionEnergyEv", "overpotentialV", "selectivityScore"], ["dft", "experiment"], "Adsorption descriptors, overpotential, and selectivity for target reaction.", "Surface model and reaction conditions must be specified."),
@@ -3300,6 +4243,54 @@ def _literature_review_plan(research_goal: str, topic: dict[str, Any], protocol_
     }
 
 
+def _literature_evidence_pipeline(
+    research_goal: str,
+    topic: dict[str, Any],
+    protocol_inputs: dict[str, Any],
+    evidence_schema: list[dict[str, Any]],
+) -> dict[str, Any]:
+    queries = list(protocol_inputs.get("literatureQueries") or [])
+    if not queries:
+        queries = [
+            f"{research_goal} benchmark",
+            f"{topic.get('label')} synthesis stability failure modes",
+            f"{topic.get('label')} contradictory evidence",
+        ]
+    return {
+        "pipelineVersion": "literature-evidence-pipeline-v1",
+        "queries": queries,
+        "stages": [
+            {
+                "stage": "search",
+                "output": "citation-search-records.jsonl",
+                "requiredFields": ["query", "title", "authors", "year", "doiOrUrl", "abstract", "source"],
+            },
+            {
+                "stage": "pdf-and-text-extraction",
+                "tool": "materials_ingest_evidence",
+                "parsers": ["literature-json", "literature-text", "literature-markdown", "literature-pdf", "csv"],
+                "output": "literature-evidence-ledger.jsonl",
+            },
+            {
+                "stage": "table-extraction",
+                "acceptedFormats": ["csv", "json", "jsonl", "markdown-table", "pdf-text-table"],
+                "requiredColumns": ["candidateId-or-formula", "property", "value", "unit", "citation"],
+            },
+            {
+                "stage": "citation-provenance",
+                "checks": ["doi-or-url-present", "artifactPath-present", "candidate-mention-resolved", "negative-evidence-captured"],
+            },
+            {
+                "stage": "conflict-routing",
+                "tool": "materials_evaluate_research_claim",
+                "output": "claim-review audit certificate with uncertainty/conflict summary",
+            },
+        ],
+        "mapsToEvidence": [requirement["id"] for requirement in evidence_schema if "literature" in requirement.get("evidenceTypes", [])],
+        "claimGuard": "Literature-only evidence can support context and benchmarks, but not a research-grade discovery claim without calculation/experiment/workflow evidence where required.",
+    }
+
+
 def _database_search_plan(research_goal: str, topic: dict[str, Any], protocol_inputs: dict[str, Any], evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
     queries = list(protocol_inputs.get("databaseQueries") or [])
     if not queries:
@@ -3316,13 +4307,73 @@ def _database_search_plan(research_goal: str, topic: dict[str, Any], protocol_in
     }
 
 
+def _domain_method_registry(topic: dict[str, Any], evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
+    topic_id = str(topic.get("id") or "general-materials")
+    common = {
+        "phase-stability": ["database convex-hull provenance", "DFT relaxation and decomposition analysis"],
+        "structure-validity": ["structure parser preflight", "oxidation-state/charge-balance sanity checks"],
+        "literature-benchmark": ["citation search", "PDF/text/table extraction", "contradictory evidence capture"],
+        "reproducibility": ["input/output bundle", "parser version manifest", "claim audit certificate"],
+    }
+    by_topic: dict[str, dict[str, list[str]]] = {
+        "catalyst": {
+            "surface-activity": ["slab generation", "adsorption energy workflow", "overpotential descriptor", "experimental activity table ingestion"],
+            "operando-stability": ["Pourbaix/environment filter", "surface dissolution risk", "AIMD or experimental durability evidence"],
+        },
+        "battery-electrode": {
+            "voltage-capacity": ["voltage profile workflow", "capacity calculation", "database/literature cycling benchmark"],
+            "cycling-stability": ["volume-change workflow", "migration barrier", "AIMD finite-temperature check"],
+        },
+        "solid-electrolyte": {
+            "ion-transport": ["NEB migration barrier", "AIMD diffusion parser", "conductivity Arrhenius fit"],
+            "electrochemical-window": ["grand-potential phase stability", "interface reaction energy"],
+        },
+        "dielectric": {
+            "dielectric-response": ["DFPT dielectric tensor", "phonon stability", "experimental permittivity table ingestion"],
+            "leakage-interface": ["band alignment", "defect/leakage proxy", "interface reaction energy"],
+        },
+        "thermoelectric": {
+            "transport-coefficients": ["Boltzmann transport sweep", "carrier concentration grid", "experiment table ingestion"],
+            "lattice-thermal": ["phonon dispersion", "thermal conductivity workflow", "AIMD/Green-Kubo evidence"],
+        },
+        "superconductor": {
+            "superconducting-transition": ["Tc literature/experiment extraction", "critical-field evidence", "Meissner/signature provenance"],
+            "electron-phonon-phonon-stability": ["DFPT phonon dispersion", "electron-phonon coupling", "Eliashberg/McMillan estimate"],
+        },
+        "alloy": {
+            "phase-diagram-stability": ["phase diagram ingestion", "mixing enthalpy", "convex hull by composition"],
+            "mechanical-processing-window": ["elastic tensor", "hardness/strength table ingestion", "processing route provenance"],
+        },
+    }
+    registry = {**common, **by_topic.get(topic_id, {})}
+    required_ids = [str(item.get("id")) for item in evidence_schema if isinstance(item, dict)]
+    return {
+        "registryVersion": "domain-method-registry-v1",
+        "topicId": topic_id,
+        "requiredEvidenceRequirementIds": required_ids,
+        "methodsByRequirement": {
+            requirement_id: registry.get(requirement_id, ["define domain method", "attach parser-backed evidence", "review uncertainty/conflicts"])
+            for requirement_id in required_ids
+        },
+        "parserCoverage": {
+            "quantum-espresso": ["total energy", "band gap", "DOS/Fermi metadata", "dielectric", "surface energy", "adsorption", "phonon", "AIMD"],
+            "vasp": ["TOTEN", "band gap", "DOS/Fermi metadata", "surface energy", "adsorption", "phonon", "AIMD"],
+            "md": ["LAMMPS thermo logs", "AIMD temperature/MSD/diffusion/drift"],
+            "literature": ["JSON/JSONL/CSV evidence", "text/markdown citation extraction", "optional PDF text extraction"],
+        },
+    }
+
+
 def _capability_plan(evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
     required_types = sorted({evidence_type for requirement in evidence_schema for evidence_type in requirement.get("evidenceTypes", [])})
     return {
         "requiredEvidenceTypes": required_types,
         "availableNow": {
             "database": ["materials_search_mp", "materials_fetch_structure", "materials_analyze_structure"],
+            "literatureEvidence": ["materials_ingest_evidence with literature-json, literature-text, literature-markdown, literature-pdf, csv"],
+            "parserIngestion": ["QE/VASP total energy, band, DOS/Fermi, surface, adsorption, phonon, AIMD", "LAMMPS/MD thermo evidence"],
             "workflowPreparation": ["materials_execute_research_plan with quantum-espresso, vasp, atomate2, aiida in prepare mode"],
+            "workflowMonitoring": ["materials_execute_research_plan with executionMode=monitor for output discovery, parsing, and optional claim review"],
             "reporting": ["materials_save_note", "materials_export_report"],
         },
         "requiresExternalIntegration": {
@@ -3348,6 +4399,7 @@ def _claim_policy(evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
             "live database provenance and literature ledger are attached",
             "property values come from parsed calculation/experimental/literature artifacts with confidence labels",
             "negative and contradictory evidence are included",
+            "uncertainty/conflict engine reports confidence above threshold with no material numeric conflict",
             "reproducibility package contains inputs, outputs, parser versions, and reranking trace",
         ],
         "requiredEvidenceRequirementIds": required,
@@ -3435,10 +4487,10 @@ def _global_protocol_steps(protocol: dict[str, Any]) -> list[dict[str, Any]]:
             "calculationId": "global-literature-evidence-ledger",
             "label": "Literature evidence ledger",
             "priority": "evidence-discovery",
-            "method": "search, cite, and extract claims from literature queries",
+            "method": "search, cite, extract PDF/text/table claims, and normalize citation provenance",
             "costClass": "metadata",
             "estimatedWallTimeHours": 1.0,
-            "writesProperties": ["literatureBaseline", "knownControls", "failureModes"],
+            "writesProperties": ["literatureBaseline", "knownControls", "failureModes", "citationProvenance"],
             "evidenceTypes": ["literature"],
             "executionBackend": "literature-connector",
             "rationale": "Research-grade claims require literature context and contradictory evidence capture.",
@@ -3746,6 +4798,26 @@ def _research_plan_markdown(plan: dict[str, Any]) -> str:
         f"- Database queries: {' | '.join((plan.get('databaseSearchPlan') or {}).get('queries') or []) or '-'}",
         f"- Literature queries: {' | '.join((plan.get('literatureReviewPlan') or {}).get('queries') or []) or '-'}",
         "",
+        "## Literature Evidence Pipeline",
+        "",
+        f"- Pipeline version: `{(plan.get('literatureEvidencePipeline') or {}).get('pipelineVersion', '-')}`",
+        f"- Parsers: {', '.join((((plan.get('methodRegistry') or {}).get('parserCoverage') or {}).get('literature') or [])) or '-'}",
+        f"- Maps to evidence: {', '.join((plan.get('literatureEvidencePipeline') or {}).get('mapsToEvidence') or []) or '-'}",
+        "",
+        "## Method Registry",
+        "",
+        f"- Registry version: `{(plan.get('methodRegistry') or {}).get('registryVersion', '-')}`",
+        f"- Topic: `{(plan.get('methodRegistry') or {}).get('topicId', '-')}`",
+        "",
+        "| Requirement | Methods |",
+        "| --- | --- |",
+    ]
+    for requirement_id, methods in ((plan.get("methodRegistry") or {}).get("methodsByRequirement") or {}).items():
+        lines.append(f"| {requirement_id} | {', '.join(methods or [])} |")
+    if not ((plan.get("methodRegistry") or {}).get("methodsByRequirement") or {}):
+        lines.append("| - | - |")
+    lines.extend([
+        "",
         "## Autonomous Discovery",
         "",
         f"- Enabled: `{(plan.get('autonomousDiscovery') or {}).get('enabled', False)}`",
@@ -3760,7 +4832,7 @@ def _research_plan_markdown(plan: dict[str, Any]) -> str:
         "",
         "| ID | Label | Evidence Types | Property Keys | Required |",
         "| --- | --- | --- | --- | --- |",
-    ]
+    ])
     for requirement in plan.get("evidenceSchema") or []:
         lines.append(
             f"| {requirement.get('id')} | {requirement.get('label')} | "
