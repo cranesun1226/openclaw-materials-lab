@@ -132,6 +132,7 @@ export interface CompareCriteria {
   excludeToxicElements?: boolean;
   excludeRiskyChemistry?: boolean;
   filterMolecularSalts?: boolean;
+  requiresLithium?: boolean;
   excludedElements?: string[];
   flaggedElements?: string[];
   maxHydrogenAtomicFraction?: number;

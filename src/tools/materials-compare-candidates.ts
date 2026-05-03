@@ -61,6 +61,7 @@ const CompareSchema = Type.Object(
           excludeToxicElements: Type.Optional(Type.Boolean()),
           excludeRiskyChemistry: Type.Optional(Type.Boolean()),
           filterMolecularSalts: Type.Optional(Type.Boolean()),
+          requiresLithium: Type.Optional(Type.Boolean()),
           excludedElements: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
           flaggedElements: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
           maxHydrogenAtomicFraction: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),

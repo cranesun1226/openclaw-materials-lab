@@ -468,6 +468,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "excludeToxicElements": True,
             "excludeRiskyChemistry": True,
             "filterMolecularSalts": True,
+            "requiresLithium": True,
             "excludedElements": ["Be", "Cd", "Hg", "Pb", "Tl", "Th", "U"],
             "flaggedElements": ["As", "Cr", "Sb", "Se"],
             "maxHydrogenAtomicFraction": 0.15,
@@ -495,6 +496,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "excludeToxicElements": False,
             "excludeRiskyChemistry": False,
             "filterMolecularSalts": False,
+            "requiresLithium": False,
             "excludedElements": [],
             "flaggedElements": [],
             "maxHydrogenAtomicFraction": 1.0,
@@ -520,7 +522,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
         merged[key] = float(merged[key])
     for key in ["maxPerFormula", "maxPerFamily"]:
         merged[key] = int(merged[key] or 0)
-    for key in ["excludeToxicElements", "excludeRiskyChemistry", "filterMolecularSalts"]:
+    for key in ["excludeToxicElements", "excludeRiskyChemistry", "filterMolecularSalts", "requiresLithium"]:
         merged[key] = bool(merged[key])
     for key in ["excludedElements", "flaggedElements"]:
         merged[key] = [str(item) for item in (merged.get(key) or [])]
@@ -664,7 +666,7 @@ def _candidate_risk_profile(candidate: dict[str, Any], criteria: dict[str, Any])
         if criteria.get("excludeRiskyChemistry"):
             exclusion_reasons.append("molecular-salt or oxidizer-like composition")
 
-    if "Li" not in elements:
+    if criteria.get("requiresLithium") and "Li" not in elements:
         risk_flags.append("no-lithium")
         warnings.append("No Li was detected in the candidate composition.")
         penalty += 1.0

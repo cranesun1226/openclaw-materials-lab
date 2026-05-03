@@ -1,0 +1,1930 @@
+{
+  "generatedAt": "2026-05-03T07:32:21.453Z",
+  "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503",
+  "topic": "high-k dielectric oxide proxy screening",
+  "liveMaterialsProject": true,
+  "searches": [
+    {
+      "label": "HfO2 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "HfO2",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 7 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 7,
+      "candidateIds": [
+        "mp-776532",
+        "mp-1018721",
+        "mp-352",
+        "mp-685097",
+        "mp-776097",
+        "mp-1858",
+        "mp-775757"
+      ]
+    },
+    {
+      "label": "ZrO2 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "ZrO2",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 12 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 12,
+      "candidateIds": [
+        "mp-775909",
+        "mp-2574",
+        "mp-2858",
+        "mp-754403",
+        "mp-1565",
+        "mp-556605",
+        "mp-775980",
+        "mp-1190186",
+        "mp-776404",
+        "mp-776427",
+        "mp-755089",
+        "mp-755759"
+      ]
+    },
+    {
+      "label": "Al2O3 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "Al2O3",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 10 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 10,
+      "candidateIds": [
+        "mp-1245211",
+        "mp-7048",
+        "mp-759943",
+        "mp-754624",
+        "mp-32570",
+        "mp-1143",
+        "mp-776475",
+        "mp-2254",
+        "mp-776490",
+        "mp-32591"
+      ]
+    },
+    {
+      "label": "SiO2 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "SiO2",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 12 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 12,
+      "candidateIds": [
+        "mp-556985",
+        "mp-557004",
+        "mp-557873",
+        "mp-733790",
+        "mp-560708",
+        "mp-557894",
+        "mp-559360",
+        "mp-600001",
+        "mp-558200",
+        "mp-600067",
+        "mp-639682",
+        "mp-644923"
+      ]
+    },
+    {
+      "label": "Y2O3 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "Y2O3",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 6 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 6,
+      "candidateIds": [
+        "mp-775907",
+        "mp-558573",
+        "mp-13061",
+        "mp-754759",
+        "mp-2652",
+        "mp-775906"
+      ]
+    },
+    {
+      "label": "La2O3 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "La2O3",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 3 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 3,
+      "candidateIds": [
+        "mp-557691",
+        "mp-1968",
+        "mp-2292"
+      ]
+    },
+    {
+      "label": "Ta2O5 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "Ta2O5",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 7 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 7,
+      "candidateIds": [
+        "mp-684897",
+        "mp-1238961",
+        "mp-1104837",
+        "mp-1392387",
+        "mp-1539317",
+        "mp-1218312",
+        "mp-780772"
+      ]
+    },
+    {
+      "label": "TiO2 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "TiO2",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 12 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 12,
+      "candidateIds": [
+        "mp-777129",
+        "mp-554278",
+        "mp-766454",
+        "mp-430",
+        "mp-390",
+        "mp-1439",
+        "mp-775938",
+        "mp-1840",
+        "mp-1201727",
+        "mp-2420244",
+        "mp-754769",
+        "mp-756655"
+      ]
+    },
+    {
+      "label": "SrTiO3 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "SrTiO3",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 0 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 0,
+      "candidateIds": []
+    },
+    {
+      "label": "BaTiO3 high-k/wide-gap oxide family",
+      "payload": {
+        "formula": "BaTiO3",
+        "maxEnergyAboveHullEv": 0.08,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 9.5,
+        "limit": 12,
+        "allowOffline": false
+      },
+      "summary": "Found 3 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 3,
+      "candidateIds": [
+        "mp-5020",
+        "mp-558125",
+        "mp-5777"
+      ]
+    }
+  ],
+  "totalUniqueCandidates": 72,
+  "comparison": {
+    "ranked": [
+      {
+        "materialId": "mp-1143",
+        "formula": "Al2O3",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 5.853700000000001,
+        "densityGcm3": 3.873499124580814,
+        "volume": 87.42001939959368,
+        "sites": 10,
+        "spacegroup": "R-3c",
+        "elements": [
+          "Al",
+          "O"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-1143",
+        "family": "generic",
+        "score": 0.921114,
+        "primaryScore": 0.921114,
+        "secondaryScore": 0.582192,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 0.935691,
+            "density": 0.645583,
+            "secondary": 0.582192,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.45,
+            "bandGap": 0.374276,
+            "density": 0.096837,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.048767,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.936 (target 5.5 eV)",
+          "density alignment 0.646 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 10 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Al",
+              "O"
+            ],
+            "numAtoms": 5,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Al",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "Al2O3",
+        "duplicateCount": 10,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 1,
+        "rank": 1
+      },
+      {
+        "materialId": "mp-733790",
+        "formula": "SiO2",
+        "energyAboveHullEv": 0.006573497500003,
+        "bandGapEv": 5.5868,
+        "densityGcm3": 2.254998357567127,
+        "volume": 1061.8792044143463,
+        "sites": 72,
+        "spacegroup": "P1",
+        "elements": [
+          "O",
+          "Si"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
+        "family": "generic",
+        "score": 0.885272,
+        "primaryScore": 0.885272,
+        "secondaryScore": 0.604433,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.967133,
+            "bandGap": 0.984218,
+            "density": 0.375833,
+            "secondary": 0.604433,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.43521,
+            "bandGap": 0.393687,
+            "density": 0.056375,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.137733,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 0.967",
+          "band-gap alignment 0.984 (target 5.5 eV)",
+          "density alignment 0.376 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 12 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Si",
+              "O"
+            ],
+            "numAtoms": 3,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Si",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "SiO2",
+        "duplicateCount": 12,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 2,
+        "rank": 2
+      },
+      {
+        "materialId": "mp-2652",
+        "formula": "Y2O3",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 4.097300000000001,
+        "densityGcm3": 5.026122832858722,
+        "volume": 596.8276909170065,
+        "sites": 40,
+        "spacegroup": "Ia-3",
+        "elements": [
+          "O",
+          "Y"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-2652",
+        "family": "generic",
+        "score": 0.873639,
+        "primaryScore": 0.873639,
+        "secondaryScore": 0.728558,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 0.744964,
+            "density": 0.837687,
+            "secondary": 0.728558,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.45,
+            "bandGap": 0.297985,
+            "density": 0.125653,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.634233,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.745 (target 5.5 eV)",
+          "density alignment 0.838 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 6 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Y",
+              "O"
+            ],
+            "numAtoms": 5,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Y",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "Y2O3",
+        "duplicateCount": 6,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 3,
+        "rank": 3
+      },
+      {
+        "materialId": "mp-1968",
+        "formula": "La2O3",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 3.824799999999999,
+        "densityGcm3": 6.615226585908185,
+        "volume": 81.78386608522705,
+        "sites": 5,
+        "spacegroup": "P-3m1",
+        "elements": [
+          "La",
+          "O"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-1968",
+        "family": "generic",
+        "score": 0.862787,
+        "primaryScore": 0.862787,
+        "secondaryScore": 0.751267,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 0.695418,
+            "density": 0.897462,
+            "secondary": 0.751267,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.45,
+            "bandGap": 0.278167,
+            "density": 0.134619,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.725067,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.695 (target 5.5 eV)",
+          "density alignment 0.897 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 3 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "La",
+              "O"
+            ],
+            "numAtoms": 5,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "La",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "La2O3",
+        "duplicateCount": 3,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 5,
+        "rank": 4
+      },
+      {
+        "materialId": "mp-2858",
+        "formula": "ZrO2",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 3.5322,
+        "densityGcm3": 5.777331384412114,
+        "volume": 141.66836532722778,
+        "sites": 12,
+        "spacegroup": "P2_1/c",
+        "elements": [
+          "O",
+          "Zr"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-2858",
+        "family": "generic",
+        "score": 0.851321,
+        "primaryScore": 0.851321,
+        "secondaryScore": 0.77565,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 0.642218,
+            "density": 0.962889,
+            "secondary": 0.77565,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.45,
+            "bandGap": 0.256887,
+            "density": 0.144433,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.8226,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.642 (target 5.5 eV)",
+          "density alignment 0.963 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 12 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Zr",
+              "O"
+            ],
+            "numAtoms": 3,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Zr",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "ZrO2",
+        "duplicateCount": 12,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 6,
+        "rank": 5
+      },
+      {
+        "materialId": "mp-352",
+        "formula": "HfO2",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 4.0165,
+        "densityGcm3": 10.24124328616322,
+        "volume": 136.51657937039403,
+        "sites": 12,
+        "spacegroup": "P2_1/c",
+        "elements": [
+          "Hf",
+          "O"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-352",
+        "family": "generic",
+        "score": 0.786078,
+        "primaryScore": 0.786078,
+        "secondaryScore": 0.735292,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 0.730273,
+            "density": 0.293126,
+            "secondary": 0.735292,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.45,
+            "bandGap": 0.292109,
+            "density": 0.043969,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.661167,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.730 (target 5.5 eV)",
+          "density alignment 0.293 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 7 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Hf",
+              "O"
+            ],
+            "numAtoms": 3,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Hf",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "HfO2",
+        "duplicateCount": 7,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 25,
+        "rank": 6
+      },
+      {
+        "materialId": "mp-5020",
+        "formula": "BaTiO3",
+        "energyAboveHullEv": 0.00004098999996848818,
+        "bandGapEv": 2.5086999999999993,
+        "densityGcm3": 5.89961040436988,
+        "volume": 65.6356490658401,
+        "sites": 5,
+        "spacegroup": "R3m",
+        "elements": [
+          "Ba",
+          "O",
+          "Ti"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-5020",
+        "family": "generic",
+        "score": 0.779849,
+        "primaryScore": 0.779849,
+        "secondaryScore": 0.779058,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.999795,
+            "bandGap": 0.456127,
+            "density": 0.983268,
+            "secondary": 0.779058,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.449908,
+            "bandGap": 0.182451,
+            "density": 0.14749,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.836233,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.456 (target 5.5 eV)",
+          "density alignment 0.983 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 3 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Ba",
+              "Ti",
+              "O"
+            ],
+            "numAtoms": 5,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Ba",
+            "Ti",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "BaTiO3",
+        "duplicateCount": 3,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 28,
+        "rank": 7
+      },
+      {
+        "materialId": "mp-1439",
+        "formula": "TiO2",
+        "energyAboveHullEv": 0.004523600833332001,
+        "bandGapEv": 2.5281000000000002,
+        "densityGcm3": 4.307081249474625,
+        "volume": 123.16487505448308,
+        "sites": 12,
+        "spacegroup": "Pbcn",
+        "elements": [
+          "O",
+          "Ti"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-1439",
+        "family": "generic",
+        "score": 0.731361,
+        "primaryScore": 0.731361,
+        "secondaryScore": 0.780675,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.977382,
+            "bandGap": 0.459655,
+            "density": 0.717847,
+            "secondary": 0.780675,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.439822,
+            "bandGap": 0.183862,
+            "density": 0.107677,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.8427,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 0.977",
+          "band-gap alignment 0.460 (target 5.5 eV)",
+          "density alignment 0.718 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 12 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Ti",
+              "O"
+            ],
+            "numAtoms": 3,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Ti",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "TiO2",
+        "duplicateCount": 12,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 45,
+        "rank": 8
+      },
+      {
+        "materialId": "mp-1238961",
+        "formula": "Ta2O5",
+        "energyAboveHullEv": 0.013927193571428001,
+        "bandGapEv": 2.341,
+        "densityGcm3": 7.574235876861001,
+        "volume": 96.87844465860483,
+        "sites": 7,
+        "spacegroup": "P2/m",
+        "elements": [
+          "O",
+          "Ta"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-1238961",
+        "family": "generic",
+        "score": 0.699562,
+        "primaryScore": 0.699562,
+        "secondaryScore": 0.765083,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.930364,
+            "bandGap": 0.425636,
+            "density": 0.737627,
+            "secondary": 0.765083,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.418664,
+            "bandGap": 0.170255,
+            "density": 0.110644,
+            "secondary": 0
+          },
+          "secondary": {
+            "bandGapMargin": 0.780333,
+            "liFraction": 1,
+            "familyPrior": 0.4,
+            "chemistryRisk": 1
+          }
+        },
+        "reasons": [
+          "stability score 0.930",
+          "band-gap alignment 0.426 (target 5.5 eV)",
+          "density alignment 0.738 (target 6.0 g/cm3)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 7 times.",
+          "Material family 'generic' appears 72 times in the candidate pool."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Ta",
+              "O"
+            ],
+            "numAtoms": 7,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Ta",
+            "O"
+          ],
+          "numAtoms": 7,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        },
+        "duplicateGroup": "Ta2O5",
+        "duplicateCount": 7,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 54,
+        "rank": 9
+      }
+    ],
+    "criteria": {
+      "preset": "generic",
+      "screeningLevel": "proxy-screen",
+      "stabilityWeight": 0.45,
+      "bandGapWeight": 0.4,
+      "densityWeight": 0.15,
+      "bandGapScoringMode": "target",
+      "minimumBandGapEv": 0,
+      "bandGapTargetEv": 5.5,
+      "densityScoringMode": "target",
+      "densityTargetGcm3": 6,
+      "secondaryWeight": 0,
+      "riskPenaltyWeight": 0,
+      "preferredBandGapEv": 3,
+      "preferredLiFractionMin": 0,
+      "preferredLiFractionMax": 1,
+      "excludeToxicElements": false,
+      "excludeRiskyChemistry": false,
+      "filterMolecularSalts": false,
+      "requiresLithium": false,
+      "excludedElements": [],
+      "flaggedElements": [],
+      "maxHydrogenAtomicFraction": 1,
+      "diversifyBy": "formula",
+      "maxPerFormula": 1,
+      "maxPerFamily": 0
+    },
+    "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.png",
+    "tablePaths": [
+      "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.csv",
+      "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.jsonl"
+    ],
+    "screeningLevel": "proxy-screen",
+    "diversity": {
+      "diversifyBy": "formula",
+      "maxPerFormula": 1,
+      "maxPerFamily": 0,
+      "originalFormulaGroups": 9,
+      "rankedFormulaGroups": 9,
+      "excludedByDiversity": 63,
+      "largestOriginalFormulaGroup": 12
+    },
+    "excludedCandidates": []
+  },
+  "rankedCandidates": [
+    {
+      "materialId": "mp-1143",
+      "formula": "Al2O3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 5.853700000000001,
+      "densityGcm3": 3.873499124580814,
+      "volume": 87.42001939959368,
+      "sites": 10,
+      "spacegroup": "R-3c",
+      "elements": [
+        "Al",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1143",
+      "family": "generic",
+      "score": 0.921114,
+      "primaryScore": 0.921114,
+      "secondaryScore": 0.582192,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 0.935691,
+          "density": 0.645583,
+          "secondary": 0.582192,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.45,
+          "bandGap": 0.374276,
+          "density": 0.096837,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.048767,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.936 (target 5.5 eV)",
+        "density alignment 0.646 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 10 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Al",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Al",
+          "O"
+        ],
+        "numAtoms": 5,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "Al2O3",
+      "duplicateCount": 10,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 1,
+      "rank": 1
+    },
+    {
+      "materialId": "mp-733790",
+      "formula": "SiO2",
+      "energyAboveHullEv": 0.006573497500003,
+      "bandGapEv": 5.5868,
+      "densityGcm3": 2.254998357567127,
+      "volume": 1061.8792044143463,
+      "sites": 72,
+      "spacegroup": "P1",
+      "elements": [
+        "O",
+        "Si"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
+      "family": "generic",
+      "score": 0.885272,
+      "primaryScore": 0.885272,
+      "secondaryScore": 0.604433,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.967133,
+          "bandGap": 0.984218,
+          "density": 0.375833,
+          "secondary": 0.604433,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.43521,
+          "bandGap": 0.393687,
+          "density": 0.056375,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.137733,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 0.967",
+        "band-gap alignment 0.984 (target 5.5 eV)",
+        "density alignment 0.376 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 12 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Si",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Si",
+          "O"
+        ],
+        "numAtoms": 3,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "SiO2",
+      "duplicateCount": 12,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 2,
+      "rank": 2
+    },
+    {
+      "materialId": "mp-2652",
+      "formula": "Y2O3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.097300000000001,
+      "densityGcm3": 5.026122832858722,
+      "volume": 596.8276909170065,
+      "sites": 40,
+      "spacegroup": "Ia-3",
+      "elements": [
+        "O",
+        "Y"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-2652",
+      "family": "generic",
+      "score": 0.873639,
+      "primaryScore": 0.873639,
+      "secondaryScore": 0.728558,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 0.744964,
+          "density": 0.837687,
+          "secondary": 0.728558,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.45,
+          "bandGap": 0.297985,
+          "density": 0.125653,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.634233,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.745 (target 5.5 eV)",
+        "density alignment 0.838 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 6 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Y",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Y",
+          "O"
+        ],
+        "numAtoms": 5,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "Y2O3",
+      "duplicateCount": 6,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 3,
+      "rank": 3
+    },
+    {
+      "materialId": "mp-1968",
+      "formula": "La2O3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 3.824799999999999,
+      "densityGcm3": 6.615226585908185,
+      "volume": 81.78386608522705,
+      "sites": 5,
+      "spacegroup": "P-3m1",
+      "elements": [
+        "La",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1968",
+      "family": "generic",
+      "score": 0.862787,
+      "primaryScore": 0.862787,
+      "secondaryScore": 0.751267,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 0.695418,
+          "density": 0.897462,
+          "secondary": 0.751267,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.45,
+          "bandGap": 0.278167,
+          "density": 0.134619,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.725067,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.695 (target 5.5 eV)",
+        "density alignment 0.897 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 3 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "La",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "La",
+          "O"
+        ],
+        "numAtoms": 5,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "La2O3",
+      "duplicateCount": 3,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 5,
+      "rank": 4
+    },
+    {
+      "materialId": "mp-2858",
+      "formula": "ZrO2",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 3.5322,
+      "densityGcm3": 5.777331384412114,
+      "volume": 141.66836532722778,
+      "sites": 12,
+      "spacegroup": "P2_1/c",
+      "elements": [
+        "O",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-2858",
+      "family": "generic",
+      "score": 0.851321,
+      "primaryScore": 0.851321,
+      "secondaryScore": 0.77565,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 0.642218,
+          "density": 0.962889,
+          "secondary": 0.77565,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.45,
+          "bandGap": 0.256887,
+          "density": 0.144433,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.8226,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.642 (target 5.5 eV)",
+        "density alignment 0.963 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 12 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Zr",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Zr",
+          "O"
+        ],
+        "numAtoms": 3,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "ZrO2",
+      "duplicateCount": 12,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 6,
+      "rank": 5
+    },
+    {
+      "materialId": "mp-352",
+      "formula": "HfO2",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.0165,
+      "densityGcm3": 10.24124328616322,
+      "volume": 136.51657937039403,
+      "sites": 12,
+      "spacegroup": "P2_1/c",
+      "elements": [
+        "Hf",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-352",
+      "family": "generic",
+      "score": 0.786078,
+      "primaryScore": 0.786078,
+      "secondaryScore": 0.735292,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 0.730273,
+          "density": 0.293126,
+          "secondary": 0.735292,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.45,
+          "bandGap": 0.292109,
+          "density": 0.043969,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.661167,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.730 (target 5.5 eV)",
+        "density alignment 0.293 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 7 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Hf",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Hf",
+          "O"
+        ],
+        "numAtoms": 3,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "HfO2",
+      "duplicateCount": 7,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 25,
+      "rank": 6
+    },
+    {
+      "materialId": "mp-5020",
+      "formula": "BaTiO3",
+      "energyAboveHullEv": 0.00004098999996848818,
+      "bandGapEv": 2.5086999999999993,
+      "densityGcm3": 5.89961040436988,
+      "volume": 65.6356490658401,
+      "sites": 5,
+      "spacegroup": "R3m",
+      "elements": [
+        "Ba",
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-5020",
+      "family": "generic",
+      "score": 0.779849,
+      "primaryScore": 0.779849,
+      "secondaryScore": 0.779058,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.999795,
+          "bandGap": 0.456127,
+          "density": 0.983268,
+          "secondary": 0.779058,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.449908,
+          "bandGap": 0.182451,
+          "density": 0.14749,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.836233,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.456 (target 5.5 eV)",
+        "density alignment 0.983 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 3 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Ba",
+            "Ti",
+            "O"
+          ],
+          "numAtoms": 5,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Ba",
+          "Ti",
+          "O"
+        ],
+        "numAtoms": 5,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "BaTiO3",
+      "duplicateCount": 3,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 28,
+      "rank": 7
+    },
+    {
+      "materialId": "mp-1439",
+      "formula": "TiO2",
+      "energyAboveHullEv": 0.004523600833332001,
+      "bandGapEv": 2.5281000000000002,
+      "densityGcm3": 4.307081249474625,
+      "volume": 123.16487505448308,
+      "sites": 12,
+      "spacegroup": "Pbcn",
+      "elements": [
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1439",
+      "family": "generic",
+      "score": 0.731361,
+      "primaryScore": 0.731361,
+      "secondaryScore": 0.780675,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.977382,
+          "bandGap": 0.459655,
+          "density": 0.717847,
+          "secondary": 0.780675,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.439822,
+          "bandGap": 0.183862,
+          "density": 0.107677,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.8427,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 0.977",
+        "band-gap alignment 0.460 (target 5.5 eV)",
+        "density alignment 0.718 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 12 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Ti",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Ti",
+          "O"
+        ],
+        "numAtoms": 3,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "TiO2",
+      "duplicateCount": 12,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 45,
+      "rank": 8
+    },
+    {
+      "materialId": "mp-1238961",
+      "formula": "Ta2O5",
+      "energyAboveHullEv": 0.013927193571428001,
+      "bandGapEv": 2.341,
+      "densityGcm3": 7.574235876861001,
+      "volume": 96.87844465860483,
+      "sites": 7,
+      "spacegroup": "P2/m",
+      "elements": [
+        "O",
+        "Ta"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1238961",
+      "family": "generic",
+      "score": 0.699562,
+      "primaryScore": 0.699562,
+      "secondaryScore": 0.765083,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.930364,
+          "bandGap": 0.425636,
+          "density": 0.737627,
+          "secondary": 0.765083,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.418664,
+          "bandGap": 0.170255,
+          "density": 0.110644,
+          "secondary": 0
+        },
+        "secondary": {
+          "bandGapMargin": 0.780333,
+          "liFraction": 1,
+          "familyPrior": 0.4,
+          "chemistryRisk": 1
+        }
+      },
+      "reasons": [
+        "stability score 0.930",
+        "band-gap alignment 0.426 (target 5.5 eV)",
+        "density alignment 0.738 (target 6.0 g/cm3)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 7 times.",
+        "Material family 'generic' appears 72 times in the candidate pool."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Ta",
+            "O"
+          ],
+          "numAtoms": 7,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Ta",
+          "O"
+        ],
+        "numAtoms": 7,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0
+      },
+      "duplicateGroup": "Ta2O5",
+      "duplicateCount": 7,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 54,
+      "rank": 9
+    }
+  ],
+  "structuresAnalyzed": [
+    {
+      "materialId": "mp-1143",
+      "formula": "Al2O3",
+      "fetchSummary": "Fetched structure for mp-1143 and wrote 2 artifact(s).",
+      "analysisSummary": "Al2O3 has 10 sites, volume 87.42 A^3, density 3.8735 g/cm^3, and 2 distinct elements.",
+      "summaryMetrics": {
+        "formula": "Al2O3",
+        "numSites": 10,
+        "volume": 87.42,
+        "densityGcm3": 3.8735,
+        "a": 5.178,
+        "b": 5.178,
+        "c": 5.178,
+        "alpha": 55.29,
+        "beta": 55.29,
+        "gamma": 55.29,
+        "numElements": 2,
+        "liCount": 0,
+        "liFraction": 0,
+        "liNumberDensityPerA3": 0,
+        "minLiLiDistanceA": null,
+        "medianLiLiDistanceA": null,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "insufficient-li-sites"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/mp-1143.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/mp-1143.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-733790",
+      "formula": "SiO2",
+      "fetchSummary": "Fetched structure for mp-733790 and wrote 2 artifact(s).",
+      "analysisSummary": "SiO2 has 72 sites, volume 1061.8792 A^3, density 2.255 g/cm^3, and 2 distinct elements.",
+      "summaryMetrics": {
+        "formula": "SiO2",
+        "numSites": 72,
+        "volume": 1061.8792,
+        "densityGcm3": 2.255,
+        "a": 8.6614,
+        "b": 8.6568,
+        "c": 16.4442,
+        "alpha": 88.538,
+        "beta": 91.483,
+        "gamma": 120.503,
+        "numElements": 2,
+        "liCount": 0,
+        "liFraction": 0,
+        "liNumberDensityPerA3": 0,
+        "minLiLiDistanceA": null,
+        "medianLiLiDistanceA": null,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "insufficient-li-sites"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-2652",
+      "formula": "Y2O3",
+      "fetchSummary": "Fetched structure for mp-2652 and wrote 2 artifact(s).",
+      "analysisSummary": "Y2O3 has 40 sites, volume 596.8277 A^3, density 5.0261 g/cm^3, and 2 distinct elements.",
+      "summaryMetrics": {
+        "formula": "Y2O3",
+        "numSites": 40,
+        "volume": 596.8277,
+        "densityGcm3": 5.0261,
+        "a": 9.1866,
+        "b": 9.1866,
+        "c": 9.1866,
+        "alpha": 109.471,
+        "beta": 109.471,
+        "gamma": 109.471,
+        "numElements": 2,
+        "liCount": 0,
+        "liFraction": 0,
+        "liNumberDensityPerA3": 0,
+        "minLiLiDistanceA": null,
+        "medianLiLiDistanceA": null,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "insufficient-li-sites"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-1968",
+      "formula": "La2O3",
+      "fetchSummary": "Fetched structure for mp-1968 and wrote 2 artifact(s).",
+      "analysisSummary": "La2O3 has 5 sites, volume 81.7839 A^3, density 6.6152 g/cm^3, and 2 distinct elements.",
+      "summaryMetrics": {
+        "formula": "La2O3",
+        "numSites": 5,
+        "volume": 81.7839,
+        "densityGcm3": 6.6152,
+        "a": 3.9308,
+        "b": 3.9308,
+        "c": 6.112,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120,
+        "numElements": 2,
+        "liCount": 0,
+        "liFraction": 0,
+        "liNumberDensityPerA3": 0,
+        "minLiLiDistanceA": null,
+        "medianLiLiDistanceA": null,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "insufficient-li-sites"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/mp-1968.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/mp-1968.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/structure-metrics.png",
+      "usedOfflineData": false
+    }
+  ],
+  "structureFailures": [],
+  "notePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/notes/2026-05-03T07-32-18-485Z-live-materials-project-high-k-dielectric-oxide-screening-process.md",
+  "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/live-high-k-dielectric-e2e-report.md",
+  "artifactPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.csv",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.jsonl",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/mp-1143.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/mp-1143.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/mp-1968.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/mp-1968.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/structure-metrics.png"
+  ],
+  "validation": {
+    "usedOfflineDataAnywhere": false,
+    "searchFamilies": 10,
+    "totalUniqueCandidates": 72,
+    "rankedCandidates": 9,
+    "rankedFormulaMultiplicityMax": 1,
+    "structuresAnalyzed": 4,
+    "requiredArtifactsExist": {
+      "ok": true,
+      "checked": 17,
+      "missing": []
+    }
+  }
+}
