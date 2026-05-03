@@ -1,0 +1,23 @@
+{
+  "backend": "local-surrogate",
+  "calculationId": "mp-733790-structure-preflight",
+  "calculationType": "structure-preflight",
+  "costClass": "metadata",
+  "estimatedWallTimeHours": 0.05,
+  "formula": "SiO2",
+  "label": "Structure fetch and normalization preflight",
+  "materialId": "mp-733790",
+  "method": "fetch_structure + structural sanity checks",
+  "properties": {
+    "structureQuality": 0.95
+  },
+  "provenance": {
+    "backend": "local-surrogate",
+    "basis": "composition, MP summary fields, and deterministic domain heuristics",
+    "confidence": "low",
+    "generatedAt": 1777805960,
+    "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment"
+  },
+  "resultPath": "materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/research-loop-executions/high-k-dielectric-research-loop-1777805960765-local-surrogate-1777805960931/mp-733790-structure-preflight.json",
+  "status": "completed-surrogate"
+}

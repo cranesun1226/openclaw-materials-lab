@@ -87,6 +87,7 @@ describe("plugin registration", () => {
         { name: "materials_export_report", optional: false },
         { name: "materials_ase_relax", optional: true },
         { name: "materials_batch_screen", optional: true },
+        { name: "materials_execute_research_plan", optional: true },
       ]),
     );
     expect(cliCommands).toContainEqual(["materials"]);

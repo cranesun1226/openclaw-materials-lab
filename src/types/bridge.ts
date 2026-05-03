@@ -5,6 +5,7 @@ export type BridgeAction =
   | "analyze_structure"
   | "compare_candidates"
   | "plan_research_loop"
+  | "execute_research_plan"
   | "ase_relax"
   | "batch_screen"
   | "export_report";
@@ -79,6 +80,11 @@ export interface CandidateSummary {
   powerFactorUwCmK2?: number;
   latticeThermalConductivityWmK?: number;
   carrierConcentrationCm3?: number;
+  phononStability?: number;
+  cbmEv?: number;
+  vbmEv?: number;
+  defectToleranceScore?: number;
+  structureQuality?: number;
   propertyProvenance?: Record<string, unknown>;
   calculationStatus?: Record<string, unknown>;
 }
@@ -221,6 +227,27 @@ export interface PlanResearchLoopResult {
   plan: Record<string, unknown>;
   manifestPath: string;
   reportPath: string;
+}
+
+export interface ExecuteResearchPlanPayload {
+  planPath?: string;
+  plan?: Record<string, unknown>;
+  backend?: "local-surrogate";
+  maxSteps?: number;
+  allowBlockedSurrogate?: boolean;
+  artifactDir: string;
+}
+
+export interface ExecuteResearchPlanResult {
+  runId: string;
+  backend: string;
+  manifestPath: string;
+  reportPath: string;
+  resultPaths: string[];
+  completedCalculations: number;
+  skippedCalculations: number;
+  propertyUpdates: ComparedCandidate[];
+  rerankingPayload?: Record<string, unknown>;
 }
 
 export interface AseRelaxPayload {

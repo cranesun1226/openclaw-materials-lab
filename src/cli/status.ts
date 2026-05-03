@@ -61,6 +61,10 @@ export function runStatus(context: MaterialsPluginContext, options: StatusOption
         allowList.includes("materials_batch_screen") || allowList.includes("materials-lab")
           ? "optional + enabled + approval-gated"
           : "optional + disabled until added to tools.allow + approval-gated",
+      materials_execute_research_plan:
+        allowList.includes("materials_execute_research_plan") || allowList.includes("materials-lab")
+          ? "optional + enabled + approval-gated"
+          : "optional + disabled until added to tools.allow + approval-gated",
     },
   };
 }

@@ -1,6 +1,6 @@
 # `@cranesun/openclaw-materials-lab`
 
-Native OpenClaw plugin for autonomous materials-science research. It lets an OpenClaw user describe a research goal in chat and then search candidate materials, fetch structures, analyze them locally, compare options, plan property-backed follow-up calculations, save research notes, and export a report. Optional heavier workflows such as ASE-based relaxation and batch screening are included behind approval gates.
+Native OpenClaw plugin for autonomous materials-science research. It lets an OpenClaw user describe a research goal in chat and then search candidate materials, fetch structures, analyze them locally, compare options, plan and execute backend-adapter follow-up calculations, save research notes, and export a report. Optional heavier workflows such as ASE-based relaxation, research-plan execution, and batch screening are included behind approval gates.
 
 ## Who This Is For
 
@@ -14,7 +14,7 @@ This plugin is for OpenClaw users who already have the gateway running and want 
 
 The plugin provides:
 
-- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, approval-gated research-loop planning, note saving, and report export.
+- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, approval-gated research-loop planning/execution, note saving, and report export.
 - Optional approval-gated tools for ASE relaxation and batch screening.
 - A bundled research skill under `skills/material-science-research`.
 - A local Python worker under `python/` using stdin/stdout JSON requests.
@@ -85,13 +85,14 @@ Add or update the plugin entry in `~/.openclaw/openclaw.json`:
   "tools": {
     "allow": [
       "materials_ase_relax",
-      "materials_batch_screen"
+      "materials_batch_screen",
+      "materials_execute_research_plan"
     ]
   }
 }
 ```
 
-`materials_ase_relax` and `materials_batch_screen` are registered as optional tools. Users can opt in explicitly through `tools.allow`.
+`materials_ase_relax`, `materials_batch_screen`, and `materials_execute_research_plan` are registered as optional tools. Users can opt in explicitly through `tools.allow`.
 
 ## Python Setup Flow
 
@@ -152,6 +153,7 @@ If no key is present, the plugin still works in offline/mock mode for testing. L
 - "Analyze the structure of `mp-149`, explain the coordination environment at a high level, and save a note."
 - "Export a markdown report comparing these three materials for thermal stability and insulating behavior."
 - "Use the ranked candidates to plan a property-backed high-k dielectric research loop with a 12-calculation budget."
+- "Execute that research-loop plan with the local-surrogate backend, then rerank the property-updated candidates."
 - "Prepare a batch screening plan, but ask me before running expensive relaxation jobs."
 
 ## Workspace Layout
@@ -199,6 +201,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - File writes are restricted to `workspaceRoot`.
 - Expensive or write-heavy workflows request approval before execution.
 - `materials_plan_research_loop` writes a plan and manifest only. It marks DFT/HPC/paid-compute work as blocked until a human explicitly approves a later execution workflow.
+- `materials_execute_research_plan` currently supports `local-surrogate`, a low-confidence backend adapter for validating execution/provenance/reranking flow. It must not be treated as DFT or experimental evidence.
 - `mpApiKey` is marked sensitive in plugin UI hints and is also supported through environment variables.
 
 ## Development Workflow

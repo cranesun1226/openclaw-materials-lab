@@ -65,6 +65,7 @@ def dispatch(*, action: str, request_id: str, payload: dict[str, Any]) -> dict[s
         "analyze_structure": lambda: handle_analyze_structure(request_id=request_id, payload=payload, api_key=api_key),
         "compare_candidates": lambda: handle_compare_candidates(request_id=request_id, payload=payload),
         "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload),
+        "execute_research_plan": lambda: handle_execute_research_plan(request_id=request_id, payload=payload, api_key=api_key),
         "ase_relax": lambda: handle_ase_relax(request_id=request_id, payload=payload, api_key=api_key),
         "batch_screen": lambda: handle_batch_screen(request_id=request_id, payload=payload, api_key=api_key),
         "export_report": lambda: handle_export_report(request_id=request_id, payload=payload),
@@ -275,6 +276,44 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
     )
 
 
+def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
+    artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    backend = str(payload.get("backend") or "local-surrogate").strip().lower()
+    if backend != "local-surrogate":
+        raise WorkerError(
+            "BACKEND_NOT_AVAILABLE",
+            f"Research backend '{backend}' is not available in this build.",
+            hint="Use backend='local-surrogate' or install a future external DFT backend adapter.",
+        )
+
+    plan = _load_research_plan(payload)
+    if not isinstance(plan.get("calculationQueue"), list):
+        raise WorkerError("INVALID_PARAMS", "execute_research_plan requires a plan with calculationQueue.")
+
+    max_steps = int(payload.get("maxSteps") or len(plan["calculationQueue"]))
+    allow_blocked_surrogate = ensure_bool(payload.get("allowBlockedSurrogate"), field="allowBlockedSurrogate", default=False)
+    execution = _execute_local_surrogate_plan(
+        plan=plan,
+        artifact_dir=artifact_dir,
+        api_key=api_key,
+        max_steps=max_steps,
+        allow_blocked_surrogate=allow_blocked_surrogate,
+    )
+    artifacts = [execution["manifestPath"], execution["reportPath"], *execution["resultPaths"]]
+    return success(
+        action="execute_research_plan",
+        request_id=request_id,
+        summary=(
+            f"Executed {execution['completedCalculations']} local-surrogate calculation(s); "
+            f"{execution['skippedCalculations']} skipped."
+        ),
+        data=execution,
+        artifacts=artifacts,
+        warnings=execution["warnings"],
+    )
+
+
 def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = ensure_string(payload.get("artifactDir"), field="artifactDir")
     structure_path = ensure_string(payload.get("structurePath"), field="structurePath", required=False)
@@ -405,6 +444,377 @@ def _normalize_research_budget(budget: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _load_research_plan(payload: dict[str, Any]) -> dict[str, Any]:
+    plan = payload.get("plan")
+    if isinstance(plan, dict):
+        return plan
+    plan_path = ensure_string(payload.get("planPath"), field="planPath", required=False)
+    if plan_path:
+        path = Path(plan_path)
+        if not path.exists():
+            raise WorkerError("PLAN_NOT_FOUND", f"Research plan was not found: {plan_path}")
+        return ensure_dict(json.loads(path.read_text("utf-8")), field="plan")
+    raise WorkerError("INVALID_PARAMS", "execute_research_plan requires either plan or planPath.")
+
+
+def _execute_local_surrogate_plan(
+    *,
+    plan: dict[str, Any],
+    artifact_dir: Path,
+    api_key: str | None,
+    max_steps: int,
+    allow_blocked_surrogate: bool,
+) -> dict[str, Any]:
+    run_id = f"{plan.get('planId', 'research-plan')}-local-surrogate-{int(time.time() * 1000)}"
+    run_dir = artifact_dir / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    selected_by_id = {
+        str(candidate.get("materialId")): candidate
+        for candidate in plan.get("selectedCandidates") or []
+        if candidate.get("materialId")
+    }
+    completed: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    property_updates: dict[str, dict[str, Any]] = {}
+    warnings: list[str] = [
+        "local-surrogate backend produces low-confidence property estimates; do not treat them as DFT/experimental values."
+    ]
+
+    for step in (plan.get("calculationQueue") or [])[: max(0, max_steps)]:
+        if not isinstance(step, dict):
+            continue
+        status = str(step.get("status") or "planned")
+        calculation_id = str(step.get("calculationId") or step.get("id") or f"calculation-{len(completed) + len(skipped) + 1}")
+        if status.startswith("blocked") and not allow_blocked_surrogate:
+            skipped.append({
+                "calculationId": calculation_id,
+                "materialId": step.get("materialId"),
+                "status": "skipped-blocked",
+                "reason": step.get("blockedReason") or "calculation is blocked by the plan approval gates",
+            })
+            continue
+
+        material_id = str(step.get("materialId") or "")
+        candidate = selected_by_id.get(material_id, {"materialId": material_id, "formula": step.get("formula")})
+        result = _run_local_surrogate_step(step, candidate, plan, api_key=api_key)
+        result_path = run_dir / f"{_safe_file_stem(calculation_id)}.json"
+        result["resultPath"] = str(result_path)
+        result_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        completed.append(result)
+        update = property_updates.setdefault(material_id, _candidate_update_base(candidate, plan))
+        _merge_property_result(update, result)
+
+    updated_candidates = [_finalize_candidate_update(update) for update in property_updates.values()]
+    manifest = {
+        "runId": run_id,
+        "backend": "local-surrogate",
+        "planId": plan.get("planId"),
+        "preset": plan.get("preset"),
+        "generatedAt": int(time.time()),
+        "completedCalculations": len(completed),
+        "skippedCalculations": len(skipped),
+        "allowBlockedSurrogate": allow_blocked_surrogate,
+        "propertyUpdates": updated_candidates,
+        "completed": completed,
+        "skipped": skipped,
+        "rerankingPayload": {
+            "criteriaPatch": {
+                **((plan.get("rerankingPolicy") or {}).get("criteriaPatch") or {}),
+                "screeningLevel": "property-backed-screen",
+            },
+            "candidates": updated_candidates,
+        },
+        "warnings": warnings,
+    }
+    manifest_path = run_dir / "execution-manifest.json"
+    report_path = run_dir / "execution-report.md"
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(_surrogate_execution_markdown(manifest), encoding="utf-8")
+    return {
+        "runId": run_id,
+        "backend": "local-surrogate",
+        "manifestPath": str(manifest_path),
+        "reportPath": str(report_path),
+        "resultPaths": [str(Path(result["resultPath"])) for result in completed],
+        "completedCalculations": len(completed),
+        "skippedCalculations": len(skipped),
+        "propertyUpdates": updated_candidates,
+        "rerankingPayload": manifest["rerankingPayload"],
+        "warnings": warnings,
+    }
+
+
+def _run_local_surrogate_step(step: dict[str, Any], candidate: dict[str, Any], plan: dict[str, Any], *, api_key: str | None) -> dict[str, Any]:
+    material_id = str(step.get("materialId") or candidate.get("materialId") or "")
+    formula = str(step.get("formula") or candidate.get("formula") or "")
+    material = _fetch_material_summary_for_surrogate(material_id, formula, api_key=api_key)
+    merged_candidate = {**material, **candidate, "materialId": material.get("materialId") or material_id, "formula": material.get("formula") or formula}
+    descriptors = _composition_descriptors(merged_candidate)
+    calculation_type = str(step.get("id") or "")
+    properties = _surrogate_properties_for_step(calculation_type, merged_candidate, descriptors, str(plan.get("preset") or "generic"))
+    return {
+        "calculationId": step.get("calculationId"),
+        "materialId": merged_candidate.get("materialId"),
+        "formula": merged_candidate.get("formula"),
+        "backend": "local-surrogate",
+        "status": "completed-surrogate",
+        "calculationType": calculation_type,
+        "label": step.get("label"),
+        "method": step.get("method"),
+        "costClass": step.get("costClass"),
+        "estimatedWallTimeHours": step.get("estimatedWallTimeHours"),
+        "properties": properties,
+        "provenance": {
+            "backend": "local-surrogate",
+            "confidence": "low",
+            "generatedAt": int(time.time()),
+            "basis": "composition, MP summary fields, and deterministic domain heuristics",
+            "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment",
+        },
+    }
+
+
+def _fetch_material_summary_for_surrogate(material_id: str, formula: str, *, api_key: str | None) -> dict[str, Any]:
+    if material_id:
+        try:
+            material, _used_offline = fetch_material(material_id, api_key=api_key, allow_offline=True)
+            return _candidate_summary(material)
+        except Exception:
+            pass
+    return {
+        "materialId": material_id,
+        "formula": formula,
+        "source": "mock",
+    }
+
+
+def _surrogate_properties_for_step(
+    calculation_type: str,
+    candidate: dict[str, Any],
+    descriptors: dict[str, Any],
+    preset: str,
+) -> dict[str, Any]:
+    if calculation_type == "structure-preflight":
+        return {
+            "structureQuality": round(_structure_quality_surrogate(candidate, descriptors), 6),
+        }
+    if preset == "high-k-dielectric":
+        return _high_k_surrogate_properties(calculation_type, candidate, descriptors)
+    if preset == "solid-electrolyte":
+        return _solid_electrolyte_surrogate_properties(calculation_type, candidate, descriptors)
+    if preset == "photovoltaic-absorber":
+        return _photovoltaic_surrogate_properties(calculation_type, candidate, descriptors)
+    if preset == "thermoelectric":
+        return _thermoelectric_surrogate_properties(calculation_type, candidate, descriptors)
+    return {"domainSpecificProperty": round(_domain_descriptor_score(descriptors, preset), 6)}
+
+
+def _high_k_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
+    elements = set(str(item) for item in descriptors.get("elements") or [])
+    density = _numeric(candidate.get("densityGcm3"), 5.0)
+    gap = _numeric(candidate.get("bandGapEv"), 3.0)
+    high_k_strength = _high_k_chemistry_score(elements, descriptors, _infer_material_family(candidate, {"preset": "high-k-dielectric"}))
+    if calculation_type == "dfpt-dielectric-tensor":
+        total = 3.5 + high_k_strength * 28.0 + max(0.0, density - 4.0) * 0.8
+        if elements.intersection({"Ba", "Sr"}) and "Ti" in elements:
+            total += 55.0
+        if elements.intersection({"Al", "Si"}) and not elements.intersection({"Hf", "Zr", "Ti", "Ta", "Nb", "La", "Y"}):
+            total = min(total, 9.5 if "Al" in elements else 4.5)
+        return {
+            "dielectricTotal": round(total, 4),
+            "dielectricElectronic": round(max(1.8, min(total * 0.22, 7.5)), 4),
+        }
+    if calculation_type == "band-alignment":
+        offset = max(0.25, min(gap * 0.32, 2.4))
+        return {
+            "bandOffsetElectronEv": round(offset, 4),
+            "bandOffsetHoleEv": round(max(0.25, min(gap - offset, 3.5)), 4),
+        }
+    if calculation_type == "interface-reaction":
+        base = 0.04 if elements.intersection({"Al", "Si", "Hf", "Zr"}) else 0.16
+        return {"interfaceReactionEnergyEv": round(base + max(0.0, density - 7.0) * 0.015, 4)}
+    if calculation_type == "phonon-stability":
+        return {"phononStability": round(max(0.0, min(1.0, 1.0 - _numeric(candidate.get("energyAboveHullEv"), 0.05) / 0.18)), 4)}
+    return {}
+
+
+def _solid_electrolyte_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
+    li_fraction = float(descriptors.get("liAtomicFraction") or 0.0)
+    framework = max(float(descriptors.get("chalcogenideAtomicFraction") or 0.0), float(descriptors.get("halogenAtomicFraction") or 0.0), float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.75)
+    if calculation_type == "li-migration-barrier":
+        return {"migrationBarrierEv": round(max(0.18, 0.75 - li_fraction * 0.9 - framework * 0.18), 4)}
+    if calculation_type == "aimd-ionic-conductivity":
+        conductivity = 1e-6 + li_fraction * framework * 4e-3
+        return {"ionicConductivityScm": round(conductivity, 8)}
+    if calculation_type == "electrochemical-window":
+        return {"electrochemicalWindowV": round(2.5 + _numeric(candidate.get("bandGapEv"), 3.0) * 0.45, 4)}
+    if calculation_type == "interface-stability":
+        return {"interfaceReactionEnergyEv": round(max(0.02, _numeric(candidate.get("energyAboveHullEv"), 0.05) + 0.05), 4)}
+    return {}
+
+
+def _photovoltaic_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
+    gap = _numeric(candidate.get("bandGapEv"), 1.5)
+    absorber = max(float(descriptors.get("chalcogenideAtomicFraction") or 0.0), float(descriptors.get("halogenAtomicFraction") or 0.0) * 0.85, float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.45)
+    if calculation_type == "optical-absorption":
+        return {
+            "directBandGapEv": round(max(0.1, gap + (0.10 if absorber < 0.4 else -0.05)), 4),
+            "absorptionCoefficientCm1": round(2500 + absorber * 45000, 2),
+        }
+    if calculation_type == "band-edge-alignment":
+        return {"cbmEv": round(-4.0 + (gap - 1.4) * 0.25, 4), "vbmEv": round(-4.0 - gap, 4)}
+    if calculation_type == "defect-tolerance":
+        return {"defectToleranceScore": round(max(0.0, min(1.0, absorber * 0.75 + _target_score(gap, 1.45) * 0.25)), 4)}
+    if calculation_type == "carrier-masses":
+        return {
+            "effectiveMassElectron": round(max(0.12, 1.2 - absorber * 0.65), 4),
+            "effectiveMassHole": round(max(0.15, 1.4 - absorber * 0.55), 4),
+        }
+    return {}
+
+
+def _thermoelectric_surrogate_properties(calculation_type: str, candidate: dict[str, Any], descriptors: dict[str, Any]) -> dict[str, Any]:
+    heavy = float(descriptors.get("heavyAtomicFraction") or 0.0)
+    gap_score = _target_score(candidate.get("bandGapEv"), 0.35)
+    complexity = min(1.0, float(descriptors.get("numElements") or 1.0) / 4.0)
+    if calculation_type == "boltzmann-transport":
+        return {
+            "seebeckUvK": round(80 + gap_score * 180 + heavy * 90, 4),
+            "powerFactorUwCmK2": round(4 + gap_score * 24 + complexity * 12, 4),
+        }
+    if calculation_type == "lattice-thermal-conductivity":
+        return {"latticeThermalConductivityWmK": round(max(0.35, 6.0 - heavy * 4.0 - complexity * 1.5), 4)}
+    if calculation_type == "carrier-concentration-sweep":
+        return {"carrierConcentrationCm3": round(5e18 + gap_score * 8e19, 2)}
+    if calculation_type == "phonon-stability":
+        return {"phononStability": round(max(0.0, min(1.0, 1.0 - _numeric(candidate.get("energyAboveHullEv"), 0.05) / 0.25)), 4)}
+    return {}
+
+
+def _structure_quality_surrogate(candidate: dict[str, Any], descriptors: dict[str, Any]) -> float:
+    score = 0.55
+    if candidate.get("spacegroup"):
+        score += 0.15
+    if candidate.get("materialsProjectUrl") or candidate.get("source") == "materials-project":
+        score += 0.15
+    if descriptors.get("numElements"):
+        score += 0.10
+    return max(0.0, min(score, 1.0))
+
+
+def _candidate_update_base(candidate: dict[str, Any], plan: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "materialId": candidate.get("materialId"),
+        "formula": candidate.get("formula"),
+        "source": candidate.get("source") or "materials-project",
+        "rank": candidate.get("rank"),
+        "score": candidate.get("score"),
+        "family": candidate.get("family"),
+        "energyAboveHullEv": candidate.get("energyAboveHullEv"),
+        "bandGapEv": candidate.get("bandGapEv"),
+        "densityGcm3": candidate.get("densityGcm3"),
+        "spacegroup": candidate.get("spacegroup"),
+        "elements": candidate.get("elements") or [],
+        "volume": candidate.get("volume"),
+        "sites": candidate.get("sites"),
+        "materialsProjectUrl": candidate.get("materialsProjectUrl"),
+        "propertyProvenance": {},
+        "calculationStatus": {},
+        "screeningLevel": "property-backed-screen",
+        "notes": [f"Updated by {plan.get('planId')} using local-surrogate backend."],
+    }
+
+
+def _merge_property_result(update: dict[str, Any], result: dict[str, Any]) -> None:
+    properties = result.get("properties") or {}
+    provenance = result.get("provenance") or {}
+    calculation_id = str(result.get("calculationId") or result.get("calculationType") or "unknown")
+    for key, value in properties.items():
+        update[key] = value
+        update["propertyProvenance"][key] = {
+            **provenance,
+            "calculationId": calculation_id,
+            "calculationType": result.get("calculationType"),
+            "resultPath": result.get("resultPath"),
+        }
+    update["calculationStatus"][calculation_id] = {
+        "status": result.get("status"),
+        "backend": result.get("backend"),
+        "resultPath": result.get("resultPath"),
+        "writesProperties": list(properties.keys()),
+    }
+
+
+def _finalize_candidate_update(update: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in update.items() if value is not None}
+
+
+def _surrogate_execution_markdown(manifest: dict[str, Any]) -> str:
+    lines = [
+        f"# Research Plan Execution: {manifest['runId']}",
+        "",
+        "## Backend",
+        "",
+        "- Backend: `local-surrogate`",
+        "- Confidence: `low`",
+        "- These values are calculation-adapter smoke outputs, not DFT or experimental results.",
+        "",
+        "## Summary",
+        "",
+        f"- Completed calculations: {manifest['completedCalculations']}",
+        f"- Skipped calculations: {manifest['skippedCalculations']}",
+        f"- Allow blocked surrogate execution: `{manifest['allowBlockedSurrogate']}`",
+        "",
+        "## Candidate Property Updates",
+        "",
+        "| Material | Formula | Updated Properties |",
+        "| --- | --- | --- |",
+    ]
+    for candidate in manifest["propertyUpdates"]:
+        property_keys = [
+            key
+            for key in candidate.keys()
+            if key not in {
+                "materialId",
+                "formula",
+                "source",
+                "rank",
+                "score",
+                "family",
+                "energyAboveHullEv",
+                "bandGapEv",
+                "densityGcm3",
+                "materialsProjectUrl",
+                "propertyProvenance",
+                "calculationStatus",
+                "screeningLevel",
+                "notes",
+            }
+        ]
+        lines.append(f"| {candidate.get('materialId')} | {candidate.get('formula')} | {', '.join(property_keys) or '-'} |")
+    lines.extend([
+        "",
+        "## Warnings",
+        "",
+        *[f"- {warning}" for warning in manifest.get("warnings") or []],
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def _safe_file_stem(value: str) -> str:
+    return "".join(char if char.isalnum() or char in {"-", "_"} else "-" for char in value).strip("-") or "artifact"
+
+
+def _numeric(value: Any, default: float) -> float:
+    try:
+        if value is None or isinstance(value, bool):
+            return default
+        return float(value)
+    except Exception:
+        return default
+
+
 def _default_research_objective(criteria: dict[str, Any]) -> str:
     preset = str(criteria.get("preset") or "generic")
     return {
@@ -487,8 +897,16 @@ def _select_research_candidates(candidates: list[dict[str, Any]], budget: dict[s
             "rank": candidate.get("rank"),
             "materialId": candidate.get("materialId"),
             "formula": candidate.get("formula"),
+            "source": candidate.get("source"),
             "family": candidate.get("family"),
             "score": candidate.get("score"),
+            "energyAboveHullEv": candidate.get("energyAboveHullEv"),
+            "bandGapEv": candidate.get("bandGapEv"),
+            "densityGcm3": candidate.get("densityGcm3"),
+            "spacegroup": candidate.get("spacegroup"),
+            "elements": candidate.get("elements") or [],
+            "volume": candidate.get("volume"),
+            "sites": candidate.get("sites"),
             "domainEvidenceScore": candidate.get("domainEvidenceScore") or evidence.get("score"),
             "evidenceTier": evidence.get("tier", "unknown"),
             "sourceLevel": evidence.get("sourceLevel", "unknown"),
@@ -1320,7 +1738,7 @@ def _solid_electrolyte_evidence(
             "Ionic conductivity",
             ionic_conductivity,
             _minimum_score(ionic_conductivity, 1e-4) if ionic_conductivity is not None else 0.35,
-            "property" if ionic_conductivity is not None else "missing-proxy",
+            _property_source(candidate, "ionicConductivityScm") if ionic_conductivity is not None else "missing-proxy",
             ">=1e-4 S/cm screen; >=1e-3 S/cm target",
         ),
         _evidence_gate(
@@ -1328,7 +1746,7 @@ def _solid_electrolyte_evidence(
             "Li migration barrier",
             migration_barrier,
             _maximum_score(migration_barrier, 0.50, 0.50) if migration_barrier is not None else 0.35,
-            "property" if migration_barrier is not None else "missing-proxy",
+            _property_source(candidate, "migrationBarrierEv") if migration_barrier is not None else "missing-proxy",
             "<=0.50 eV preferred",
         ),
         _evidence_gate(
@@ -1336,7 +1754,7 @@ def _solid_electrolyte_evidence(
             "Electrochemical window",
             electrochemical_window,
             _minimum_score(electrochemical_window, 4.0) if electrochemical_window is not None else 0.30,
-            "property" if electrochemical_window is not None else "missing-proxy",
+            _property_source(candidate, "electrochemicalWindowV") if electrochemical_window is not None else "missing-proxy",
             ">=4 V preferred",
         ),
     ]
@@ -1376,7 +1794,7 @@ def _high_k_evidence(
     hole_offset = _candidate_number(candidate, "bandOffsetHoleEv", "valenceBandOffsetEv")
     dielectric_score = _minimum_score(dielectric_total, 15.0) if dielectric_total is not None else _high_k_chemistry_score(elements, descriptors, family)
     dielectric_label = "Static dielectric response" if dielectric_total is not None else "High-k chemistry proxy"
-    dielectric_source = "property" if dielectric_total is not None else "composition-proxy"
+    dielectric_source = _property_source(candidate, "dielectricTotal") if dielectric_total is not None else "composition-proxy"
     dielectric_threshold = "k_total >=15 preferred" if dielectric_total is not None else "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
     offset_score = _offset_score(electron_offset, hole_offset)
     interface_score = _high_k_interface_score(elements, family)
@@ -1392,7 +1810,7 @@ def _high_k_evidence(
             dielectric_threshold,
         ),
         _evidence_gate("interfaceCompatibility", "Interface compatibility proxy", None, interface_score, "composition-proxy", "Si/channel interface risk proxy"),
-        _evidence_gate("bandOffset", "Band offset leakage guard", _first_present(electron_offset, hole_offset), offset_score, "property" if electron_offset is not None or hole_offset is not None else "missing-proxy", "electron/hole offset >=1 eV"),
+        _evidence_gate("bandOffset", "Band offset leakage guard", _first_present(electron_offset, hole_offset), offset_score, _property_source(candidate, "bandOffsetElectronEv", "bandOffsetHoleEv") if electron_offset is not None or hole_offset is not None else "missing-proxy", "electron/hole offset >=1 eV"),
         _evidence_gate("densityPolarizability", "Density/polarizability proxy", candidate.get("densityGcm3"), raw_scores["density"], "mp-summary", "density near high-k oxide target"),
     ]
     missing = _missing_properties(
@@ -1440,17 +1858,17 @@ def _photovoltaic_evidence(
     transport_score = _carrier_mass_score(electron_mass, hole_mass)
     gates = [
         _evidence_gate("phaseStability", "Phase stability", candidate.get("energyAboveHullEv"), _maximum_score(candidate.get("energyAboveHullEv"), 0.05, 0.20), "mp-summary", "<=0.05 eV preferred"),
-        _evidence_gate("opticalGap", "Optical gap alignment", gap_value, _target_score(gap_value, 1.45), "property" if direct_gap is not None else "mp-summary", "near 1.45 eV"),
+        _evidence_gate("opticalGap", "Optical gap alignment", gap_value, _target_score(gap_value, 1.45), _property_source(candidate, "directBandGapEv") if direct_gap is not None else "mp-summary", "near 1.45 eV"),
         _evidence_gate(
             "absorption",
             "Absorption strength",
             absorption,
             _minimum_score(absorption, 1e4) if absorption is not None else absorber_score,
-            "property" if absorption is not None else "composition-proxy",
+            _property_source(candidate, "absorptionCoefficientCm1") if absorption is not None else "composition-proxy",
             ">=1e4 cm^-1 preferred",
         ),
         _evidence_gate("absorberChemistry", "Absorber chemistry", None, absorber_score, "composition-proxy", "chalcogenide/halide/oxide absorber proxy"),
-        _evidence_gate("carrierTransport", "Carrier transport proxy", _first_present(electron_mass, hole_mass), transport_score, "property" if electron_mass is not None or hole_mass is not None else "missing-proxy", "low balanced effective masses"),
+        _evidence_gate("carrierTransport", "Carrier transport proxy", _first_present(electron_mass, hole_mass), transport_score, _property_source(candidate, "effectiveMassElectron", "effectiveMassHole") if electron_mass is not None or hole_mass is not None else "missing-proxy", "low balanced effective masses"),
         _evidence_gate("chemistryRisk", "Toxicity/supply risk", None, max(0.0, 1.0 - float(risk_profile.get("penalty") or 0.0)), "composition", "risk flags penalized"),
     ]
     missing = _missing_properties(
@@ -1501,7 +1919,7 @@ def _thermoelectric_evidence(
         _evidence_gate("narrowGap", "Narrow-gap electronic structure", candidate.get("bandGapEv"), _target_score(candidate.get("bandGapEv"), 0.35), "mp-summary", "near 0.35 eV"),
         _evidence_gate("heavyElements", "Heavy-element phonon proxy", None, heavy_score, "composition-proxy", "heavy atoms favor low lattice thermal conductivity"),
         _evidence_gate("structuralComplexity", "Complexity proxy", descriptors.get("numElements"), complexity_score, "composition-proxy", "multi-element complexity proxy"),
-        _evidence_gate("transport", "Transport coefficients", _first_present(power_factor, seebeck, thermal_conductivity), transport_score, "property" if any(value is not None for value in [seebeck, power_factor, thermal_conductivity]) else "missing-proxy", "Seebeck/power factor/kappa"),
+        _evidence_gate("transport", "Transport coefficients", _first_present(power_factor, seebeck, thermal_conductivity), transport_score, _property_source(candidate, "seebeckUvK", "powerFactorUwCmK2", "latticeThermalConductivityWmK") if any(value is not None for value in [seebeck, power_factor, thermal_conductivity]) else "missing-proxy", "Seebeck/power factor/kappa"),
         _evidence_gate("chemistryRisk", "Chemistry risk", None, max(0.0, 1.0 - float(risk_profile.get("penalty") or 0.0)), "composition", "risk flags penalized"),
     ]
     missing = _missing_properties(
@@ -1601,14 +2019,30 @@ def _evidence_source_level(gates: list[dict[str, Any]]) -> str:
     if not gates:
         return "none"
     property_count = sum(1 for gate in gates if gate.get("source") == "property")
+    surrogate_count = sum(1 for gate in gates if gate.get("source") == "surrogate-property")
     proxy_count = sum(1 for gate in gates if str(gate.get("source") or "").endswith("proxy") or gate.get("source") == "composition-proxy")
     if property_count >= max(2, len(gates) // 2):
         return "property-backed"
     if property_count > 0:
         return "mixed-property-proxy"
+    if surrogate_count >= max(2, len(gates) // 2):
+        return "surrogate-backed"
+    if surrogate_count > 0:
+        return "mixed-surrogate-proxy"
     if proxy_count:
         return "proxy-only"
     return "summary-only"
+
+
+def _property_source(candidate: dict[str, Any], *keys: str) -> str:
+    provenance = candidate.get("propertyProvenance")
+    if not isinstance(provenance, dict):
+        return "property"
+    for key in keys:
+        entry = provenance.get(key)
+        if isinstance(entry, dict) and entry.get("backend") == "local-surrogate":
+            return "surrogate-property"
+    return "property"
 
 
 def _evidence_interpretation(profile: dict[str, Any], candidate: dict[str, Any], family: str) -> str:

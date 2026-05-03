@@ -24,5 +24,13 @@ describe("approval hooks", () => {
         severity: "warning",
       },
     });
+    expect(handler?.({ toolName: "materials_execute_research_plan", params: {} })).toEqual({
+      requireApproval: {
+        title: "Approve materials_execute_research_plan",
+        description:
+          "materials_execute_research_plan can run heavier local computation and may write multiple artifacts under the Materials Lab workspace.",
+        severity: "warning",
+      },
+    });
   });
 });

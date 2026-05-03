@@ -18,6 +18,8 @@ import type {
   BridgeSuccess,
   CompareCandidatesPayload,
   CompareCandidatesResult,
+  ExecuteResearchPlanPayload,
+  ExecuteResearchPlanResult,
   ExportReportPayload,
   ExportReportResult,
   FetchStructurePayload,
@@ -75,6 +77,10 @@ export class PythonBridgeService {
 
   public async planResearchLoop(payload: PlanResearchLoopPayload): Promise<BridgeSuccess<PlanResearchLoopResult>> {
     return this.call("plan_research_loop", payload);
+  }
+
+  public async executeResearchPlan(payload: ExecuteResearchPlanPayload): Promise<BridgeSuccess<ExecuteResearchPlanResult>> {
+    return this.call("execute_research_plan", payload, 10 * 60_000);
   }
 
   public async aseRelax(payload: AseRelaxPayload): Promise<BridgeSuccess<AseRelaxResult>> {

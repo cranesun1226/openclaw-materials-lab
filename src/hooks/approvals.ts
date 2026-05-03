@@ -1,6 +1,10 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
 
-const APPROVAL_REQUIRED_TOOLS = new Set(["materials_ase_relax", "materials_batch_screen"]);
+const APPROVAL_REQUIRED_TOOLS = new Set([
+  "materials_ase_relax",
+  "materials_batch_screen",
+  "materials_execute_research_plan",
+]);
 
 export function registerMaterialsApprovalHook(api: OpenClawPluginApi): void {
   api.on("before_tool_call", (event) => {

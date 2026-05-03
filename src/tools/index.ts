@@ -5,6 +5,7 @@ import { createMaterialsAnalyzeStructureTool } from "./materials-analyze-structu
 import { createMaterialsAseRelaxTool } from "./materials-ase-relax.js";
 import { createMaterialsBatchScreenTool } from "./materials-batch-screen.js";
 import { createMaterialsCompareCandidatesTool } from "./materials-compare-candidates.js";
+import { createMaterialsExecuteResearchPlanTool } from "./materials-execute-research-plan.js";
 import { createMaterialsExportReportTool } from "./materials-export-report.js";
 import { createMaterialsFetchStructureTool } from "./materials-fetch-structure.js";
 import { createMaterialsPlanResearchLoopTool } from "./materials-plan-research-loop.js";
@@ -21,4 +22,5 @@ export function registerMaterialsTools(api: OpenClawPluginApi, context: Material
   api.registerTool(createMaterialsExportReportTool(context));
   api.registerTool(createMaterialsAseRelaxTool(context), { optional: true });
   api.registerTool(createMaterialsBatchScreenTool(context), { optional: true });
+  api.registerTool(createMaterialsExecuteResearchPlanTool(context), { optional: true });
 }

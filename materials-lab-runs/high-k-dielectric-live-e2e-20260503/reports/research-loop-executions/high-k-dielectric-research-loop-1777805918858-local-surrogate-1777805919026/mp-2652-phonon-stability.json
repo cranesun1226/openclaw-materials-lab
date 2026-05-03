@@ -1,0 +1,23 @@
+{
+  "backend": "local-surrogate",
+  "calculationId": "mp-2652-phonon-stability",
+  "calculationType": "phonon-stability",
+  "costClass": "expensive",
+  "estimatedWallTimeHours": 18.0,
+  "formula": "Y2O3",
+  "label": "Phonon stability",
+  "materialId": "mp-2652",
+  "method": "phonon or imaginary-mode screen",
+  "properties": {
+    "phononStability": 1.0
+  },
+  "provenance": {
+    "backend": "local-surrogate",
+    "basis": "composition, MP summary fields, and deterministic domain heuristics",
+    "confidence": "low",
+    "generatedAt": 1777805919,
+    "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment"
+  },
+  "resultPath": "materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/research-loop-executions/high-k-dielectric-research-loop-1777805918858-local-surrogate-1777805919026/mp-2652-phonon-stability.json",
+  "status": "completed-surrogate"
+}

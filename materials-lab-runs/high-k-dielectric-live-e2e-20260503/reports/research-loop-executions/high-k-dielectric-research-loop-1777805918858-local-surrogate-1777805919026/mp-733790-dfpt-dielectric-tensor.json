@@ -1,0 +1,24 @@
+{
+  "backend": "local-surrogate",
+  "calculationId": "mp-733790-dfpt-dielectric-tensor",
+  "calculationType": "dfpt-dielectric-tensor",
+  "costClass": "expensive",
+  "estimatedWallTimeHours": 12.0,
+  "formula": "SiO2",
+  "label": "DFPT dielectric tensor",
+  "materialId": "mp-733790",
+  "method": "DFPT electronic + ionic dielectric calculation",
+  "properties": {
+    "dielectricElectronic": 1.8,
+    "dielectricTotal": 4.5
+  },
+  "provenance": {
+    "backend": "local-surrogate",
+    "basis": "composition, MP summary fields, and deterministic domain heuristics",
+    "confidence": "low",
+    "generatedAt": 1777805919,
+    "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment"
+  },
+  "resultPath": "materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/research-loop-executions/high-k-dielectric-research-loop-1777805918858-local-surrogate-1777805919026/mp-733790-dfpt-dielectric-tensor.json",
+  "status": "completed-surrogate"
+}

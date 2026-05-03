@@ -1,0 +1,24 @@
+{
+  "backend": "local-surrogate",
+  "calculationId": "mp-2652-band-alignment",
+  "calculationType": "band-alignment",
+  "costClass": "medium",
+  "estimatedWallTimeHours": 6.0,
+  "formula": "Y2O3",
+  "label": "Band offsets",
+  "materialId": "mp-2652",
+  "method": "absolute band alignment against target channel",
+  "properties": {
+    "bandOffsetElectronEv": 1.3111,
+    "bandOffsetHoleEv": 2.7862
+  },
+  "provenance": {
+    "backend": "local-surrogate",
+    "basis": "composition, MP summary fields, and deterministic domain heuristics",
+    "confidence": "low",
+    "generatedAt": 1777805960,
+    "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment"
+  },
+  "resultPath": "materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/research-loop-executions/high-k-dielectric-research-loop-1777805960765-local-surrogate-1777805960931/mp-2652-band-alignment.json",
+  "status": "completed-surrogate"
+}

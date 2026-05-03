@@ -1,0 +1,24 @@
+{
+  "backend": "local-surrogate",
+  "calculationId": "mp-1143-dfpt-dielectric-tensor",
+  "calculationType": "dfpt-dielectric-tensor",
+  "costClass": "expensive",
+  "estimatedWallTimeHours": 12.0,
+  "formula": "Al2O3",
+  "label": "DFPT dielectric tensor",
+  "materialId": "mp-1143",
+  "method": "DFPT electronic + ionic dielectric calculation",
+  "properties": {
+    "dielectricElectronic": 2.09,
+    "dielectricTotal": 9.5
+  },
+  "provenance": {
+    "backend": "local-surrogate",
+    "basis": "composition, MP summary fields, and deterministic domain heuristics",
+    "confidence": "low",
+    "generatedAt": 1777805960,
+    "notAReplacementFor": "DFT, DFPT, NEB, AIMD, Boltzmann transport, or experiment"
+  },
+  "resultPath": "materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/research-loop-executions/high-k-dielectric-research-loop-1777805960765-local-surrogate-1777805960931/mp-1143-dfpt-dielectric-tensor.json",
+  "status": "completed-surrogate"
+}

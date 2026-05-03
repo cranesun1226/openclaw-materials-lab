@@ -79,7 +79,7 @@ describe("CLI helpers", () => {
       mpApiKey: "configured",
       source: {
         tools: {
-          allow: ["materials_batch_screen", "materials_ase_relax"],
+          allow: ["materials_batch_screen", "materials_ase_relax", "materials_execute_research_plan"],
         },
       },
     });
@@ -89,6 +89,7 @@ describe("CLI helpers", () => {
     expect(report.config.hasMpApiKey).toBe(true);
     expect(report.tools.materials_ase_relax).toContain("enabled");
     expect(report.tools.materials_batch_screen).toContain("enabled");
+    expect(report.tools.materials_execute_research_plan).toContain("enabled");
   });
 });
 

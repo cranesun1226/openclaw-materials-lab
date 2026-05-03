@@ -83,5 +83,17 @@ describe("Python bridge", () => {
     expect(result.data.plan.calculationQueue).toBeDefined();
     expect(result.artifacts).toContain(result.data.manifestPath);
     expect(await readFile(result.data.reportPath, "utf8")).toContain("Approval Gates");
+
+    const execution = await bridge.executeResearchPlan({
+      planPath: result.data.manifestPath,
+      artifactDir: path.join(tempDir, "reports", "research-loop-executions"),
+      backend: "local-surrogate",
+      allowBlockedSurrogate: true,
+      maxSteps: 3,
+    });
+
+    expect(execution.data.completedCalculations).toBeGreaterThan(0);
+    expect(execution.data.propertyUpdates[0]?.propertyProvenance).toBeDefined();
+    expect(await readFile(execution.data.reportPath, "utf8")).toContain("local-surrogate");
   });
 });
