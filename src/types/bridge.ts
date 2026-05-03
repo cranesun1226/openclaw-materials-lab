@@ -444,6 +444,7 @@ export interface ExecuteResearchPlanPayload {
 export interface ExecuteResearchPlanResult {
   runId: string;
   backend: string;
+  scheduler?: Record<string, unknown>;
   statusSummary?: string;
   manifestPath: string;
   reportPath: string;

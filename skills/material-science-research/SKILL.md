@@ -79,6 +79,8 @@ Use `materials_execute_research_plan` with `executionMode: "monitor"` after a `p
 - Pass `executionManifestPath`, `planPath`, and the backend name.
 - Set `backendConfig.parseOutputs: true` to parse discovered outputs into an evidence ledger.
 - Set `backendConfig.claimReview: true` only when you want the monitor step to emit claim-review audit artifacts immediately.
+- For HPC, set `backendConfig.scheduler` to `slurm` or `pbs` during prepare/submit. Include `backendConfig.resources` such as `queue`, `account`, `nodes`, `ntasks`, `cpusPerTask`, `memoryGb`, `walltime`, and `modules`.
+- During monitor, scheduler job IDs from `submission-manifest.json` are checked through `squeue`/`sacct` or `qstat` when those commands are available. Scheduler status is supporting provenance; parsed outputs are still required for property evidence.
 
 ### 3. Define evaluation criteria
 

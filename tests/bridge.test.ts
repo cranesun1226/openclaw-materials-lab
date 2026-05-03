@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -139,6 +139,103 @@ describe("Python bridge", () => {
     expect(monitored.data.parsedEvidenceRows).toBeGreaterThan(0);
     expect(monitored.data.evidenceLedgerPath).toBeDefined();
     expect(await readFile(monitored.data.reportPath, "utf8")).toContain("Backend Monitor");
+
+    const fakeBin = path.join(tempDir, "fake-bin");
+    await mkdir(fakeBin, { recursive: true });
+    const fakeSqueue = path.join(fakeBin, "squeue");
+    await writeFile(fakeSqueue, "#!/usr/bin/env bash\necho '12345|RUNNING|00:12:34|1|None'\n", "utf8");
+    await chmod(fakeSqueue, 0o755);
+    const slurmPreparation = await bridge.executeResearchPlan({
+      planPath: result.data.manifestPath,
+      artifactDir: path.join(tempDir, "reports", "research-loop-slurm-prepare"),
+      backend: "quantum-espresso",
+      executionMode: "prepare",
+      maxSteps: 8,
+      backendConfig: {
+        pseudoDir: "./pseudo",
+        kpoints: "2 2 2 0 0 0",
+        allowDevFixtures: true,
+        scheduler: "slurm",
+        statusCommand: fakeSqueue,
+        resources: {
+          queue: "debug",
+          account: "materials",
+          nodes: 2,
+          ntasks: 8,
+          cpusPerTask: 2,
+          memoryGb: 16,
+          walltime: "01:30:00",
+          modules: ["quantum-espresso"],
+        },
+      },
+    });
+    expect(slurmPreparation.data.scheduler?.scheduler).toBe("slurm");
+    const slurmSubmit = slurmPreparation.data.inputPaths?.find((item) => item.endsWith("submit.slurm"));
+    expect(slurmSubmit).toBeDefined();
+    const slurmText = await readFile(slurmSubmit ?? "", "utf8");
+    expect(slurmText).toContain("#SBATCH --partition=debug");
+    expect(slurmText).toContain("module load quantum-espresso");
+    expect(slurmText).toContain("./run.sh");
+
+    const slurmStepManifestPath = slurmPreparation.data.resultPaths.find((item) => item.endsWith("step-manifest.json"));
+    const slurmStep = JSON.parse(await readFile(slurmStepManifestPath ?? "", "utf8")) as Record<string, unknown>;
+    await writeFile(
+      path.join(path.dirname(slurmStepManifestPath ?? ""), "submission-manifest.json"),
+      JSON.stringify(
+        {
+          calculationId: slurmStep.calculationId,
+          status: "submitted",
+          scheduler: { scheduler: "slurm", jobId: "12345" },
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+    const slurmMonitored = await bridge.executeResearchPlan({
+      planPath: result.data.manifestPath,
+      artifactDir: path.join(tempDir, "reports", "research-loop-slurm-monitor"),
+      backend: "quantum-espresso",
+      executionMode: "monitor",
+      executionManifestPath: slurmPreparation.data.manifestPath,
+      backendConfig: { parseOutputs: false },
+    });
+    const slurmMonitorManifest = JSON.parse(await readFile(slurmMonitored.data.manifestPath, "utf8")) as {
+      monitored: Array<{ schedulerStatus?: { state?: string; jobId?: string } }>;
+    };
+    expect(slurmMonitorManifest.monitored[0]?.schedulerStatus?.state).toBe("running");
+    expect(slurmMonitorManifest.monitored[0]?.schedulerStatus?.jobId).toBe("12345");
+    expect(await readFile(slurmMonitored.data.reportPath, "utf8")).toContain("Scheduler");
+
+    const pbsPreparation = await bridge.executeResearchPlan({
+      planPath: result.data.manifestPath,
+      artifactDir: path.join(tempDir, "reports", "research-loop-pbs-prepare"),
+      backend: "quantum-espresso",
+      executionMode: "prepare",
+      maxSteps: 8,
+      backendConfig: {
+        pseudoDir: "./pseudo",
+        kpoints: "2 2 2 0 0 0",
+        allowDevFixtures: true,
+        scheduler: "pbs",
+        resources: {
+          queue: "batch",
+          account: "materials",
+          nodes: 1,
+          ntasks: 4,
+          cpusPerTask: 2,
+          memoryGb: 8,
+          walltime: "00:45:00",
+        },
+      },
+    });
+    expect(pbsPreparation.data.scheduler?.scheduler).toBe("pbs");
+    const pbsSubmit = pbsPreparation.data.inputPaths?.find((item) => item.endsWith("submit.pbs"));
+    expect(pbsSubmit).toBeDefined();
+    const pbsText = await readFile(pbsSubmit ?? "", "utf8");
+    expect(pbsText).toContain("#PBS -q batch");
+    expect(pbsText).toContain("#PBS -l select=1:ncpus=8:mem=8gb");
+    expect(pbsText).toContain("./run.sh");
   });
 
   it("compiles a dynamic research protocol before candidates exist", async () => {

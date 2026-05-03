@@ -3179,6 +3179,7 @@ def _execute_external_backend_plan(
     input_paths: list[str] = []
     warnings: list[str] = []
     allow_blocked_steps = backend_config.get("allowBlockedSteps") is True
+    scheduler = _normalize_scheduler_config(backend_config, run_dir=run_dir)
     if execution_mode == "submit" and not allow_execution:
         warnings.append("executionMode=submit was requested, but allowExecution=false; prepared inputs without launching external jobs.")
         execution_mode = "prepare"
@@ -3241,6 +3242,7 @@ def _execute_external_backend_plan(
         "runId": run_id,
         "backend": backend,
         "executionMode": execution_mode,
+        "scheduler": scheduler,
         "allowBlockedSteps": allow_blocked_steps,
         "planId": plan.get("planId"),
         "preset": plan.get("preset"),
@@ -3263,6 +3265,7 @@ def _execute_external_backend_plan(
     return {
         "runId": run_id,
         "backend": backend,
+        "scheduler": scheduler,
         "statusSummary": status_summary,
         "manifestPath": str(manifest_path),
         "reportPath": str(report_path),
@@ -3317,6 +3320,17 @@ def _monitor_external_backend_execution(
     parsed_rows: list[dict[str, Any]] = []
     parsed_artifacts: list[dict[str, Any]] = []
     parse_outputs = backend_config.get("parseOutputs", True) is not False
+    submitted_by_calculation = {
+        str(item.get("calculationId")): item
+        for item in prior_manifest.get("submitted") or []
+        if isinstance(item, dict) and item.get("calculationId")
+    }
+    scheduler = (
+        prior_manifest.get("scheduler")
+        if isinstance(prior_manifest.get("scheduler"), dict)
+        else _normalize_scheduler_config(backend_config)
+    )
+    query_scheduler = backend_config.get("queryScheduler", True) is not False
 
     for step in prior_manifest.get("prepared") or []:
         if not isinstance(step, dict):
@@ -3324,13 +3338,24 @@ def _monitor_external_backend_execution(
         step_manifest_path = Path(str(step.get("stepManifestPath") or ""))
         step_dir = step_manifest_path.parent if step_manifest_path.exists() else Path(str(step.get("executionScript") or ".")).parent
         outputs = _backend_output_candidates(step_dir, backend)
-        status = _backend_step_observed_status(outputs, backend)
+        output_status = _backend_step_observed_status(outputs, backend)
+        submitted_record = _submitted_record_for_step(step, submitted_by_calculation, step_dir)
+        scheduler_status = _scheduler_status_for_step(
+            step=step,
+            submitted_record=submitted_record,
+            scheduler=scheduler,
+            backend_config=backend_config,
+            query_scheduler=query_scheduler,
+        )
+        status = _merge_output_and_scheduler_status(output_status, scheduler_status)
         record = {
             "calculationId": step.get("calculationId"),
             "materialId": step.get("materialId"),
             "formula": step.get("formula"),
             "backend": backend,
             "status": status,
+            "outputStatus": output_status,
+            "schedulerStatus": scheduler_status,
             "stepDir": str(step_dir),
             "outputPaths": [str(path) for path in outputs],
             "evidenceRowsParsed": 0,
@@ -3391,6 +3416,7 @@ def _monitor_external_backend_execution(
         "runId": run_id,
         "backend": backend,
         "executionMode": "monitor",
+        "scheduler": scheduler,
         "sourceExecutionManifestPath": str(manifest_path),
         "planId": plan.get("planId"),
         "generatedAt": int(time.time()),
@@ -3418,6 +3444,7 @@ def _monitor_external_backend_execution(
     return {
         "runId": run_id,
         "backend": backend,
+        "scheduler": scheduler,
         "statusSummary": f"Monitored {backend} backend",
         "manifestPath": str(monitor_manifest_path),
         "reportPath": str(monitor_report_path),
@@ -3433,6 +3460,300 @@ def _monitor_external_backend_execution(
         "claimReviews": claim_reviews,
         "warnings": warnings,
     }
+
+
+def _submitted_record_for_step(
+    step: dict[str, Any],
+    submitted_by_calculation: dict[str, dict[str, Any]],
+    step_dir: Path,
+) -> dict[str, Any] | None:
+    calculation_id = str(step.get("calculationId") or "")
+    if calculation_id in submitted_by_calculation:
+        return submitted_by_calculation[calculation_id]
+    submission_path = step_dir / "submission-manifest.json"
+    if submission_path.exists():
+        try:
+            return ensure_dict(json.loads(submission_path.read_text("utf-8")), field="submissionManifest")
+        except Exception:
+            return None
+    return None
+
+
+def _scheduler_status_for_step(
+    *,
+    step: dict[str, Any],
+    submitted_record: dict[str, Any] | None,
+    scheduler: dict[str, Any],
+    backend_config: dict[str, Any],
+    query_scheduler: bool,
+) -> dict[str, Any]:
+    scheduler_name = str(
+        ((submitted_record or {}).get("scheduler") or {}).get("scheduler")
+        if isinstance((submitted_record or {}).get("scheduler"), dict)
+        else scheduler.get("scheduler")
+    )
+    if scheduler_name not in {"slurm", "pbs"}:
+        return {"scheduler": "local", "state": "not-scheduler-managed", "terminal": False}
+    submitted_scheduler = (submitted_record or {}).get("scheduler") if isinstance((submitted_record or {}).get("scheduler"), dict) else {}
+    job_id = submitted_scheduler.get("jobId") or _job_id_from_step_dir(step)
+    status = {
+        "scheduler": scheduler_name,
+        "jobId": job_id,
+        "state": "unknown-job-id" if not job_id else "unknown",
+        "terminal": False,
+        "queried": False,
+    }
+    if not job_id:
+        return status
+    if not query_scheduler:
+        status.update({"state": "query-disabled", "queried": False})
+        return status
+    query = _query_scheduler_job(
+        scheduler_name=scheduler_name,
+        job_id=str(job_id),
+        scheduler=scheduler,
+        backend_config=backend_config,
+    )
+    status.update(query)
+    return status
+
+
+def _job_id_from_step_dir(step: dict[str, Any]) -> str | None:
+    manifest_path = step.get("stepManifestPath")
+    if not manifest_path:
+        return None
+    submission_path = Path(str(manifest_path)).parent / "submission-manifest.json"
+    if not submission_path.exists():
+        return None
+    try:
+        submission = json.loads(submission_path.read_text("utf-8"))
+    except Exception:
+        return None
+    scheduler = submission.get("scheduler") if isinstance(submission, dict) and isinstance(submission.get("scheduler"), dict) else {}
+    job_id = scheduler.get("jobId")
+    return str(job_id) if job_id else None
+
+
+def _query_scheduler_job(
+    *,
+    scheduler_name: str,
+    job_id: str,
+    scheduler: dict[str, Any],
+    backend_config: dict[str, Any],
+) -> dict[str, Any]:
+    if scheduler_name == "slurm":
+        return _query_slurm_job(job_id=job_id, scheduler=scheduler, backend_config=backend_config)
+    if scheduler_name == "pbs":
+        return _query_pbs_job(job_id=job_id, scheduler=scheduler, backend_config=backend_config)
+    return {"state": "not-scheduler-managed", "terminal": False, "queried": False}
+
+
+def _query_slurm_job(*, job_id: str, scheduler: dict[str, Any], backend_config: dict[str, Any]) -> dict[str, Any]:
+    squeue = str(scheduler.get("statusCommand") or "squeue")
+    sacct = str(scheduler.get("accountingCommand") or "sacct")
+    timeout = int(backend_config.get("schedulerQueryTimeoutSeconds") or 20)
+    squeue_result = _run_scheduler_command([squeue, "-h", "-j", job_id, "-o", "%i|%T|%M|%D|%R"], timeout=timeout)
+    if squeue_result.get("available") and squeue_result.get("returnCode") == 0 and str(squeue_result.get("stdout") or "").strip():
+        parsed = _parse_slurm_squeue(str(squeue_result.get("stdout") or ""))
+        return {
+            "state": parsed.get("state") or "queued-or-running",
+            "rawState": parsed.get("state"),
+            "elapsed": parsed.get("elapsed"),
+            "nodes": parsed.get("nodes"),
+            "reason": parsed.get("reason"),
+            "terminal": False,
+            "queried": True,
+            "querySource": "squeue",
+            "query": squeue_result,
+        }
+    sacct_result = _run_scheduler_command([sacct, "-n", "-j", job_id, "--format=JobIDRaw,State,Elapsed,ExitCode", "--parsable2"], timeout=timeout)
+    if sacct_result.get("available") and sacct_result.get("returnCode") == 0 and str(sacct_result.get("stdout") or "").strip():
+        parsed = _parse_slurm_sacct(str(sacct_result.get("stdout") or ""), job_id)
+        state = parsed.get("state") or "not-in-active-queue"
+        return {
+            "state": state,
+            "rawState": parsed.get("state"),
+            "elapsed": parsed.get("elapsed"),
+            "exitCode": parsed.get("exitCode"),
+            "terminal": _slurm_state_terminal(str(state)),
+            "queried": True,
+            "querySource": "sacct",
+            "query": sacct_result,
+        }
+    return {
+        "state": "scheduler-query-unavailable",
+        "terminal": False,
+        "queried": False,
+        "querySource": "squeue+sacct",
+        "query": {"squeue": squeue_result, "sacct": sacct_result},
+    }
+
+
+def _query_pbs_job(*, job_id: str, scheduler: dict[str, Any], backend_config: dict[str, Any]) -> dict[str, Any]:
+    qstat = str(scheduler.get("statusCommand") or "qstat")
+    timeout = int(backend_config.get("schedulerQueryTimeoutSeconds") or 20)
+    result = _run_scheduler_command([qstat, "-f", job_id], timeout=timeout)
+    if result.get("available") and result.get("returnCode") == 0 and str(result.get("stdout") or "").strip():
+        parsed = _parse_pbs_qstat(str(result.get("stdout") or ""))
+        state = parsed.get("state") or "unknown"
+        return {
+            "state": state,
+            "rawState": parsed.get("rawState"),
+            "elapsed": parsed.get("elapsed"),
+            "exitStatus": parsed.get("exitStatus"),
+            "terminal": _pbs_state_terminal(str(state)),
+            "queried": True,
+            "querySource": "qstat",
+            "query": result,
+        }
+    return {
+        "state": "scheduler-query-unavailable",
+        "terminal": False,
+        "queried": False,
+        "querySource": "qstat",
+        "query": result,
+    }
+
+
+def _run_scheduler_command(command: list[str], *, timeout: int) -> dict[str, Any]:
+    executable = shutil.which(command[0])
+    if executable is None:
+        return {
+            "available": False,
+            "command": command,
+            "returnCode": None,
+            "stdout": "",
+            "stderr": f"Executable not found: {command[0]}",
+        }
+    try:
+        completed = subprocess.run(
+            [executable, *command[1:]],
+            text=True,
+            capture_output=True,
+            timeout=timeout,
+            check=False,
+        )
+        return {
+            "available": True,
+            "command": command,
+            "returnCode": completed.returncode,
+            "stdout": completed.stdout[-4000:],
+            "stderr": completed.stderr[-4000:],
+        }
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "available": True,
+            "command": command,
+            "returnCode": None,
+            "stdout": exc.stdout.decode("utf-8", errors="replace") if isinstance(exc.stdout, bytes) else exc.stdout or "",
+            "stderr": exc.stderr.decode("utf-8", errors="replace") if isinstance(exc.stderr, bytes) else exc.stderr or f"Timed out after {timeout}s",
+        }
+
+
+def _parse_slurm_squeue(text: str) -> dict[str, Any]:
+    first = next((line for line in text.splitlines() if line.strip()), "")
+    parts = first.split("|")
+    return {
+        "jobId": parts[0] if len(parts) > 0 else None,
+        "state": _normalize_slurm_state(parts[1] if len(parts) > 1 else None),
+        "elapsed": parts[2] if len(parts) > 2 else None,
+        "nodes": parts[3] if len(parts) > 3 else None,
+        "reason": parts[4] if len(parts) > 4 else None,
+    }
+
+
+def _parse_slurm_sacct(text: str, job_id: str) -> dict[str, Any]:
+    selected: list[str] = []
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        parts = line.split("|")
+        if parts and parts[0] == job_id:
+            selected = parts
+            break
+        if not selected:
+            selected = parts
+    return {
+        "jobId": selected[0] if len(selected) > 0 else job_id,
+        "state": _normalize_slurm_state(selected[1] if len(selected) > 1 else None),
+        "elapsed": selected[2] if len(selected) > 2 else None,
+        "exitCode": selected[3] if len(selected) > 3 else None,
+    }
+
+
+def _parse_pbs_qstat(text: str) -> dict[str, Any]:
+    fields: dict[str, str] = {}
+    current_key = None
+    for line in text.splitlines():
+        if " = " in line:
+            key, value = line.split(" = ", 1)
+            current_key = key.strip()
+            fields[current_key] = value.strip()
+        elif current_key and line.startswith("\t"):
+            fields[current_key] += line.strip()
+    raw_state = fields.get("job_state")
+    return {
+        "rawState": raw_state,
+        "state": _normalize_pbs_state(raw_state),
+        "elapsed": fields.get("resources_used.walltime"),
+        "exitStatus": fields.get("exit_status"),
+    }
+
+
+def _normalize_slurm_state(state: Any) -> str:
+    text = str(state or "").strip().upper()
+    mapping = {
+        "PENDING": "pending",
+        "CONFIGURING": "pending",
+        "RUNNING": "running",
+        "COMPLETING": "running",
+        "COMPLETED": "completed",
+        "FAILED": "failed",
+        "CANCELLED": "cancelled",
+        "TIMEOUT": "failed",
+        "OUT_OF_MEMORY": "failed",
+        "NODE_FAIL": "failed",
+        "PREEMPTED": "failed",
+        "BOOT_FAIL": "failed",
+    }
+    return mapping.get(text.split()[0] if text else "", text.lower() or "unknown")
+
+
+def _normalize_pbs_state(state: Any) -> str:
+    text = str(state or "").strip().upper()
+    mapping = {
+        "Q": "pending",
+        "H": "pending",
+        "W": "pending",
+        "R": "running",
+        "E": "running",
+        "C": "completed",
+        "F": "completed",
+    }
+    return mapping.get(text, text.lower() or "unknown")
+
+
+def _slurm_state_terminal(state: str) -> bool:
+    return state in {"completed", "failed", "cancelled"}
+
+
+def _pbs_state_terminal(state: str) -> bool:
+    return state in {"completed", "failed", "cancelled"}
+
+
+def _merge_output_and_scheduler_status(output_status: str, scheduler_status: dict[str, Any]) -> str:
+    scheduler_state = str(scheduler_status.get("state") or "")
+    if output_status == "completed":
+        return "completed"
+    if output_status == "failed":
+        return "failed"
+    if scheduler_state in {"failed", "cancelled"}:
+        return scheduler_state
+    if scheduler_state == "completed" and output_status in {"waiting-for-outputs", "outputs-detected"}:
+        return "completed-awaiting-parse" if output_status == "outputs-detected" else "completed-missing-outputs"
+    if scheduler_state in {"running", "pending"}:
+        return scheduler_state
+    return output_status
 
 
 def _backend_output_candidates(step_dir: Path, backend: str) -> list[Path]:
@@ -3491,6 +3812,7 @@ def _monitor_execution_markdown(manifest: dict[str, Any]) -> str:
         "",
         "## Summary",
         "",
+        f"- Scheduler: `{(manifest.get('scheduler') or {}).get('scheduler', 'local')}`",
         f"- Source execution manifest: {manifest.get('sourceExecutionManifestPath')}",
         f"- Monitored calculations: {manifest.get('monitoredCalculations')}",
         f"- Completed calculations: {manifest.get('completedCalculations')}",
@@ -3500,12 +3822,14 @@ def _monitor_execution_markdown(manifest: dict[str, Any]) -> str:
         "",
         "## Calculations",
         "",
-        "| Calculation | Material | Status | Outputs | Parsed Rows |",
-        "| --- | --- | --- | ---: | ---: |",
+        "| Calculation | Material | Status | Scheduler State | Job ID | Outputs | Parsed Rows |",
+        "| --- | --- | --- | --- | --- | ---: | ---: |",
     ]
     for item in manifest.get("monitored") or []:
+        scheduler_status = item.get("schedulerStatus") if isinstance(item.get("schedulerStatus"), dict) else {}
         lines.append(
             f"| {item.get('calculationId')} | {item.get('materialId') or '-'} | {item.get('status')} | "
+            f"{scheduler_status.get('state', '-')} | {scheduler_status.get('jobId', '-')} | "
             f"{len(item.get('outputPaths') or [])} | {item.get('evidenceRowsParsed')} |"
         )
     lines.extend([
@@ -3563,10 +3887,24 @@ def _prepare_external_backend_step(
         input_paths = _write_aiida_inputs(step, material, structure_paths, step_dir, backend_config)
     else:
         raise WorkerError("BACKEND_NOT_AVAILABLE", f"Unsupported backend: {backend}")
+    execution_script = next((item for item in input_paths if item.endswith(("run.sh", "submit.sh", "atomate2_flow.py", "aiida_submit.py"))), None)
+    scheduler = _normalize_scheduler_config(backend_config, run_dir=step_dir.parent)
+    scheduler_script = None
+    if scheduler["scheduler"] in {"slurm", "pbs"} and execution_script:
+        scheduler_script = _write_scheduler_submit_script(
+            scheduler=scheduler,
+            backend=backend,
+            step=step,
+            material=material,
+            step_dir=step_dir,
+            execution_script=execution_script,
+        )
+        input_paths.append(scheduler_script)
     all_inputs = [*structure_paths.values(), *input_paths]
     step_manifest = {
         "calculationId": step.get("calculationId"),
         "backend": backend,
+        "scheduler": scheduler,
         "status": "prepared",
         "materialId": material.get("materialId"),
         "formula": material.get("formula"),
@@ -3577,7 +3915,8 @@ def _prepare_external_backend_step(
         "writesProperties": step.get("writesProperties") or [],
         "inputPaths": all_inputs,
         "structurePaths": structure_paths,
-        "executionScript": next((item for item in input_paths if item.endswith(("run.sh", "submit.sh", "atomate2_flow.py", "aiida_submit.py"))), None),
+        "executionScript": execution_script,
+        "schedulerScript": scheduler_script,
         "provenance": {
             "backend": backend,
             "stage": "input-preparation",
@@ -3759,12 +4098,206 @@ def _write_aiida_inputs(step: dict[str, Any], material: dict[str, Any], structur
     return [str(script_path), str(profile_path)]
 
 
+def _normalize_scheduler_config(backend_config: dict[str, Any], *, run_dir: Path | None = None) -> dict[str, Any]:
+    hpc = backend_config.get("hpc") if isinstance(backend_config.get("hpc"), dict) else {}
+    resources = backend_config.get("resources") if isinstance(backend_config.get("resources"), dict) else {}
+    if isinstance(hpc.get("resources"), dict):
+        resources = {**resources, **hpc["resources"]}
+    scheduler = str(
+        backend_config.get("scheduler")
+        or hpc.get("scheduler")
+        or ("slurm" if backend_config.get("useSlurm") else None)
+        or ("pbs" if backend_config.get("usePbs") else None)
+        or "local"
+    ).strip().lower()
+    aliases = {
+        "none": "local",
+        "shell": "local",
+        "bash": "local",
+        "local": "local",
+        "slurm": "slurm",
+        "sbatch": "slurm",
+        "pbs": "pbs",
+        "torque": "pbs",
+        "qsub": "pbs",
+    }
+    scheduler = aliases.get(scheduler, "local")
+    walltime = str(resources.get("walltime") or resources.get("wallTime") or backend_config.get("walltime") or "02:00:00")
+    queue = resources.get("queue") or resources.get("partition") or backend_config.get("queue") or backend_config.get("partition")
+    account = resources.get("account") or backend_config.get("account")
+    qos = resources.get("qos") or backend_config.get("qos")
+    normalized = {
+        "scheduler": scheduler,
+        "submitCommand": str(backend_config.get("submitCommand") or hpc.get("submitCommand") or ("sbatch" if scheduler == "slurm" else "qsub" if scheduler == "pbs" else "bash")),
+        "statusCommand": str(backend_config.get("statusCommand") or hpc.get("statusCommand") or ("squeue" if scheduler == "slurm" else "qstat" if scheduler == "pbs" else "")),
+        "accountingCommand": str(backend_config.get("accountingCommand") or hpc.get("accountingCommand") or ("sacct" if scheduler == "slurm" else "qstat" if scheduler == "pbs" else "")),
+        "cancelCommand": str(backend_config.get("cancelCommand") or hpc.get("cancelCommand") or ("scancel" if scheduler == "slurm" else "qdel" if scheduler == "pbs" else "")),
+        "runDir": str(run_dir) if run_dir else None,
+        "resources": {
+            "jobNamePrefix": str(resources.get("jobNamePrefix") or backend_config.get("jobNamePrefix") or "openclaw"),
+            "nodes": int(resources.get("nodes") or backend_config.get("nodes") or 1),
+            "ntasks": int(resources.get("ntasks") or resources.get("tasks") or backend_config.get("ntasks") or 1),
+            "cpusPerTask": int(resources.get("cpusPerTask") or resources.get("cpus") or backend_config.get("cpusPerTask") or 1),
+            "gpus": int(resources.get("gpus") or backend_config.get("gpus") or 0),
+            "memoryGb": float(resources.get("memoryGb") or resources.get("memGb") or backend_config.get("memoryGb") or 0.0),
+            "walltime": walltime,
+            "queue": str(queue) if queue else None,
+            "account": str(account) if account else None,
+            "qos": str(qos) if qos else None,
+            "modules": _string_list(resources.get("modules")) or _string_list(backend_config.get("modules")),
+            "environment": resources.get("environment") if isinstance(resources.get("environment"), dict) else backend_config.get("environment") if isinstance(backend_config.get("environment"), dict) else {},
+            "extraDirectives": _string_list(resources.get("extraDirectives")) or _string_list(backend_config.get("extraDirectives")),
+        },
+    }
+    return normalized
+
+
+def _write_scheduler_submit_script(
+    *,
+    scheduler: dict[str, Any],
+    backend: str,
+    step: dict[str, Any],
+    material: dict[str, Any],
+    step_dir: Path,
+    execution_script: str,
+) -> str:
+    scheduler_name = str(scheduler.get("scheduler") or "local")
+    if scheduler_name == "slurm":
+        path = step_dir / "submit.slurm"
+        text = _slurm_submit_script(scheduler, backend, step, material, execution_script)
+    elif scheduler_name == "pbs":
+        path = step_dir / "submit.pbs"
+        text = _pbs_submit_script(scheduler, backend, step, material, execution_script)
+    else:
+        raise WorkerError("INVALID_PARAMS", f"Unsupported scheduler for submit script generation: {scheduler_name}")
+    path.write_text(text, encoding="utf-8")
+    path.chmod(0o755)
+    return str(path)
+
+
+def _slurm_submit_script(
+    scheduler: dict[str, Any],
+    backend: str,
+    step: dict[str, Any],
+    material: dict[str, Any],
+    execution_script: str,
+) -> str:
+    resources = scheduler.get("resources") if isinstance(scheduler.get("resources"), dict) else {}
+    job_name = _scheduler_job_name(resources, step, material)
+    lines = [
+        "#!/usr/bin/env bash",
+        f"#SBATCH --job-name={job_name}",
+        "#SBATCH --output=slurm-%j.out",
+        "#SBATCH --error=slurm-%j.err",
+        f"#SBATCH --time={resources.get('walltime') or '02:00:00'}",
+        f"#SBATCH --nodes={int(resources.get('nodes') or 1)}",
+        f"#SBATCH --ntasks={int(resources.get('ntasks') or 1)}",
+        f"#SBATCH --cpus-per-task={int(resources.get('cpusPerTask') or 1)}",
+    ]
+    if resources.get("memoryGb"):
+        lines.append(f"#SBATCH --mem={float(resources['memoryGb']):.0f}G")
+    if resources.get("queue"):
+        lines.append(f"#SBATCH --partition={resources['queue']}")
+    if resources.get("account"):
+        lines.append(f"#SBATCH --account={resources['account']}")
+    if resources.get("qos"):
+        lines.append(f"#SBATCH --qos={resources['qos']}")
+    if int(resources.get("gpus") or 0) > 0:
+        lines.append(f"#SBATCH --gres=gpu:{int(resources['gpus'])}")
+    lines.extend(str(item) for item in resources.get("extraDirectives") or [])
+    lines.extend([
+        "",
+        "set -euo pipefail",
+        f'echo "OpenClaw HPC job for {backend} calculation {step.get("calculationId")}"',
+        "date",
+        *_scheduler_environment_lines(resources),
+        _execution_script_invocation(execution_script),
+        "date",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def _pbs_submit_script(
+    scheduler: dict[str, Any],
+    backend: str,
+    step: dict[str, Any],
+    material: dict[str, Any],
+    execution_script: str,
+) -> str:
+    resources = scheduler.get("resources") if isinstance(scheduler.get("resources"), dict) else {}
+    job_name = _scheduler_job_name(resources, step, material)
+    nodes = int(resources.get("nodes") or 1)
+    ntasks = int(resources.get("ntasks") or 1)
+    cpus = int(resources.get("cpusPerTask") or 1)
+    select = f"select={nodes}:ncpus={max(1, ntasks * cpus)}"
+    if resources.get("memoryGb"):
+        select += f":mem={float(resources['memoryGb']):.0f}gb"
+    if int(resources.get("gpus") or 0) > 0:
+        select += f":ngpus={int(resources['gpus'])}"
+    lines = [
+        "#!/usr/bin/env bash",
+        f"#PBS -N {job_name}",
+        f"#PBS -l walltime={resources.get('walltime') or '02:00:00'}",
+        f"#PBS -l {select}",
+        "#PBS -o pbs-$PBS_JOBID.out",
+        "#PBS -e pbs-$PBS_JOBID.err",
+    ]
+    if resources.get("queue"):
+        lines.append(f"#PBS -q {resources['queue']}")
+    if resources.get("account"):
+        lines.append(f"#PBS -A {resources['account']}")
+    lines.extend(str(item) for item in resources.get("extraDirectives") or [])
+    lines.extend([
+        "",
+        "set -euo pipefail",
+        "cd \"${PBS_O_WORKDIR:-$PWD}\"",
+        f'echo "OpenClaw HPC job for {backend} calculation {step.get("calculationId")}"',
+        "date",
+        *_scheduler_environment_lines(resources),
+        _execution_script_invocation(execution_script),
+        "date",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def _scheduler_job_name(resources: dict[str, Any], step: dict[str, Any], material: dict[str, Any]) -> str:
+    prefix = _safe_file_stem(str(resources.get("jobNamePrefix") or "openclaw"))
+    identifier = _safe_file_stem(str(step.get("calculationId") or material.get("materialId") or "calc"))
+    return f"{prefix}-{identifier}"[:120]
+
+
+def _scheduler_environment_lines(resources: dict[str, Any]) -> list[str]:
+    lines: list[str] = []
+    modules = [str(item) for item in resources.get("modules") or [] if str(item).strip()]
+    if modules:
+        lines.append("module purge || true")
+        lines.extend(f"module load {module}" for module in modules)
+    environment = resources.get("environment") if isinstance(resources.get("environment"), dict) else {}
+    for key, value in environment.items():
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", str(key)):
+            lines.append(f"export {key}={json.dumps(str(value))}")
+    return lines
+
+
+def _execution_script_invocation(execution_script: str) -> str:
+    name = Path(execution_script).name
+    if name.endswith(".py"):
+        return f"python {name}"
+    return f"./{name}"
+
+
 def _submit_external_backend_step(*, backend: str, prepared_step: dict[str, Any], backend_config: dict[str, Any]) -> dict[str, Any]:
-    script = prepared_step.get("executionScript")
+    scheduler = prepared_step.get("scheduler") if isinstance(prepared_step.get("scheduler"), dict) else _normalize_scheduler_config(backend_config)
+    scheduler_name = str(scheduler.get("scheduler") or "local")
+    script = prepared_step.get("schedulerScript") if scheduler_name in {"slurm", "pbs"} else prepared_step.get("executionScript")
+    if not script:
+        script = prepared_step.get("executionScript")
     calculation_id = str(prepared_step.get("calculationId") or "calculation")
     if not script:
         return _submission_result(calculation_id, "not-submitted", "No execution script was generated.")
-    command = _backend_submit_command(backend, script, backend_config)
+    command = _backend_submit_command(backend, script, backend_config, scheduler=scheduler)
     executable = shutil.which(command[0])
     if executable is None:
         result = _submission_result(calculation_id, "not-submitted", f"Executable not found: {command[0]}")
@@ -3786,15 +4319,32 @@ def _submit_external_backend_step(*, backend: str, prepared_step: dict[str, Any]
                 stdout=completed.stdout[-4000:],
                 stderr=completed.stderr[-4000:],
             )
+            if completed.returncode == 0 and scheduler_name in {"slurm", "pbs"}:
+                job_id = _parse_scheduler_job_id(scheduler_name, completed.stdout, completed.stderr)
+                result["scheduler"] = {
+                    "scheduler": scheduler_name,
+                    "jobId": job_id,
+                    "submitCommand": command,
+                    "submitStdout": completed.stdout[-4000:],
+                    "submitStderr": completed.stderr[-4000:],
+                }
+                if not job_id:
+                    result["status"] = "submitted-unknown-job-id"
+                    result["message"] = "Scheduler submit command returned 0, but no job id was parsed."
         except subprocess.TimeoutExpired as exc:
             result = _submission_result(calculation_id, "failed", f"Timed out after {timeout}s", stdout=exc.stdout, stderr=exc.stderr)
+    result.setdefault("scheduler", {"scheduler": scheduler_name, "jobId": None, "submitCommand": command})
     submission_path = Path(str(script)).parent / "submission-manifest.json"
     result["submissionManifestPath"] = str(submission_path)
     submission_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return result
 
 
-def _backend_submit_command(backend: str, script: str, backend_config: dict[str, Any]) -> list[str]:
+def _backend_submit_command(backend: str, script: str, backend_config: dict[str, Any], *, scheduler: dict[str, Any] | None = None) -> list[str]:
+    scheduler = scheduler or _normalize_scheduler_config(backend_config)
+    scheduler_name = str(scheduler.get("scheduler") or "local")
+    if scheduler_name in {"slurm", "pbs"}:
+        return [str(scheduler.get("submitCommand") or ("sbatch" if scheduler_name == "slurm" else "qsub")), str(Path(script).name)]
     if backend in {"quantum-espresso", "vasp"}:
         return [str(backend_config.get("shellCommand") or "bash"), str(Path(script).name)]
     if backend == "atomate2":
@@ -3802,6 +4352,20 @@ def _backend_submit_command(backend: str, script: str, backend_config: dict[str,
     if backend == "aiida":
         return [str(backend_config.get("pythonCommand") or "python"), str(Path(script).name)]
     return ["bash", str(Path(script).name)]
+
+
+def _parse_scheduler_job_id(scheduler: str, stdout: str, stderr: str = "") -> str | None:
+    text = f"{stdout}\n{stderr}"
+    if scheduler == "slurm":
+        match = re.search(r"Submitted\s+batch\s+job\s+([A-Za-z0-9_.-]+)", text, flags=re.IGNORECASE)
+        if match:
+            return match.group(1)
+    if scheduler == "pbs":
+        match = re.search(r"\b(\d+(?:\.[A-Za-z0-9_.-]+)?)\b", text)
+        if match:
+            return match.group(1)
+    match = re.search(r"\bjob(?:id)?[=:\s]+([A-Za-z0-9_.-]+)", text, flags=re.IGNORECASE)
+    return match.group(1) if match else None
 
 
 def _submission_result(calculation_id: str, status: str, message: str, *, stdout: Any = "", stderr: Any = "") -> dict[str, Any]:
@@ -4077,6 +4641,7 @@ def _external_execution_markdown(manifest: dict[str, Any]) -> str:
         "",
         f"- Backend: `{manifest.get('backend')}`",
         f"- Execution mode: `{manifest.get('executionMode')}`",
+        f"- Scheduler: `{(manifest.get('scheduler') or {}).get('scheduler', 'local')}`",
         f"- Allow blocked steps: `{manifest.get('allowBlockedSteps')}`",
         f"- Prepared calculations: {manifest.get('preparedCalculations')}",
         f"- Submitted calculations: {manifest.get('submittedCalculations')}",
@@ -4097,6 +4662,7 @@ def _external_execution_markdown(manifest: dict[str, Any]) -> str:
         "## Notes",
         "",
         "- This adapter prepares reproducible backend inputs and optional submission scripts.",
+        "- When scheduler is `slurm` or `pbs`, generated submit scripts are scheduler-ready but still require explicit execution approval.",
         "- It does not mark candidates as property-backed until completed outputs are parsed into propertyUpdates.",
         "- Review pseudopotentials, k-points, cutoffs, scheduler resources, and code licenses before submission.",
         "",

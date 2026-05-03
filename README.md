@@ -163,6 +163,8 @@ Live Materials Project search and structure fetch require a valid key and the `m
 - "Execute that research-loop plan with the dev-smoke backend to validate plumbing without generating research property evidence."
 - "Prepare Quantum ESPRESSO inputs for the top two calculations in that research-loop plan."
 - "Prepare VASP, atomate2/jobflow, or AiiDA backend inputs for this approved plan without submitting jobs."
+- "Prepare SLURM or PBS submit scripts for this plan with my queue, account, walltime, and module settings."
+- "Monitor the SLURM/PBS execution manifest, check scheduler state, parse completed outputs, and refresh the claim review."
 - "Monitor a prepared backend execution manifest, parse completed outputs, and emit a claim-review audit certificate."
 - "Prepare a batch screening plan, but ask me before running expensive relaxation jobs."
 
@@ -218,7 +220,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - `materials_close_evidence_gaps` evaluates a candidate against the claim policy and writes the next action queue needed to close missing, blocking, or conflicting evidence gates. It can optionally run bounded literature search, but fixture literature remains non-claim evidence.
 - `materials_ingest_evidence` parses QE/VASP/MD outputs plus literature PDFs/text/markdown and experiment/literature JSON, JSONL, or CSV evidence tables into standard evidence-ledger rows for claim evaluation.
 - `materials_execute_research_plan` supports a non-evidentiary `dev-smoke` backend plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
-- External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided. `executionMode: "monitor"` reads a prior execution manifest, detects completed outputs, parses evidence rows, and can run claim review when requested.
+- External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. Set `backendConfig.scheduler` to `slurm` or `pbs` to generate `submit.slurm`/`submit.pbs` scripts with queue/account/walltime/module/resource directives. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided. `executionMode: "monitor"` reads a prior execution manifest, checks scheduler state with `squeue`/`sacct` or `qstat` when job IDs are available, detects completed outputs, parses evidence rows, and can run claim review when requested.
 - The `dev-smoke` backend validates execution/provenance plumbing only. It does not emit property updates or reranking payloads.
 - External prepared jobs do not produce property-backed candidate updates until completed outputs are parsed back into `propertyUpdates`.
 - `mpApiKey` is marked sensitive in plugin UI hints and is also supported through environment variables.
