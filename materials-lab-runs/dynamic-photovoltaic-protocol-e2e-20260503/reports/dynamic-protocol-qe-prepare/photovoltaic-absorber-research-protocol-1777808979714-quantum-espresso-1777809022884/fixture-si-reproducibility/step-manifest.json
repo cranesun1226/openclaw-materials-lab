@@ -1,0 +1,37 @@
+{
+  "backend": "quantum-espresso",
+  "calculationId": "fixture-si-reproducibility",
+  "calculationType": "reproducibility",
+  "costClass": "medium",
+  "executionScript": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/run.sh",
+  "formula": "Si",
+  "inputPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/run.sh"
+  ],
+  "label": "Reproducibility package",
+  "materialId": "fixture-si",
+  "provenance": {
+    "backend": "quantum-espresso",
+    "generatedAt": 1777809022,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/step-manifest.json",
+  "structurePaths": {
+    "poscar": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/POSCAR",
+    "structureCif": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/structure.cif",
+    "structureJson": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-reproducibility/structure.json"
+  },
+  "writesProperties": [
+    "workflowManifest",
+    "inputDecks",
+    "parsedOutputs"
+  ]
+}

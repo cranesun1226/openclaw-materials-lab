@@ -1,0 +1,37 @@
+{
+  "backend": "quantum-espresso",
+  "calculationId": "fixture-si-defect-transport",
+  "calculationType": "defect-transport",
+  "costClass": "medium",
+  "executionScript": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/run.sh",
+  "formula": "Si",
+  "inputPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/run.sh"
+  ],
+  "label": "Defect and transport risk",
+  "materialId": "fixture-si",
+  "provenance": {
+    "backend": "quantum-espresso",
+    "generatedAt": 1777809022,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/step-manifest.json",
+  "structurePaths": {
+    "poscar": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/POSCAR",
+    "structureCif": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/structure.cif",
+    "structureJson": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-defect-transport/structure.json"
+  },
+  "writesProperties": [
+    "defectToleranceScore",
+    "effectiveMassElectron",
+    "effectiveMassHole"
+  ]
+}

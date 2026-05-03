@@ -1,0 +1,36 @@
+{
+  "backend": "quantum-espresso",
+  "calculationId": "fixture-si-phase-stability",
+  "calculationType": "phase-stability",
+  "costClass": "medium",
+  "executionScript": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/run.sh",
+  "formula": "Si",
+  "inputPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/run.sh"
+  ],
+  "label": "Phase stability",
+  "materialId": "fixture-si",
+  "provenance": {
+    "backend": "quantum-espresso",
+    "generatedAt": 1777809022,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/step-manifest.json",
+  "structurePaths": {
+    "poscar": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/POSCAR",
+    "structureCif": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/structure.cif",
+    "structureJson": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777808979714-quantum-espresso-1777809022884/fixture-si-phase-stability/structure.json"
+  },
+  "writesProperties": [
+    "energyAboveHullEv",
+    "decompositionProducts"
+  ]
+}

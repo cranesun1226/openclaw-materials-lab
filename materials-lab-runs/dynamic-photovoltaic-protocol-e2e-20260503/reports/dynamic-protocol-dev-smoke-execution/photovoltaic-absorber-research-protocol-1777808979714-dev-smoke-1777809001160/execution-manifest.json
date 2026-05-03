@@ -1,0 +1,249 @@
+{
+  "allowBlockedDevSmoke": true,
+  "backend": "dev-smoke",
+  "completed": [
+    {
+      "backend": "dev-smoke",
+      "calculationId": "global-research-protocol-review",
+      "calculationType": "research-protocol-review",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": false,
+        "hasMaterialId": false,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "protocolReview"
+        ]
+      },
+      "estimatedWallTimeHours": 0.25,
+      "formula": "",
+      "label": "Research protocol and evidence schema review",
+      "materialId": "",
+      "method": "review compiled goal, candidate-generation strategy, evidence schema, claim policy, and stop criteria",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/global-research-protocol-review.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "global-literature-evidence-ledger",
+      "calculationType": "literature-evidence-ledger",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": false,
+        "hasMaterialId": false,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "literatureBaseline",
+          "knownControls",
+          "failureModes"
+        ]
+      },
+      "estimatedWallTimeHours": 1.0,
+      "formula": "",
+      "label": "Literature evidence ledger",
+      "materialId": "",
+      "method": "search, cite, and extract claims from literature queries",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/global-literature-evidence-ledger.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "global-database-candidate-search",
+      "calculationType": "database-candidate-search",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": false,
+        "hasMaterialId": false,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "candidatePool",
+          "databaseSummary"
+        ]
+      },
+      "estimatedWallTimeHours": 0.5,
+      "formula": "",
+      "label": "Database candidate generation",
+      "materialId": "",
+      "method": "run database queries and build source-tagged candidate pool",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/global-database-candidate-search.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "fixture-si-structure-preflight",
+      "calculationType": "structure-preflight",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "structurePath",
+          "cifPath",
+          "structureQuality"
+        ]
+      },
+      "estimatedWallTimeHours": 0.05,
+      "formula": "Si",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "fixture-si",
+      "method": "fetch_structure + structural sanity checks",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/fixture-si-structure-preflight.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "fixture-si-literature-benchmark",
+      "calculationType": "literature-benchmark",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "literatureBaseline"
+        ]
+      },
+      "estimatedWallTimeHours": 1.0,
+      "formula": "Si",
+      "label": "Literature benchmark",
+      "materialId": "fixture-si",
+      "method": "citation-backed literature extraction",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/fixture-si-literature-benchmark.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "fixture-si-database-provenance",
+      "calculationType": "database-provenance",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "databaseSummary"
+        ]
+      },
+      "estimatedWallTimeHours": 0.5,
+      "formula": "Si",
+      "label": "Database provenance",
+      "materialId": "fixture-si",
+      "method": "database query and provenance capture",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/fixture-si-database-provenance.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "fixture-si-phase-stability",
+      "calculationType": "phase-stability",
+      "costClass": "medium",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "energyAboveHullEv",
+          "decompositionProducts"
+        ]
+      },
+      "estimatedWallTimeHours": 8.0,
+      "formula": "Si",
+      "label": "Phase stability",
+      "materialId": "fixture-si",
+      "method": "DFT workflow with convergence checks and parsed properties",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/fixture-si-phase-stability.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "fixture-si-structure-validity",
+      "calculationType": "structure-validity",
+      "costClass": "medium",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "structureQuality",
+          "oxidationStates",
+          "chargeBalance"
+        ]
+      },
+      "estimatedWallTimeHours": 2.0,
+      "formula": "Si",
+      "label": "Structure and chemistry validity",
+      "materialId": "fixture-si",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777809001,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/fixture-si-structure-validity.json",
+      "status": "completed-dev-smoke"
+    }
+  ],
+  "completedCalculations": 8,
+  "generatedAt": 1777809001,
+  "planId": "photovoltaic-absorber-research-protocol-1777808979714",
+  "preset": "dynamic",
+  "propertyUpdates": [],
+  "runId": "photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160",
+  "skipped": [],
+  "skippedCalculations": 0,
+  "warnings": [
+    "dev-smoke backend validates execution plumbing only; it does not generate property evidence or reranking updates."
+  ]
+}

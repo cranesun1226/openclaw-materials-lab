@@ -1,0 +1,28 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "fixture-si-database-provenance",
+  "calculationType": "database-provenance",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": true,
+    "hasMaterialId": true,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "databaseSummary"
+    ]
+  },
+  "estimatedWallTimeHours": 0.5,
+  "formula": "Si",
+  "label": "Database provenance",
+  "materialId": "fixture-si",
+  "method": "database query and provenance capture",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777809001,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/fixture-si-database-provenance.json",
+  "status": "completed-dev-smoke"
+}

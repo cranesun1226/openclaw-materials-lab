@@ -1,0 +1,1130 @@
+{
+  "approvalGates": [
+    {
+      "blocks": [
+        "global-research-protocol-review",
+        "global-literature-evidence-ledger",
+        "global-database-candidate-search",
+        "mp-21713-structure-preflight",
+        "mp-21713-literature-benchmark",
+        "mp-21713-database-provenance",
+        "mp-21713-phase-stability",
+        "mp-21713-structure-validity",
+        "mp-21713-synthesis-safety",
+        "mp-21713-optical-absorption",
+        "mp-21713-defect-transport",
+        "mp-21713-environmental-health-safety",
+        "mp-21713-reproducibility",
+        "mp-1224609-structure-preflight"
+      ],
+      "gateId": "gate-0-human-plan-review",
+      "prompt": "Review research goal, evidence schema, candidate-generation strategy, budget, and stop criteria before execution.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-21713-phase-stability",
+        "mp-21713-structure-validity",
+        "mp-21713-synthesis-safety",
+        "mp-21713-optical-absorption",
+        "mp-21713-defect-transport",
+        "mp-21713-reproducibility"
+      ],
+      "budgetCheck": {
+        "computeBudgetUsd": null,
+        "estimatedWallTimeHours": 168.35,
+        "maxWallTimeHours": 72.0,
+        "plannedCalculations": 14
+      },
+      "gateId": "gate-1-budget-confirmation",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-21713-synthesis-safety",
+        "mp-21713-optical-absorption"
+      ],
+      "gateId": "gate-2-expensive-method-approval",
+      "prompt": "Approve expensive DFT/DFPT/MD/workflow/experimental calculations explicitly.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "mp-21713-synthesis-safety",
+        "mp-21713-optical-absorption",
+        "mp-21713-environmental-health-safety"
+      ],
+      "gateId": "gate-3-safety-and-experiment-review",
+      "prompt": "Review safety, EHS, wet-lab, or experimental actions before execution or recommendation.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "update-shortlist",
+        "export-final-report"
+      ],
+      "gateId": "gate-4-evidence-ledger-acceptance",
+      "prompt": "Accept parsed evidence ledgers before they replace proxy rankings or support research-grade claims.",
+      "required": true,
+      "status": "pending"
+    },
+    {
+      "blocks": [
+        "research-grade-claim"
+      ],
+      "gateId": "gate-5-claim-policy-review",
+      "prompt": "Verify claimPolicy.researchGradeRequires and required evidenceSchema entries before any discovery claim.",
+      "required": true,
+      "requiredEvidenceRequirementIds": [
+        "literature-benchmark",
+        "database-provenance",
+        "phase-stability",
+        "structure-validity",
+        "synthesis-safety",
+        "optical-absorption",
+        "defect-transport",
+        "environmental-health-safety",
+        "reproducibility"
+      ],
+      "status": "pending"
+    }
+  ],
+  "autonomyBoundary": {
+    "allowedActionsBeforeApproval": [
+      "write-plan-artifacts",
+      "validate-input-artifacts"
+    ],
+    "approvalPolicy": "approval-required",
+    "blockedActionsBeforeApproval": [
+      "run-dft",
+      "submit-hpc-job",
+      "call-paid-compute-service",
+      "overwrite-candidate-ranking",
+      "make-research-grade-claim-without-evidence-ledger"
+    ],
+    "canExecuteWithoutApproval": false,
+    "requestedAutonomyMode": "high-autonomy-plan"
+  },
+  "budget": {
+    "allowExpensiveCalculations": false,
+    "computeBudgetUsd": null,
+    "maxCalculations": 14,
+    "maxCandidates": 2,
+    "maxLoopIterations": 2,
+    "maxWallTimeHours": 72.0
+  },
+  "calculationQueue": [
+    {
+      "approvalRequired": true,
+      "calculationId": "global-research-protocol-review",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.25,
+      "evidenceTypes": [
+        "workflow"
+      ],
+      "executionBackend": "agent-review",
+      "id": "research-protocol-review",
+      "label": "Research protocol and evidence schema review",
+      "method": "review compiled goal, candidate-generation strategy, evidence schema, claim policy, and stop criteria",
+      "priority": "required-preflight",
+      "rationale": "General-purpose research automation needs an explicit evidence contract before execution.",
+      "status": "planned",
+      "writesProperties": [
+        "protocolReview"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "global-literature-evidence-ledger",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 1.0,
+      "evidenceTypes": [
+        "literature"
+      ],
+      "executionBackend": "literature-connector",
+      "id": "literature-evidence-ledger",
+      "label": "Literature evidence ledger",
+      "method": "search, cite, and extract claims from literature queries",
+      "priority": "evidence-discovery",
+      "rationale": "Research-grade claims require literature context and contradictory evidence capture.",
+      "status": "planned",
+      "writesProperties": [
+        "literatureBaseline",
+        "knownControls",
+        "failureModes"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "global-database-candidate-search",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.5,
+      "evidenceTypes": [
+        "database"
+      ],
+      "executionBackend": "materials_search_mp",
+      "id": "database-candidate-search",
+      "label": "Database candidate generation",
+      "method": "run database queries and build source-tagged candidate pool",
+      "priority": "evidence-discovery",
+      "rationale": "The agent should discover candidates from database evidence before narrowing.",
+      "status": "planned",
+      "writesProperties": [
+        "candidatePool",
+        "databaseSummary"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-21713-structure-preflight",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.05,
+      "evidenceRequirementId": "structure-validity",
+      "evidenceTypes": [
+        "database",
+        "workflow"
+      ],
+      "executionBackend": "materials-lab",
+      "formula": "K2In3CuSe6",
+      "id": "structure-preflight",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-21713",
+      "method": "fetch_structure + structural sanity checks",
+      "priority": "required-preflight",
+      "rationale": "Property calculations need a traceable, normalized input structure.",
+      "status": "planned",
+      "writesProperties": [
+        "structurePath",
+        "cifPath",
+        "structureQuality"
+      ]
+    },
+    {
+      "acceptanceCriteria": "At least two independent relevant references or an explicit no-literature-found note.",
+      "approvalRequired": true,
+      "calculationId": "mp-21713-literature-benchmark",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 1.0,
+      "evidenceRequirementId": "literature-benchmark",
+      "evidenceTypes": [
+        "literature"
+      ],
+      "executionBackend": "literature-connector",
+      "formula": "K2In3CuSe6",
+      "id": "literature-benchmark",
+      "label": "Literature benchmark",
+      "materialId": "mp-21713",
+      "method": "citation-backed literature extraction",
+      "priority": "property-evidence",
+      "rationale": "Prior art, known positive/negative controls, and reported property ranges.",
+      "status": "planned",
+      "writesProperties": [
+        "literatureBaseline"
+      ]
+    },
+    {
+      "acceptanceCriteria": "Every candidate must have source, query, structure, and version metadata.",
+      "approvalRequired": true,
+      "calculationId": "mp-21713-database-provenance",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.5,
+      "evidenceRequirementId": "database-provenance",
+      "evidenceTypes": [
+        "database"
+      ],
+      "executionBackend": "database-tool",
+      "formula": "K2In3CuSe6",
+      "id": "database-provenance",
+      "label": "Database provenance",
+      "materialId": "mp-21713",
+      "method": "database query and provenance capture",
+      "priority": "property-evidence",
+      "rationale": "Traceable database source, query payloads, data timestamp, and structure provenance.",
+      "status": "planned",
+      "writesProperties": [
+        "databaseSummary"
+      ]
+    },
+    {
+      "acceptanceCriteria": "Low eHull or a justified metastability window with decomposition products.",
+      "approvalRequired": true,
+      "calculationId": "mp-21713-phase-stability",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 8.0,
+      "evidenceRequirementId": "phase-stability",
+      "evidenceTypes": [
+        "database",
+        "dft"
+      ],
+      "executionBackend": "external-backend",
+      "formula": "K2In3CuSe6",
+      "id": "phase-stability",
+      "label": "Phase stability",
+      "materialId": "mp-21713",
+      "method": "DFT workflow with convergence checks and parsed properties",
+      "priority": "property-evidence",
+      "rationale": "Thermodynamic stability or metastability relative to competing phases.",
+      "status": "planned",
+      "writesProperties": [
+        "energyAboveHullEv",
+        "decompositionProducts"
+      ]
+    },
+    {
+      "acceptanceCriteria": "Candidate must have a validated structure and no unresolved chemistry sanity failure.",
+      "approvalRequired": true,
+      "calculationId": "mp-21713-structure-validity",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 2.0,
+      "evidenceRequirementId": "structure-validity",
+      "evidenceTypes": [
+        "database",
+        "workflow"
+      ],
+      "executionBackend": "external-backend",
+      "formula": "K2In3CuSe6",
+      "id": "structure-validity",
+      "label": "Structure and chemistry validity",
+      "materialId": "mp-21713",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "priority": "property-evidence",
+      "rationale": "Structure parseability, oxidation-state plausibility, charge balance, and duplicate/prototype grouping.",
+      "status": "planned",
+      "writesProperties": [
+        "structureQuality",
+        "oxidationStates",
+        "chargeBalance"
+      ]
+    },
+    {
+      "acceptanceCriteria": "Risk must be explicitly accepted or mitigated before research-grade claims.",
+      "approvalRequired": true,
+      "blockedReason": "budget.allowExpensiveCalculations is false; explicit approval is required before execution.",
+      "calculationId": "mp-21713-synthesis-safety",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 72.0,
+      "evidenceRequirementId": "synthesis-safety",
+      "evidenceTypes": [
+        "literature",
+        "safety",
+        "experiment"
+      ],
+      "executionBackend": "experimental-system",
+      "formula": "K2In3CuSe6",
+      "id": "synthesis-safety",
+      "label": "Synthesis, toxicity, and handling risk",
+      "materialId": "mp-21713",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "priority": "property-evidence",
+      "rationale": "Known synthesis feasibility, hazardous elements, air/moisture risk, and supply constraints.",
+      "status": "blocked-pending-expensive-approval",
+      "writesProperties": [
+        "synthesisRoute",
+        "toxicityFlags",
+        "supplyRisk"
+      ]
+    },
+    {
+      "acceptanceCriteria": "Absorption must be property-backed for target spectrum.",
+      "approvalRequired": true,
+      "blockedReason": "budget.allowExpensiveCalculations is false; explicit approval is required before execution.",
+      "calculationId": "mp-21713-optical-absorption",
+      "consumesBudget": true,
+      "costClass": "expensive",
+      "estimatedWallTimeHours": 72.0,
+      "evidenceRequirementId": "optical-absorption",
+      "evidenceTypes": [
+        "dft",
+        "experiment"
+      ],
+      "executionBackend": "external-backend",
+      "formula": "K2In3CuSe6",
+      "id": "optical-absorption",
+      "label": "Optical absorption",
+      "materialId": "mp-21713",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "priority": "property-evidence",
+      "rationale": "Direct/indirect gap and absorption strength.",
+      "status": "blocked-pending-expensive-approval",
+      "writesProperties": [
+        "absorptionCoefficientCm1",
+        "directBandGapEv"
+      ]
+    },
+    {
+      "acceptanceCriteria": "Transport and defect evidence must be present before device claims.",
+      "approvalRequired": true,
+      "calculationId": "mp-21713-defect-transport",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 8.0,
+      "evidenceRequirementId": "defect-transport",
+      "evidenceTypes": [
+        "dft"
+      ],
+      "executionBackend": "external-backend",
+      "formula": "K2In3CuSe6",
+      "id": "defect-transport",
+      "label": "Defect and transport risk",
+      "materialId": "mp-21713",
+      "method": "DFT workflow with convergence checks and parsed properties",
+      "priority": "property-evidence",
+      "rationale": "Carrier masses, defect tolerance, and recombination risk.",
+      "status": "planned",
+      "writesProperties": [
+        "defectToleranceScore",
+        "effectiveMassElectron",
+        "effectiveMassHole"
+      ]
+    },
+    {
+      "acceptanceCriteria": "EHS risk must be reviewed before promotion or experimental recommendation.",
+      "approvalRequired": true,
+      "blockedReason": "safety/experiment evidence requires external review and explicit approval before execution.",
+      "calculationId": "mp-21713-environmental-health-safety",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 1.0,
+      "evidenceRequirementId": "environmental-health-safety",
+      "evidenceTypes": [
+        "safety",
+        "literature"
+      ],
+      "executionBackend": "literature-connector",
+      "formula": "K2In3CuSe6",
+      "id": "environmental-health-safety",
+      "label": "Environmental health and safety",
+      "materialId": "mp-21713",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "priority": "property-evidence",
+      "rationale": "Toxicity, environmental release, handling, and regulatory constraints.",
+      "status": "blocked-pending-safety-review",
+      "writesProperties": [
+        "ehsRisk",
+        "regulatoryFlags"
+      ]
+    },
+    {
+      "acceptanceCriteria": "All promoted claims must link to artifact paths and parser provenance.",
+      "approvalRequired": true,
+      "calculationId": "mp-21713-reproducibility",
+      "consumesBudget": true,
+      "costClass": "medium",
+      "estimatedWallTimeHours": 2.0,
+      "evidenceRequirementId": "reproducibility",
+      "evidenceTypes": [
+        "workflow"
+      ],
+      "executionBackend": "external-backend",
+      "formula": "K2In3CuSe6",
+      "id": "reproducibility",
+      "label": "Reproducibility package",
+      "materialId": "mp-21713",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "priority": "property-evidence",
+      "rationale": "Machine-readable inputs, outputs, parser versions, and reranking trace.",
+      "status": "planned",
+      "writesProperties": [
+        "workflowManifest",
+        "inputDecks",
+        "parsedOutputs"
+      ]
+    },
+    {
+      "approvalRequired": true,
+      "calculationId": "mp-1224609-structure-preflight",
+      "consumesBudget": false,
+      "costClass": "metadata",
+      "estimatedWallTimeHours": 0.05,
+      "evidenceRequirementId": "structure-validity",
+      "evidenceTypes": [
+        "database",
+        "workflow"
+      ],
+      "executionBackend": "materials-lab",
+      "formula": "In2Ga(CuSe2)3",
+      "id": "structure-preflight",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-1224609",
+      "method": "fetch_structure + structural sanity checks",
+      "priority": "required-preflight",
+      "rationale": "Property calculations need a traceable, normalized input structure.",
+      "status": "planned",
+      "writesProperties": [
+        "structurePath",
+        "cifPath",
+        "structureQuality"
+      ]
+    }
+  ],
+  "candidateGenerationPlan": {
+    "constraints": [
+      "lead-free",
+      "moisture-stable",
+      "Earth-abundant preferred",
+      "no research-grade claim without parsed evidence"
+    ],
+    "databaseQueries": [
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. candidate materials",
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. computed screening",
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. materials discovery",
+      "thin-film solar absorber materials candidates"
+    ],
+    "diversityControls": [
+      "deduplicate by reduced formula",
+      "deduplicate by prototype/space group when structures are available",
+      "cap repeated families before final reranking"
+    ],
+    "elementsExclude": [
+      "Pb",
+      "Cd",
+      "Hg"
+    ],
+    "elementsInclude": [],
+    "formulas": [],
+    "initialCandidateCount": 3,
+    "literatureQueries": [
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. candidate materials review",
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. computed screening review"
+    ],
+    "requiredEvidenceBeforeShortlist": [
+      "literature-benchmark",
+      "database-provenance",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "optical-absorption",
+      "defect-transport",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "seedMaterials": [],
+    "strategy": "use live database candidates when available; otherwise use explicit development fixture smoke data only"
+  },
+  "capabilityPlan": {
+    "availableNow": {
+      "database": [
+        "materials_search_mp",
+        "materials_fetch_structure",
+        "materials_analyze_structure"
+      ],
+      "reporting": [
+        "materials_save_note",
+        "materials_export_report"
+      ],
+      "workflowPreparation": [
+        "materials_execute_research_plan with quantum-espresso, vasp, atomate2, aiida in prepare mode"
+      ]
+    },
+    "currentLimitations": [
+      "prepared external jobs do not become property evidence until parsed outputs are ingested",
+      "research-grade claims require an evidence ledger, not only generated plans",
+      "costly or hazardous execution remains approval-gated"
+    ],
+    "requiredEvidenceTypes": [
+      "database",
+      "dft",
+      "experiment",
+      "literature",
+      "safety",
+      "workflow"
+    ],
+    "requiresExternalIntegration": {
+      "dft/dfpt/md/workflow": "external code execution plus parser ingestion for completed outputs",
+      "experiment": "human lab system or imported experimental dataset",
+      "literature": "connector or search tool with citation capture",
+      "safety": "EHS/regulatory data source and human review for hazardous actions"
+    }
+  },
+  "claimPolicy": {
+    "allowedClaimLevels": [
+      "technical-smoke",
+      "candidate-hypothesis",
+      "proxy-shortlist",
+      "property-backed-shortlist",
+      "research-grade-candidate"
+    ],
+    "forbiddenWithoutEvidence": [
+      "discovered",
+      "validated",
+      "best material",
+      "experimentally proven",
+      "DFT-confirmed"
+    ],
+    "requiredEvidenceRequirementIds": [
+      "literature-benchmark",
+      "database-provenance",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "optical-absorption",
+      "defect-transport",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "researchGradeRequires": [
+      "all required evidence requirements pass or have documented waivers",
+      "live database provenance and literature ledger are attached",
+      "property values come from parsed calculation/experimental/literature artifacts with confidence labels",
+      "negative and contradictory evidence are included",
+      "reproducibility package contains inputs, outputs, parser versions, and reranking trace"
+    ]
+  },
+  "constraints": [
+    "lead-free",
+    "moisture-stable",
+    "Earth-abundant preferred",
+    "no research-grade claim without parsed evidence"
+  ],
+  "databaseSearchPlan": {
+    "additionalSourcesToIntegrate": [
+      "Materials Project task/property endpoints",
+      "OQMD/AFLOW/NOMAD when available",
+      "user-provided experimental tables"
+    ],
+    "mapsToEvidence": [
+      "database-provenance",
+      "phase-stability",
+      "structure-validity"
+    ],
+    "primaryTool": "materials_search_mp",
+    "queries": [
+      "Materials Project search for Design a lead-free moisture-stable photovoltaic absorber discovery campaign.",
+      "structure and stability query for Photovoltaic absorber"
+    ],
+    "requiredOutput": "candidate table with query payload, source database, version/timestamp, raw fields, and missing-field markers"
+  },
+  "evidenceSchema": [
+    {
+      "acceptanceCriteria": "At least two independent relevant references or an explicit no-literature-found note.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Prior art, known positive/negative controls, and reported property ranges.",
+      "evidenceTypes": [
+        "literature"
+      ],
+      "id": "literature-benchmark",
+      "label": "Literature benchmark",
+      "propertyKeys": [
+        "literatureBaseline"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "Every candidate must have source, query, structure, and version metadata.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Traceable database source, query payloads, data timestamp, and structure provenance.",
+      "evidenceTypes": [
+        "database"
+      ],
+      "id": "database-provenance",
+      "label": "Database provenance",
+      "propertyKeys": [
+        "databaseSummary"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "Low eHull or a justified metastability window with decomposition products.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Thermodynamic stability or metastability relative to competing phases.",
+      "evidenceTypes": [
+        "database",
+        "dft"
+      ],
+      "id": "phase-stability",
+      "label": "Phase stability",
+      "propertyKeys": [
+        "energyAboveHullEv",
+        "decompositionProducts"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "Candidate must have a validated structure and no unresolved chemistry sanity failure.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Structure parseability, oxidation-state plausibility, charge balance, and duplicate/prototype grouping.",
+      "evidenceTypes": [
+        "database",
+        "workflow"
+      ],
+      "id": "structure-validity",
+      "label": "Structure and chemistry validity",
+      "propertyKeys": [
+        "structureQuality",
+        "oxidationStates",
+        "chargeBalance"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "Risk must be explicitly accepted or mitigated before research-grade claims.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Known synthesis feasibility, hazardous elements, air/moisture risk, and supply constraints.",
+      "evidenceTypes": [
+        "literature",
+        "safety",
+        "experiment"
+      ],
+      "id": "synthesis-safety",
+      "label": "Synthesis, toxicity, and handling risk",
+      "propertyKeys": [
+        "synthesisRoute",
+        "toxicityFlags",
+        "supplyRisk"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "Absorption must be property-backed for target spectrum.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Direct/indirect gap and absorption strength.",
+      "evidenceTypes": [
+        "dft",
+        "experiment"
+      ],
+      "id": "optical-absorption",
+      "label": "Optical absorption",
+      "propertyKeys": [
+        "absorptionCoefficientCm1",
+        "directBandGapEv"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "Transport and defect evidence must be present before device claims.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Carrier masses, defect tolerance, and recombination risk.",
+      "evidenceTypes": [
+        "dft"
+      ],
+      "id": "defect-transport",
+      "label": "Defect and transport risk",
+      "propertyKeys": [
+        "defectToleranceScore",
+        "effectiveMassElectron",
+        "effectiveMassHole"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "EHS risk must be reviewed before promotion or experimental recommendation.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Toxicity, environmental release, handling, and regulatory constraints.",
+      "evidenceTypes": [
+        "safety",
+        "literature"
+      ],
+      "id": "environmental-health-safety",
+      "label": "Environmental health and safety",
+      "propertyKeys": [
+        "ehsRisk",
+        "regulatoryFlags"
+      ],
+      "requiredForClaim": true
+    },
+    {
+      "acceptanceCriteria": "All promoted claims must link to artifact paths and parser provenance.",
+      "confidenceRules": [
+        "database/literature-only evidence cannot support research-grade discovery claims",
+        "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+        "conflicting evidence must be recorded in the evidence ledger rather than silently discarded"
+      ],
+      "description": "Machine-readable inputs, outputs, parser versions, and reranking trace.",
+      "evidenceTypes": [
+        "workflow"
+      ],
+      "id": "reproducibility",
+      "label": "Reproducibility package",
+      "propertyKeys": [
+        "workflowManifest",
+        "inputDecks",
+        "parsedOutputs"
+      ],
+      "requiredForClaim": true
+    }
+  ],
+  "executionStatus": "planned-not-started",
+  "hypothesis": "A bounded autonomous agent can compile an evidence contract and backend-ready workflow before claiming any photovoltaic absorber discovery.",
+  "legacyPreset": "generic",
+  "literatureReviewPlan": {
+    "extract": [
+      "reported property values",
+      "known positive controls",
+      "known failure modes",
+      "synthesis conditions",
+      "contradictory evidence"
+    ],
+    "mapsToEvidence": [
+      "literature-benchmark",
+      "synthesis-safety",
+      "environmental-health-safety"
+    ],
+    "queries": [
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. review",
+      "Design a lead-free moisture-stable photovoltaic absorber discovery campaign. benchmark materials",
+      "Photovoltaic absorber experimental validation"
+    ],
+    "requiredOutput": "literature-evidence-ledger with citation, claim, property, candidate, and confidence fields"
+  },
+  "loopPolicy": {
+    "afterEachIteration": [
+      "parse calculation artifacts into candidate property fields",
+      "rerun materials_compare_candidates with evidenceWeight enabled",
+      "compare domainCoverage against previous iteration",
+      "stop, continue, or request human review based on stopCriteria"
+    ],
+    "maxIterations": 2
+  },
+  "mode": "property-backed",
+  "objective": "Design a lead-free moisture-stable photovoltaic absorber discovery campaign.",
+  "planId": "photovoltaic-absorber-research-protocol-1777809086533",
+  "preset": "dynamic",
+  "propertySchema": [
+    "literatureBaseline",
+    "databaseSummary",
+    "energyAboveHullEv",
+    "decompositionProducts",
+    "structureQuality",
+    "oxidationStates",
+    "chargeBalance",
+    "synthesisRoute",
+    "toxicityFlags",
+    "supplyRisk",
+    "absorptionCoefficientCm1",
+    "directBandGapEv",
+    "defectToleranceScore",
+    "effectiveMassElectron",
+    "effectiveMassHole",
+    "ehsRisk",
+    "regulatoryFlags",
+    "workflowManifest",
+    "inputDecks",
+    "parsedOutputs"
+  ],
+  "protocolKind": "research-protocol-compiler",
+  "protocolVersion": "dynamic-research-protocol-v1",
+  "rerankingPolicy": {
+    "criteriaPatch": {
+      "evidenceWeight": 0.25,
+      "screeningLevel": "property-backed-screen"
+    },
+    "evidenceSchemaIds": [
+      "literature-benchmark",
+      "database-provenance",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "optical-absorption",
+      "defect-transport",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "promoteWhen": [
+      "required evidenceSchema entries have parsed evidence or documented waivers",
+      "literature, database, and property evidence ledgers agree or conflicts are explicitly recorded",
+      "no blocking safety, stability, or reproducibility gate remains unresolved"
+    ],
+    "tool": "materials_compare_candidates"
+  },
+  "researchGoal": "Design a lead-free moisture-stable photovoltaic absorber discovery campaign.",
+  "selectedCandidates": [
+    {
+      "bandGapEv": 1.2031,
+      "densityGcm3": 4.351386864837917,
+      "domainEvidenceScore": 0.937,
+      "elements": [
+        "Cu",
+        "In",
+        "K",
+        "Se"
+      ],
+      "energyAboveHullEv": 0,
+      "evidenceTier": "database-shortlist",
+      "family": "generic",
+      "formula": "K2In3CuSe6",
+      "materialId": "mp-21713",
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-21713",
+      "missingProperties": [
+        "absorptionCoefficientCm1",
+        "directBandGapEv",
+        "effectiveMassElectron",
+        "effectiveMassHole",
+        "defectToleranceScore",
+        "literatureBaseline"
+      ],
+      "nextCalculations": [
+        "optical-absorption",
+        "defect-transport",
+        "phase-stability",
+        "structure-validity"
+      ],
+      "plannedCalculations": [
+        "mp-21713-structure-preflight",
+        "mp-21713-literature-benchmark",
+        "mp-21713-database-provenance",
+        "mp-21713-phase-stability",
+        "mp-21713-structure-validity",
+        "mp-21713-synthesis-safety",
+        "mp-21713-optical-absorption",
+        "mp-21713-defect-transport",
+        "mp-21713-environmental-health-safety",
+        "mp-21713-reproducibility"
+      ],
+      "rank": 1,
+      "score": 0.937,
+      "sites": 48,
+      "source": "materials-project",
+      "sourceLevel": "database-summary",
+      "spacegroup": "C2/c",
+      "volume": 1465.321734016757
+    },
+    {
+      "bandGapEv": 0.7523000000000001,
+      "densityGcm3": 5.465717565789669,
+      "domainEvidenceScore": 0.761,
+      "elements": [
+        "Cu",
+        "Ga",
+        "In",
+        "Se"
+      ],
+      "energyAboveHullEv": 0.004506016666669,
+      "evidenceTier": "database-shortlist",
+      "family": "generic",
+      "formula": "In2Ga(CuSe2)3",
+      "materialId": "mp-1224609",
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1224609",
+      "missingProperties": [
+        "absorptionCoefficientCm1",
+        "directBandGapEv",
+        "effectiveMassElectron",
+        "effectiveMassHole",
+        "defectToleranceScore",
+        "literatureBaseline"
+      ],
+      "nextCalculations": [
+        "optical-absorption",
+        "defect-transport",
+        "phase-stability",
+        "structure-validity"
+      ],
+      "plannedCalculations": [
+        "mp-1224609-structure-preflight"
+      ],
+      "rank": 2,
+      "score": 0.761,
+      "sites": 24,
+      "source": "materials-project",
+      "sourceLevel": "database-summary",
+      "spacegroup": "C2",
+      "volume": 585.5978213093058
+    }
+  ],
+  "stopCriteria": [
+    "candidateGenerationPlan produces no new candidates after query expansion",
+    "budget.maxCalculations or budget.maxWallTimeHours is exhausted",
+    "all selected candidates fail at least one required evidence gate",
+    "at least one candidate satisfies required evidenceSchema ids: literature-benchmark, database-provenance, phase-stability, structure-validity, synthesis-safety, optical-absorption, defect-transport, environmental-health-safety, reproducibility",
+    "claimPolicy.researchGradeRequires is satisfied for a promoted candidate",
+    "human reviewer or configured governance policy stops the dynamic loop"
+  ],
+  "targetApplication": "thin-film solar absorber",
+  "topic": {
+    "alternateTopics": [
+      {
+        "id": "catalyst",
+        "label": "Catalyst / surface material",
+        "matchedKeywords": [
+          "her"
+        ]
+      }
+    ],
+    "id": "photovoltaic-absorber",
+    "inference": "keyword-derived",
+    "label": "Photovoltaic absorber",
+    "matchedKeywords": [
+      "photovoltaic",
+      "solar",
+      "absorber"
+    ]
+  },
+  "validationMatrix": [
+    {
+      "acceptanceCriteria": "At least two independent relevant references or an explicit no-literature-found note.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "literature-benchmark",
+      "evidenceTypes": [
+        "literature"
+      ],
+      "propertyKeys": [
+        "literatureBaseline"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "Every candidate must have source, query, structure, and version metadata.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "database-provenance",
+      "evidenceTypes": [
+        "database"
+      ],
+      "propertyKeys": [
+        "databaseSummary"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "Low eHull or a justified metastability window with decomposition products.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "phase-stability",
+      "evidenceTypes": [
+        "database",
+        "dft"
+      ],
+      "propertyKeys": [
+        "energyAboveHullEv",
+        "decompositionProducts"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "Candidate must have a validated structure and no unresolved chemistry sanity failure.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "structure-validity",
+      "evidenceTypes": [
+        "database",
+        "workflow"
+      ],
+      "propertyKeys": [
+        "structureQuality",
+        "oxidationStates",
+        "chargeBalance"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "Risk must be explicitly accepted or mitigated before research-grade claims.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "synthesis-safety",
+      "evidenceTypes": [
+        "literature",
+        "safety",
+        "experiment"
+      ],
+      "propertyKeys": [
+        "synthesisRoute",
+        "toxicityFlags",
+        "supplyRisk"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "Absorption must be property-backed for target spectrum.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "optical-absorption",
+      "evidenceTypes": [
+        "dft",
+        "experiment"
+      ],
+      "propertyKeys": [
+        "absorptionCoefficientCm1",
+        "directBandGapEv"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "Transport and defect evidence must be present before device claims.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "defect-transport",
+      "evidenceTypes": [
+        "dft"
+      ],
+      "propertyKeys": [
+        "defectToleranceScore",
+        "effectiveMassElectron",
+        "effectiveMassHole"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "EHS risk must be reviewed before promotion or experimental recommendation.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "environmental-health-safety",
+      "evidenceTypes": [
+        "safety",
+        "literature"
+      ],
+      "propertyKeys": [
+        "ehsRisk",
+        "regulatoryFlags"
+      ],
+      "status": "planned"
+    },
+    {
+      "acceptanceCriteria": "All promoted claims must link to artifact paths and parser provenance.",
+      "blockingForResearchGradeClaim": true,
+      "evidenceRequirementId": "reproducibility",
+      "evidenceTypes": [
+        "workflow"
+      ],
+      "propertyKeys": [
+        "workflowManifest",
+        "inputDecks",
+        "parsedOutputs"
+      ],
+      "status": "planned"
+    }
+  ],
+  "warnings": [
+    "Planned calculation wall-time estimate exceeds maxWallTimeHours; trim queue before execution.",
+    "Expensive calculations are present but blocked until allowExpensiveCalculations and explicit approval are set.",
+    "Safety or experimental evidence steps are present and require external review before execution.",
+    "Selected candidates still have 12 missing research-grade property field(s).",
+    "Dynamic protocol compiler output is a research plan, not independent scientific validation."
+  ]
+}

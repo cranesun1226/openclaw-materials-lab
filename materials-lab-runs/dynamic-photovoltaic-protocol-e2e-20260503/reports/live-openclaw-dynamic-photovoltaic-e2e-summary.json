@@ -1,0 +1,706 @@
+{
+  "status": "passed",
+  "startedAt": "2026-05-03T11:50:49.148Z",
+  "completedAt": "2026-05-03T11:51:49.934Z",
+  "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503",
+  "topic": "Design a lead-free moisture-stable photovoltaic absorber discovery campaign.",
+  "targetApplication": "thin-film solar absorber",
+  "constraints": [
+    "lead-free",
+    "moisture-stable",
+    "Earth-abundant preferred",
+    "no research-grade claim without parsed evidence"
+  ],
+  "openclaw": {
+    "configPath": "/Users/haksunlee/.openclaw/openclaw.json",
+    "materialsLabConfigured": true,
+    "materialsProjectApiKeyConfigured": true,
+    "pythonPath": "/Users/haksunlee/.openclaw/materials-lab/.venv/bin/python"
+  },
+  "candidateSourceMode": "materials-project-live",
+  "liveSearches": [
+    {
+      "label": "silicon absorber baseline",
+      "status": "ok",
+      "summary": "Found 1 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 1,
+      "candidateIds": [
+        "mp-149"
+      ]
+    },
+    {
+      "label": "chalcopyrite selenide absorber family",
+      "status": "ok",
+      "summary": "Found 2 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 2,
+      "candidateIds": [
+        "mp-1224609",
+        "mp-21713"
+      ]
+    },
+    {
+      "label": "kesterite sulfide absorber family",
+      "status": "ok",
+      "summary": "Found 0 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 0,
+      "candidateIds": []
+    }
+  ],
+  "fixtureFallback": null,
+  "structureChecks": [
+    {
+      "materialId": "mp-149",
+      "status": "fetched",
+      "summary": "Fetched structure for mp-149 and wrote 2 artifact(s).",
+      "usedOfflineData": false,
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/structures/mp-149/mp-149.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/structures/mp-149/mp-149.cif"
+    }
+  ],
+  "protocolOnly": {
+    "summary": "Compiled dynamic research protocol with 3 approval-gated step(s) for 0 selected candidate(s).",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-no-candidates/photovoltaic-absorber-research-protocol-1777809082886.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-no-candidates/photovoltaic-absorber-research-protocol-1777809082886.md",
+    "protocolVersion": "dynamic-research-protocol-v1",
+    "topic": {
+      "id": "photovoltaic-absorber",
+      "label": "Photovoltaic absorber",
+      "inference": "keyword-derived",
+      "matchedKeywords": [
+        "photovoltaic",
+        "solar",
+        "absorber"
+      ],
+      "alternateTopics": []
+    },
+    "selectedCandidateCount": 0,
+    "selectedCandidateIds": [],
+    "evidenceSchemaIds": [
+      "literature-benchmark",
+      "database-provenance",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "optical-absorption",
+      "defect-transport",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "calculationQueueCount": 3,
+    "approvalGateCount": 6,
+    "claimPolicy": {
+      "allowedClaimLevels": [
+        "technical-smoke",
+        "candidate-hypothesis",
+        "proxy-shortlist",
+        "property-backed-shortlist",
+        "research-grade-candidate"
+      ],
+      "researchGradeRequires": [
+        "all required evidence requirements pass or have documented waivers",
+        "live database provenance and literature ledger are attached",
+        "property values come from parsed calculation/experimental/literature artifacts with confidence labels",
+        "negative and contradictory evidence are included",
+        "reproducibility package contains inputs, outputs, parser versions, and reranking trace"
+      ],
+      "requiredEvidenceRequirementIds": [
+        "literature-benchmark",
+        "database-provenance",
+        "phase-stability",
+        "structure-validity",
+        "synthesis-safety",
+        "optical-absorption",
+        "defect-transport",
+        "environmental-health-safety",
+        "reproducibility"
+      ],
+      "forbiddenWithoutEvidence": [
+        "discovered",
+        "validated",
+        "best material",
+        "experimentally proven",
+        "DFT-confirmed"
+      ]
+    }
+  },
+  "candidateBackedPlan": {
+    "summary": "Compiled dynamic research protocol with 14 approval-gated step(s) for 2 selected candidate(s).",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-candidate-backed/photovoltaic-absorber-research-protocol-1777809086533.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-candidate-backed/photovoltaic-absorber-research-protocol-1777809086533.md",
+    "protocolVersion": "dynamic-research-protocol-v1",
+    "topic": {
+      "id": "photovoltaic-absorber",
+      "label": "Photovoltaic absorber",
+      "inference": "keyword-derived",
+      "matchedKeywords": [
+        "photovoltaic",
+        "solar",
+        "absorber"
+      ],
+      "alternateTopics": [
+        {
+          "id": "catalyst",
+          "label": "Catalyst / surface material",
+          "matchedKeywords": [
+            "her"
+          ]
+        }
+      ]
+    },
+    "selectedCandidateCount": 2,
+    "selectedCandidateIds": [
+      "mp-21713",
+      "mp-1224609"
+    ],
+    "evidenceSchemaIds": [
+      "literature-benchmark",
+      "database-provenance",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "optical-absorption",
+      "defect-transport",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "calculationQueueCount": 14,
+    "approvalGateCount": 6,
+    "claimPolicy": {
+      "allowedClaimLevels": [
+        "technical-smoke",
+        "candidate-hypothesis",
+        "proxy-shortlist",
+        "property-backed-shortlist",
+        "research-grade-candidate"
+      ],
+      "researchGradeRequires": [
+        "all required evidence requirements pass or have documented waivers",
+        "live database provenance and literature ledger are attached",
+        "property values come from parsed calculation/experimental/literature artifacts with confidence labels",
+        "negative and contradictory evidence are included",
+        "reproducibility package contains inputs, outputs, parser versions, and reranking trace"
+      ],
+      "requiredEvidenceRequirementIds": [
+        "literature-benchmark",
+        "database-provenance",
+        "phase-stability",
+        "structure-validity",
+        "synthesis-safety",
+        "optical-absorption",
+        "defect-transport",
+        "environmental-health-safety",
+        "reproducibility"
+      ],
+      "forbiddenWithoutEvidence": [
+        "discovered",
+        "validated",
+        "best material",
+        "experimentally proven",
+        "DFT-confirmed"
+      ]
+    }
+  },
+  "devSmoke": {
+    "summary": "Executed dev-smoke backend: 8 completed, 0 prepared, 0 submitted, 0 skipped.",
+    "backend": "dev-smoke",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/execution-manifest.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/execution-report.md",
+    "completedCalculations": 8,
+    "preparedCalculations": 0,
+    "submittedCalculations": 0,
+    "skippedCalculations": 0,
+    "propertyUpdates": [],
+    "inputPathCount": 0,
+    "resultPathCount": 8,
+    "warnings": [
+      "dev-smoke backend validates execution plumbing only; it does not generate property evidence or reranking updates."
+    ]
+  },
+  "quantumEspressoPrepare": {
+    "summary": "Prepared quantum-espresso backend: 0 completed, 7 prepared, 0 submitted, 7 skipped.",
+    "backend": "quantum-espresso",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/execution-manifest.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/execution-report.md",
+    "completedCalculations": 0,
+    "preparedCalculations": 7,
+    "submittedCalculations": 0,
+    "skippedCalculations": 7,
+    "propertyUpdates": [],
+    "inputPathCount": 38,
+    "resultPathCount": 7,
+    "warnings": []
+  },
+  "checks": [
+    {
+      "name": "bridge-ping",
+      "ok": true,
+      "detail": "Materials Lab worker 0.1.0 is ready."
+    },
+    {
+      "name": "live-search-silicon absorber baseline",
+      "ok": true,
+      "detail": "candidateCount=1"
+    },
+    {
+      "name": "live-search-chalcopyrite selenide absorber family",
+      "ok": true,
+      "detail": "candidateCount=2"
+    },
+    {
+      "name": "live-search-kesterite sulfide absorber family",
+      "ok": true,
+      "detail": "candidateCount=0"
+    },
+    {
+      "name": "candidate-pool",
+      "ok": true,
+      "detail": "candidateCount=3; sourceMode=materials-project-live"
+    },
+    {
+      "name": "live-structure-fetch",
+      "ok": true,
+      "detail": "Fetched structure for mp-149 and wrote 2 artifact(s)."
+    },
+    {
+      "name": "protocol-compiler-version",
+      "ok": true,
+      "detail": "Compiled dynamic research protocol with 3 approval-gated step(s) for 0 selected candidate(s)."
+    },
+    {
+      "name": "protocol-without-candidates",
+      "ok": true,
+      "detail": "selectedCandidates=0"
+    },
+    {
+      "name": "photovoltaic-evidence-schema",
+      "ok": true,
+      "detail": "literature-benchmark, database-provenance, phase-stability, structure-validity, synthesis-safety, optical-absorption, defect-transport, environmental-health-safety, reproducibility"
+    },
+    {
+      "name": "candidate-backed-plan",
+      "ok": true,
+      "detail": "Compiled dynamic research protocol with 14 approval-gated step(s) for 2 selected candidate(s)."
+    },
+    {
+      "name": "claim-policy-present",
+      "ok": true,
+      "detail": "researchGradeRequires is present"
+    },
+    {
+      "name": "approval-gates-present",
+      "ok": true,
+      "detail": "approvalGates=6"
+    },
+    {
+      "name": "dev-smoke-completed",
+      "ok": true,
+      "detail": "Executed dev-smoke backend: 8 completed, 0 prepared, 0 submitted, 0 skipped."
+    },
+    {
+      "name": "dev-smoke-no-property-claims",
+      "ok": true,
+      "detail": "propertyUpdates=0"
+    },
+    {
+      "name": "qe-inputs-prepared",
+      "ok": true,
+      "detail": "Prepared quantum-espresso backend: 0 completed, 7 prepared, 0 submitted, 7 skipped."
+    },
+    {
+      "name": "qe-no-submission",
+      "ok": true,
+      "detail": "submittedCalculations=0"
+    },
+    {
+      "name": "qe-scf-input-contains-atomic-species",
+      "ok": true,
+      "detail": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/pw.scf.in"
+    }
+  ],
+  "artifactPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-candidate-backed/photovoltaic-absorber-research-protocol-1777809086533.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-candidate-backed/photovoltaic-absorber-research-protocol-1777809086533.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/execution-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/execution-report.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/global-database-candidate-search.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/global-literature-evidence-ledger.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/global-research-protocol-review.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-database-provenance.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-literature-benchmark.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-phase-stability.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-structure-preflight.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-structure-validity.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-no-candidates/photovoltaic-absorber-research-protocol-1777809082886.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-no-candidates/photovoltaic-absorber-research-protocol-1777809082886.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/execution-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/execution-report.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/preflight-note.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/preflight-note.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/structures/mp-149/mp-149.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/structures/mp-149/mp-149.json"
+  ],
+  "artifactsExist": [
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/structures/mp-149/mp-149.json",
+      "exists": true,
+      "bytes": 1285
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/structures/mp-149/mp-149.cif",
+      "exists": true,
+      "bytes": 746
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-no-candidates/photovoltaic-absorber-research-protocol-1777809082886.json",
+      "exists": true,
+      "bytes": 24519
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-no-candidates/photovoltaic-absorber-research-protocol-1777809082886.md",
+      "exists": true,
+      "bytes": 4913
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-candidate-backed/photovoltaic-absorber-research-protocol-1777809086533.json",
+      "exists": true,
+      "bytes": 39699
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-candidate-backed/photovoltaic-absorber-research-protocol-1777809086533.md",
+      "exists": true,
+      "bytes": 8958
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/execution-manifest.json",
+      "exists": true,
+      "bytes": 10711
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/execution-report.md",
+      "exists": true,
+      "bytes": 1300
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/global-research-protocol-review.json",
+      "exists": true,
+      "bytes": 1188
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/global-literature-evidence-ledger.json",
+      "exists": true,
+      "bytes": 1179
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/global-database-candidate-search.json",
+      "exists": true,
+      "bytes": 1157
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-structure-preflight.json",
+      "exists": true,
+      "bytes": 1175
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-literature-benchmark.json",
+      "exists": true,
+      "bytes": 1111
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-database-provenance.json",
+      "exists": true,
+      "bytes": 1104
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-phase-stability.json",
+      "exists": true,
+      "bytes": 1140
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-structure-validity.json",
+      "exists": true,
+      "bytes": 1185
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/execution-manifest.json",
+      "exists": true,
+      "bytes": 28024
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/execution-report.md",
+      "exists": true,
+      "bytes": 1156
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/step-manifest.json",
+      "exists": true,
+      "bytes": 2984
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/step-manifest.json",
+      "exists": true,
+      "bytes": 3728
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/step-manifest.json",
+      "exists": true,
+      "bytes": 3798
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/step-manifest.json",
+      "exists": true,
+      "bytes": 3774
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/step-manifest.json",
+      "exists": true,
+      "bytes": 3779
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/step-manifest.json",
+      "exists": true,
+      "bytes": 3745
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/step-manifest.json",
+      "exists": true,
+      "bytes": 3007
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/structure.json",
+      "exists": true,
+      "bytes": 18297
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/structure.cif",
+      "exists": true,
+      "bytes": 3194
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/POSCAR",
+      "exists": true,
+      "bytes": 3551
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-preflight/preflight-note.md",
+      "exists": true,
+      "bytes": 310
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/structure.json",
+      "exists": true,
+      "bytes": 18297
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/structure.cif",
+      "exists": true,
+      "bytes": 3194
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/POSCAR",
+      "exists": true,
+      "bytes": 3551
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/pw.scf.in",
+      "exists": true,
+      "bytes": 2634
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 27
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-phase-stability/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/structure.json",
+      "exists": true,
+      "bytes": 18297
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/structure.cif",
+      "exists": true,
+      "bytes": 3194
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/POSCAR",
+      "exists": true,
+      "bytes": 3551
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/pw.scf.in",
+      "exists": true,
+      "bytes": 2634
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 27
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-structure-validity/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/structure.json",
+      "exists": true,
+      "bytes": 18297
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/structure.cif",
+      "exists": true,
+      "bytes": 3194
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/POSCAR",
+      "exists": true,
+      "bytes": 3551
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/pw.scf.in",
+      "exists": true,
+      "bytes": 2634
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 27
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-optical-absorption/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/structure.json",
+      "exists": true,
+      "bytes": 18297
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/structure.cif",
+      "exists": true,
+      "bytes": 3194
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/POSCAR",
+      "exists": true,
+      "bytes": 3551
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/pw.scf.in",
+      "exists": true,
+      "bytes": 2634
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 27
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-defect-transport/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/structure.json",
+      "exists": true,
+      "bytes": 18297
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/structure.cif",
+      "exists": true,
+      "bytes": 3194
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/POSCAR",
+      "exists": true,
+      "bytes": 3551
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/pw.scf.in",
+      "exists": true,
+      "bytes": 2634
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 27
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-21713-reproducibility/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/structure.json",
+      "exists": true,
+      "bytes": 9501
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/structure.cif",
+      "exists": true,
+      "bytes": 1944
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/POSCAR",
+      "exists": true,
+      "bytes": 1903
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-qe-prepare/photovoltaic-absorber-research-protocol-1777809086533-quantum-espresso-1777809093906/mp-1224609-structure-preflight/preflight-note.md",
+      "exists": true,
+      "bytes": 317
+    }
+  ],
+  "verdict": "OpenClaw Materials Lab compiled and exercised a live-data dynamic research protocol. No research-grade discovery claim was made."
+}

@@ -1,0 +1,30 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "mp-21713-structure-preflight",
+  "calculationType": "structure-preflight",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": true,
+    "hasMaterialId": true,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "structurePath",
+      "cifPath",
+      "structureQuality"
+    ]
+  },
+  "estimatedWallTimeHours": 0.05,
+  "formula": "K2In3CuSe6",
+  "label": "Structure fetch and normalization preflight",
+  "materialId": "mp-21713",
+  "method": "fetch_structure + structural sanity checks",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777809090,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-structure-preflight.json",
+  "status": "completed-dev-smoke"
+}

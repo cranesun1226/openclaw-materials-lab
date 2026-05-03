@@ -1,0 +1,28 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "mp-21713-database-provenance",
+  "calculationType": "database-provenance",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": true,
+    "hasMaterialId": true,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "databaseSummary"
+    ]
+  },
+  "estimatedWallTimeHours": 0.5,
+  "formula": "K2In3CuSe6",
+  "label": "Database provenance",
+  "materialId": "mp-21713",
+  "method": "database query and provenance capture",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777809090,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777809086533-dev-smoke-1777809090152/mp-21713-database-provenance.json",
+  "status": "completed-dev-smoke"
+}

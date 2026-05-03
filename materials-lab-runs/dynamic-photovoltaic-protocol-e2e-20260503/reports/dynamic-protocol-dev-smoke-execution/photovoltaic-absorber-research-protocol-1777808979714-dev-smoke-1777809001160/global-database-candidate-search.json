@@ -1,0 +1,29 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "global-database-candidate-search",
+  "calculationType": "database-candidate-search",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": false,
+    "hasMaterialId": false,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "candidatePool",
+      "databaseSummary"
+    ]
+  },
+  "estimatedWallTimeHours": 0.5,
+  "formula": "",
+  "label": "Database candidate generation",
+  "materialId": "",
+  "method": "run database queries and build source-tagged candidate pool",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777809001,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/dynamic-photovoltaic-protocol-e2e-20260503/reports/dynamic-protocol-dev-smoke-execution/photovoltaic-absorber-research-protocol-1777808979714-dev-smoke-1777809001160/global-database-candidate-search.json",
+  "status": "completed-dev-smoke"
+}
