@@ -12,6 +12,9 @@ import time
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from . import __version__
 from .ase_ops import run_relaxation
@@ -139,8 +142,10 @@ def dispatch(*, action: str, request_id: str, payload: dict[str, Any]) -> dict[s
         "analyze_structure": lambda: handle_analyze_structure(request_id=request_id, payload=payload, api_key=api_key),
         "compare_candidates": lambda: handle_compare_candidates(request_id=request_id, payload=payload),
         "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload, api_key=api_key),
+        "search_literature": lambda: handle_search_literature(request_id=request_id, payload=payload),
         "ingest_evidence": lambda: handle_ingest_evidence(request_id=request_id, payload=payload),
         "evaluate_research_claim": lambda: handle_evaluate_research_claim(request_id=request_id, payload=payload),
+        "close_evidence_gaps": lambda: handle_close_evidence_gaps(request_id=request_id, payload=payload),
         "execute_research_plan": lambda: handle_execute_research_plan(request_id=request_id, payload=payload, api_key=api_key),
         "ase_relax": lambda: handle_ase_relax(request_id=request_id, payload=payload, api_key=api_key),
         "batch_screen": lambda: handle_batch_screen(request_id=request_id, payload=payload, api_key=api_key),
@@ -386,6 +391,101 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any], api_k
     )
 
 
+def handle_search_literature(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    plan: dict[str, Any] = {}
+    if payload.get("plan") or payload.get("planPath"):
+        plan = _load_research_plan(payload)
+    candidate_id = (
+        ensure_string(payload.get("candidateId"), field="candidateId", required=False)
+        or _default_claim_candidate_id(plan)
+    )
+    queries = _literature_queries_from_payload(payload, plan=plan, candidate_id=candidate_id)
+    if not queries:
+        raise WorkerError(
+            "INVALID_PARAMS",
+            "search_literature requires queries, researchGoal, or a plan with literatureReviewPlan queries.",
+        )
+    providers = _string_list(payload.get("providers")) or ["openalex", "crossref"]
+    max_results_per_query = max(1, min(int(payload.get("maxResultsPerQuery") or 5), 25))
+    allow_network = ensure_bool(payload.get("allowNetwork"), field="allowNetwork", default=True)
+    allow_development_fixtures = ensure_bool(
+        payload.get("allowDevelopmentFixtures"),
+        field="allowDevelopmentFixtures",
+        default=False,
+    )
+    timeout_seconds = max(2.0, min(float(payload.get("timeoutSeconds") or 12.0), 60.0))
+    evidence_requirement_id = ensure_string(payload.get("evidenceRequirementId"), field="evidenceRequirementId", required=False)
+    source_label = ensure_string(payload.get("sourceLabel"), field="sourceLabel", required=False)
+    ledger_path = ensure_string(payload.get("evidenceLedgerPath"), field="evidenceLedgerPath", required=False)
+    output_ledger_path = ensure_string(payload.get("outputLedgerPath"), field="outputLedgerPath", required=False)
+
+    search_result = _search_literature(
+        queries=queries,
+        providers=providers,
+        max_results_per_query=max_results_per_query,
+        allow_network=allow_network,
+        allow_development_fixtures=allow_development_fixtures,
+        timeout_seconds=timeout_seconds,
+    )
+    rows = _literature_records_to_evidence_rows(
+        records=search_result["records"],
+        plan=plan,
+        candidate_id=candidate_id,
+        evidence_requirement_id=evidence_requirement_id,
+        source_label=source_label,
+    )
+    prior_rows = _read_evidence_ledger(ledger_path) if ledger_path and Path(ledger_path).exists() else []
+    output_path = Path(output_ledger_path or ledger_path or artifact_dir / "literature-evidence-ledger.jsonl")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    merged_rows = _dedupe_evidence_rows([*prior_rows, *rows])
+    output_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in merged_rows), encoding="utf-8")
+
+    query_log_path = artifact_dir / "literature-query-log.json"
+    records_path = artifact_dir / "literature-records.jsonl"
+    report_path = artifact_dir / "literature-search-report.md"
+    query_log_path.write_text(json.dumps(search_result["queryRecords"], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    records_path.write_text("".join(json.dumps(record, sort_keys=True) + "\n" for record in search_result["records"]), encoding="utf-8")
+    report = {
+        "queries": queries,
+        "providers": providers,
+        "candidateId": candidate_id,
+        "recordCount": len(search_result["records"]),
+        "newEvidenceRows": len(rows),
+        "totalEvidenceRows": len(merged_rows),
+        "evidenceLedgerPath": str(output_path),
+        "recordsPath": str(records_path),
+        "queryLogPath": str(query_log_path),
+        "warnings": search_result["warnings"],
+        "records": search_result["records"],
+    }
+    report_path.write_text(_literature_search_markdown(report), encoding="utf-8")
+    data = {
+        "candidateId": candidate_id,
+        "queries": queries,
+        "providers": providers,
+        "records": search_result["records"],
+        "recordCount": len(search_result["records"]),
+        "evidenceRows": rows,
+        "evidenceRowCount": len(rows),
+        "evidenceLedgerPath": str(output_path),
+        "queryLogPath": str(query_log_path),
+        "recordsPath": str(records_path),
+        "reportPath": str(report_path),
+        "usedDevelopmentFixtureData": search_result["usedDevelopmentFixtureData"],
+        "warnings": search_result["warnings"],
+    }
+    return success(
+        action="search_literature",
+        request_id=request_id,
+        summary=f"Collected {len(search_result['records'])} literature record(s) and wrote {len(rows)} evidence row(s).",
+        data=data,
+        artifacts=[str(output_path), str(query_log_path), str(records_path), str(report_path)],
+        warnings=search_result["warnings"],
+    )
+
+
 def handle_evaluate_research_claim(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -459,6 +559,148 @@ def handle_evaluate_research_claim(*, request_id: str, payload: dict[str, Any]) 
         ),
         data=data,
         artifacts=[str(review_path), str(report_path), str(merged_ledger_path)],
+        warnings=warnings,
+    )
+
+
+def handle_close_evidence_gaps(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    plan = _load_research_plan(payload)
+    candidate_id = (
+        ensure_string(payload.get("candidateId"), field="candidateId", required=False)
+        or _default_claim_candidate_id(plan)
+    )
+    if not candidate_id:
+        raise WorkerError("INVALID_PARAMS", "close_evidence_gaps requires candidateId or a plan with selectedCandidates.")
+    ledger_path = (
+        ensure_string(payload.get("evidenceLedgerPath"), field="evidenceLedgerPath", required=False)
+        or _default_evidence_ledger_path(plan)
+    )
+    existing_rows = _read_evidence_ledger(ledger_path) if ledger_path else []
+    provided_rows = [
+        _normalize_evidence_row(item, candidate_id=candidate_id)
+        for item in (payload.get("evidenceRows") or [])
+        if isinstance(item, dict)
+    ]
+    rows = _dedupe_evidence_rows([*existing_rows, *provided_rows])
+    requested = str(payload.get("requestedClaimLevel") or "research-grade-candidate")
+    merged_ledger_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-closure-evidence-ledger.jsonl"
+    merged_ledger_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+    review = _evaluate_research_claim(
+        plan=plan,
+        candidate_id=candidate_id,
+        rows=rows,
+        requested_claim_level=requested,
+        ledger_path=ledger_path,
+        merged_ledger_path=str(merged_ledger_path),
+    ) if rows else _empty_claim_review(plan, candidate_id, requested, ledger_path, str(merged_ledger_path))
+
+    run_literature_search = ensure_bool(payload.get("runLiteratureSearch"), field="runLiteratureSearch", default=False)
+    allow_network = ensure_bool(payload.get("allowNetwork"), field="allowNetwork", default=True)
+    allow_development_fixtures = ensure_bool(payload.get("allowDevelopmentFixtures"), field="allowDevelopmentFixtures", default=False)
+    max_literature_queries = max(1, min(int(payload.get("maxLiteratureQueries") or 4), 20))
+    max_results_per_query = max(1, min(int(payload.get("maxResultsPerQuery") or 4), 20))
+
+    closure_plan = _build_evidence_gap_closure_plan(
+        plan=plan,
+        candidate_id=candidate_id,
+        review=review,
+        rows=rows,
+        max_literature_queries=max_literature_queries,
+    )
+    warnings = list(review.get("warnings") or [])
+    literature_search: dict[str, Any] | None = None
+    if run_literature_search:
+        literature_queries = [
+            action["query"]
+            for action in closure_plan.get("actions") or []
+            if action.get("actionType") == "search-literature" and action.get("query")
+        ][:max_literature_queries]
+        if literature_queries:
+            search_result = _search_literature(
+                queries=literature_queries,
+                providers=_string_list(payload.get("providers")) or ["openalex", "crossref"],
+                max_results_per_query=max_results_per_query,
+                allow_network=allow_network,
+                allow_development_fixtures=allow_development_fixtures,
+                timeout_seconds=max(2.0, min(float(payload.get("timeoutSeconds") or 12.0), 60.0)),
+            )
+            lit_rows = _literature_records_to_evidence_rows(
+                records=search_result["records"],
+                plan=plan,
+                candidate_id=candidate_id,
+                evidence_requirement_id=None,
+                source_label=None,
+            )
+            rows = _dedupe_evidence_rows([*rows, *lit_rows])
+            merged_ledger_path.write_text("".join(json.dumps(row, sort_keys=True) + "\n" for row in rows), encoding="utf-8")
+            review = _evaluate_research_claim(
+                plan=plan,
+                candidate_id=candidate_id,
+                rows=rows,
+                requested_claim_level=requested,
+                ledger_path=ledger_path,
+                merged_ledger_path=str(merged_ledger_path),
+            )
+            closure_plan = _build_evidence_gap_closure_plan(
+                plan=plan,
+                candidate_id=candidate_id,
+                review=review,
+                rows=rows,
+                max_literature_queries=max_literature_queries,
+            )
+            literature_search = {
+                "queries": literature_queries,
+                "recordCount": len(search_result["records"]),
+                "evidenceRowCount": len(lit_rows),
+                "usedDevelopmentFixtureData": search_result["usedDevelopmentFixtureData"],
+                "warnings": search_result["warnings"],
+            }
+            warnings.extend(search_result["warnings"])
+        else:
+            warnings.append("runLiteratureSearch=true but no literature gap queries were generated.")
+
+    closure_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-evidence-closure-plan.json"
+    report_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-evidence-closure-plan.md"
+    review_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-closure-claim-review.json"
+    review_report_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-closure-claim-review.md"
+    closure_payload = {
+        **closure_plan,
+        "claimStatus": review["claimStatus"],
+        "literatureSearch": literature_search,
+        "evidenceLedgerPath": str(merged_ledger_path),
+        "warnings": warnings,
+    }
+    closure_path.write_text(json.dumps(closure_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(_evidence_gap_closure_markdown(closure_payload), encoding="utf-8")
+    review_path.write_text(json.dumps(review, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    review_report_path.write_text(_claim_evaluation_markdown(review), encoding="utf-8")
+    data = {
+        "candidateId": candidate_id,
+        "claimStatus": review["claimStatus"],
+        "missingEvidence": review.get("missingEvidence") or [],
+        "blockingEvidence": review.get("blockingEvidence") or [],
+        "conflictingEvidence": review.get("conflictingEvidence") or [],
+        "closurePlan": closure_payload,
+        "closurePlanPath": str(closure_path),
+        "reportPath": str(report_path),
+        "reviewPath": str(review_path),
+        "reviewReportPath": str(review_report_path),
+        "evidenceLedgerPath": str(merged_ledger_path),
+        "literatureSearch": literature_search,
+        "warnings": warnings,
+    }
+    return success(
+        action="close_evidence_gaps",
+        request_id=request_id,
+        summary=(
+            f"Built evidence closure plan for {candidate_id}: "
+            f"{len(closure_payload.get('actions') or [])} action(s), "
+            f"research-grade allowed={str(review['claimStatus']['researchGradeClaimAllowed']).lower()}."
+        ),
+        data=data,
+        artifacts=[str(closure_path), str(report_path), str(review_path), str(review_report_path), str(merged_ledger_path)],
         warnings=warnings,
     )
 
@@ -722,6 +964,655 @@ def handle_export_report(*, request_id: str, payload: dict[str, Any]) -> dict[st
         data={"outputPath": output_file, "references": references},
         artifacts=[output_file],
     )
+
+
+def _literature_queries_from_payload(payload: dict[str, Any], *, plan: dict[str, Any], candidate_id: str | None) -> list[str]:
+    queries = _string_list(payload.get("queries"))
+    if payload.get("query"):
+        queries.append(str(payload["query"]).strip())
+    if payload.get("researchGoal"):
+        queries.append(str(payload["researchGoal"]).strip())
+    literature_plan = plan.get("literatureReviewPlan") if isinstance(plan.get("literatureReviewPlan"), dict) else {}
+    pipeline = plan.get("literatureEvidencePipeline") if isinstance(plan.get("literatureEvidencePipeline"), dict) else {}
+    queries.extend(_string_list(literature_plan.get("queries")))
+    queries.extend(_string_list(pipeline.get("queries")))
+    candidate = _candidate_for_plan(plan, candidate_id)
+    formula = str((candidate or {}).get("formula") or "").strip()
+    if formula:
+        queries.extend([f"{formula} {query}" for query in queries[:3]])
+    return _unique_ordered([query for query in queries if query])[:30]
+
+
+def _search_literature(
+    *,
+    queries: list[str],
+    providers: list[str],
+    max_results_per_query: int,
+    allow_network: bool,
+    allow_development_fixtures: bool,
+    timeout_seconds: float,
+) -> dict[str, Any]:
+    query_records: list[dict[str, Any]] = []
+    records_by_key: dict[str, dict[str, Any]] = {}
+    warnings: list[str] = []
+    used_fixture = False
+    normalized_providers = [provider.lower() for provider in providers if provider.lower() in {"openalex", "crossref"}]
+    if not normalized_providers:
+        normalized_providers = ["openalex", "crossref"]
+    if not allow_network and not allow_development_fixtures:
+        warnings.append("Literature search network access is disabled and development fixtures were not allowed.")
+    for query_index, query in enumerate(queries, start=1):
+        for provider in normalized_providers:
+            query_id = f"litq-{query_index:03d}-{provider}"
+            record: dict[str, Any] = {
+                "queryId": query_id,
+                "query": query,
+                "provider": provider,
+                "status": "planned",
+                "resultCount": 0,
+            }
+            try:
+                if allow_network:
+                    provider_records = _fetch_literature_provider(
+                        provider=provider,
+                        query=query,
+                        limit=max_results_per_query,
+                        timeout_seconds=timeout_seconds,
+                    )
+                elif allow_development_fixtures:
+                    provider_records = _development_literature_records(provider, query, max_results_per_query)
+                    used_fixture = True
+                else:
+                    provider_records = []
+                for item in provider_records:
+                    item["queryId"] = query_id
+                    item["query"] = query
+                    key = _literature_record_key(item)
+                    existing = records_by_key.setdefault(key, item)
+                    existing_query_ids = set(existing.get("queryIds") or [])
+                    existing_query_ids.add(query_id)
+                    existing["queryIds"] = sorted(existing_query_ids)
+                record["status"] = "ok"
+                record["resultCount"] = len(provider_records)
+            except (HTTPError, URLError, TimeoutError) as exc:
+                record["status"] = "failed"
+                record["error"] = exc.__class__.__name__
+                record["message"] = str(exc)
+                if allow_development_fixtures:
+                    provider_records = _development_literature_records(provider, query, max_results_per_query)
+                    used_fixture = True
+                    for item in provider_records:
+                        item["queryId"] = query_id
+                        item["query"] = query
+                        key = _literature_record_key(item)
+                        existing = records_by_key.setdefault(key, item)
+                        existing_query_ids = set(existing.get("queryIds") or [])
+                        existing_query_ids.add(query_id)
+                        existing["queryIds"] = sorted(existing_query_ids)
+                    record["fixtureFallbackCount"] = len(provider_records)
+                    warnings.append(f"{provider} query failed; development literature fixture was used for {query!r}.")
+                else:
+                    warnings.append(f"{provider} literature query failed for {query!r}: {exc}")
+            except Exception as exc:  # pragma: no cover - provider/runtime dependent
+                record["status"] = "failed"
+                record["error"] = exc.__class__.__name__
+                record["message"] = str(exc)
+                warnings.append(f"{provider} literature query failed for {query!r}: {exc}")
+            query_records.append(record)
+    records = list(records_by_key.values())
+    records.sort(key=lambda item: (float(item.get("relevanceScore") or 0.0), int(item.get("year") or 0)), reverse=True)
+    return {
+        "records": records,
+        "queryRecords": query_records,
+        "warnings": warnings,
+        "usedDevelopmentFixtureData": used_fixture,
+    }
+
+
+def _fetch_literature_provider(*, provider: str, query: str, limit: int, timeout_seconds: float) -> list[dict[str, Any]]:
+    if provider == "openalex":
+        params = urlencode({"search": query, "per-page": limit})
+        url = f"https://api.openalex.org/works?{params}"
+        payload = _http_json(url, timeout_seconds=timeout_seconds)
+        return [_normalize_openalex_work(item) for item in payload.get("results") or [] if isinstance(item, dict)]
+    if provider == "crossref":
+        params = urlencode({"query.bibliographic": query, "rows": limit})
+        url = f"https://api.crossref.org/v1/works?{params}"
+        payload = _http_json(url, timeout_seconds=timeout_seconds)
+        message = payload.get("message") if isinstance(payload.get("message"), dict) else {}
+        return [_normalize_crossref_work(item) for item in message.get("items") or [] if isinstance(item, dict)]
+    return []
+
+
+def _http_json(url: str, *, timeout_seconds: float) -> dict[str, Any]:
+    request = Request(
+        url,
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "OpenClaw-Materials-Lab/0.1 (mailto:research@example.invalid)",
+        },
+    )
+    with urlopen(request, timeout=timeout_seconds) as response:  # nosec B310 - public literature APIs only
+        return ensure_dict(json.loads(response.read().decode("utf-8")), field="literatureResponse")
+
+
+def _normalize_openalex_work(item: dict[str, Any]) -> dict[str, Any]:
+    doi = str(item.get("doi") or "").replace("https://doi.org/", "") or None
+    authorships = item.get("authorships") if isinstance(item.get("authorships"), list) else []
+    authors = []
+    for authorship in authorships[:8]:
+        author = authorship.get("author") if isinstance(authorship, dict) else {}
+        if isinstance(author, dict) and author.get("display_name"):
+            authors.append(str(author["display_name"]))
+    concepts = [concept.get("display_name") for concept in item.get("concepts") or [] if isinstance(concept, dict) and concept.get("display_name")]
+    return {
+        "provider": "openalex",
+        "recordId": item.get("id"),
+        "title": item.get("display_name"),
+        "year": item.get("publication_year"),
+        "doi": doi,
+        "url": item.get("primary_location", {}).get("landing_page_url") if isinstance(item.get("primary_location"), dict) else item.get("id"),
+        "abstract": _openalex_abstract(item.get("abstract_inverted_index")),
+        "authors": authors,
+        "venue": (item.get("primary_location") or {}).get("source", {}).get("display_name") if isinstance(item.get("primary_location"), dict) and isinstance((item.get("primary_location") or {}).get("source"), dict) else None,
+        "citationCount": item.get("cited_by_count"),
+        "concepts": concepts[:12],
+        "source": "openalex",
+        "relevanceScore": float(item.get("relevance_score") or item.get("cited_by_count") or 0.0),
+    }
+
+
+def _normalize_crossref_work(item: dict[str, Any]) -> dict[str, Any]:
+    title_values = item.get("title") if isinstance(item.get("title"), list) else []
+    container_values = item.get("container-title") if isinstance(item.get("container-title"), list) else []
+    published = item.get("published-print") or item.get("published-online") or item.get("created") or {}
+    date_parts = published.get("date-parts") if isinstance(published, dict) else []
+    year = date_parts[0][0] if date_parts and isinstance(date_parts[0], list) and date_parts[0] else None
+    authors = []
+    for author in item.get("author") or []:
+        if not isinstance(author, dict):
+            continue
+        name = " ".join(part for part in [author.get("given"), author.get("family")] if part)
+        if name:
+            authors.append(name)
+    return {
+        "provider": "crossref",
+        "recordId": item.get("DOI") or item.get("URL"),
+        "title": title_values[0] if title_values else None,
+        "year": year,
+        "doi": item.get("DOI"),
+        "url": item.get("URL"),
+        "abstract": _strip_html(str(item.get("abstract") or "")) or None,
+        "authors": authors[:8],
+        "venue": container_values[0] if container_values else None,
+        "citationCount": item.get("is-referenced-by-count"),
+        "concepts": item.get("subject") or [],
+        "source": "crossref",
+        "relevanceScore": float(item.get("score") or item.get("is-referenced-by-count") or 0.0),
+    }
+
+
+def _openalex_abstract(inverted_index: Any) -> str | None:
+    if not isinstance(inverted_index, dict):
+        return None
+    positions: list[tuple[int, str]] = []
+    for word, indexes in inverted_index.items():
+        if not isinstance(indexes, list):
+            continue
+        for index in indexes:
+            try:
+                positions.append((int(index), str(word)))
+            except Exception:
+                continue
+    if not positions:
+        return None
+    return " ".join(word for _index, word in sorted(positions))
+
+
+def _strip_html(text: str) -> str:
+    return re.sub(r"<[^>]+>", " ", text).replace("\n", " ").strip()
+
+
+def _development_literature_records(provider: str, query: str, limit: int) -> list[dict[str, Any]]:
+    records = [
+        {
+            "provider": provider,
+            "recordId": f"dev-lit-{_safe_file_stem(query).lower()}-1",
+            "title": f"Development fixture review for {query}",
+            "year": 2026,
+            "doi": "10.0000/dev-fixture.materials-literature",
+            "url": "https://example.invalid/openclaw-materials-lab/dev-literature-fixture",
+            "abstract": f"This development fixture discusses benchmark properties, synthesis risks, and contradictory evidence for {query}.",
+            "authors": ["OpenClaw Materials Lab Fixture"],
+            "venue": "Development Fixture",
+            "citationCount": 0,
+            "concepts": ["materials science", "development fixture"],
+            "source": "development-literature-fixture",
+            "relevanceScore": 1.0,
+        }
+    ]
+    return records[:limit]
+
+
+def _literature_record_key(record: dict[str, Any]) -> str:
+    doi = str(record.get("doi") or "").strip().lower()
+    if doi:
+        return f"doi:{doi}"
+    record_id = str(record.get("recordId") or "").strip().lower()
+    if record_id:
+        return f"{record.get('provider')}:{record_id}"
+    return _safe_file_stem(str(record.get("title") or "literature-record")).lower()
+
+
+def _literature_records_to_evidence_rows(
+    *,
+    records: list[dict[str, Any]],
+    plan: dict[str, Any],
+    candidate_id: str | None,
+    evidence_requirement_id: str | None,
+    source_label: str | None,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    generated_at = int(time.time())
+    for record in records:
+        requirement_id = evidence_requirement_id or _infer_literature_requirement(plan, record)
+        title = str(record.get("title") or "Untitled literature record")
+        source = source_label or str(record.get("source") or record.get("provider") or "literature")
+        record_candidate_id = candidate_id or _candidate_id_from_literature_record(plan, record)
+        rows.append(_normalize_evidence_row({
+            "ledgerVersion": "evidence-ledger-v1",
+            "evidenceId": _safe_file_stem(f"{record_candidate_id or 'candidate'}-{requirement_id}-{_literature_record_key(record)}").lower(),
+            "candidateId": record_candidate_id,
+            "formula": _candidate_formula_for_plan(plan, record_candidate_id),
+            "evidenceRequirementId": requirement_id,
+            "claim": f"Literature search record identified potentially relevant evidence: {title}",
+            "status": "literature-supported",
+            "sourceType": "literature",
+            "source": source,
+            "confidence": "citation-search-result",
+            "propertyValues": {
+                "literatureBaseline": True,
+                "publicationYear": record.get("year"),
+                "citationCount": record.get("citationCount"),
+                **_extract_literature_property_values(" ".join(str(record.get(key) or "") for key in ["title", "abstract"])),
+            },
+            "citation": record.get("doi") or record.get("url") or title,
+            "citationProvenance": {
+                "provider": record.get("provider"),
+                "recordId": record.get("recordId"),
+                "doi": record.get("doi"),
+                "url": record.get("url"),
+                "title": title,
+                "year": record.get("year"),
+                "authors": record.get("authors") or [],
+                "venue": record.get("venue"),
+                "queryIds": record.get("queryIds") or ([record["queryId"]] if record.get("queryId") else []),
+            },
+            "queryIds": record.get("queryIds") or ([record["queryId"]] if record.get("queryId") else []),
+            "generatedAt": generated_at,
+        }, candidate_id=record_candidate_id))
+    return rows
+
+
+def _infer_literature_requirement(plan: dict[str, Any], record: dict[str, Any]) -> str:
+    text = " ".join(str(record.get(key) or "") for key in ["title", "abstract", "concepts"]).lower()
+    property_values = _extract_literature_property_values(text)
+    if property_values:
+        inferred = _infer_requirement_for_properties(plan, list(property_values.keys()), "literature-benchmark")
+        if inferred:
+            return inferred
+    for requirement in plan.get("evidenceSchema") or []:
+        if isinstance(requirement, dict) and "literature" in (requirement.get("evidenceTypes") or []):
+            return str(requirement.get("id") or "literature-benchmark")
+    return "literature-benchmark"
+
+
+def _candidate_id_from_literature_record(plan: dict[str, Any], record: dict[str, Any]) -> str | None:
+    text = " ".join(str(record.get(key) or "") for key in ["title", "abstract", "doi", "url"]).lower()
+    for candidate in plan.get("selectedCandidates") or []:
+        if not isinstance(candidate, dict):
+            continue
+        material_id = str(candidate.get("materialId") or "")
+        formula = str(candidate.get("formula") or "")
+        if material_id and material_id.lower() in text:
+            return material_id
+        if formula and formula.lower() in text and material_id:
+            return material_id
+    return None
+
+
+def _literature_search_markdown(report: dict[str, Any]) -> str:
+    lines = [
+        "# Literature Evidence Search",
+        "",
+        "## Summary",
+        "",
+        f"- Candidate: `{report.get('candidateId') or '-'}`",
+        f"- Providers: {', '.join(report.get('providers') or [])}",
+        f"- Queries: {len(report.get('queries') or [])}",
+        f"- Literature records: {report.get('recordCount')}",
+        f"- New evidence rows: {report.get('newEvidenceRows')}",
+        f"- Evidence ledger: {report.get('evidenceLedgerPath')}",
+        "",
+        "## Records",
+        "",
+        "| Provider | Year | Title | DOI/URL |",
+        "| --- | ---: | --- | --- |",
+    ]
+    for record in report.get("records") or []:
+        title = str(record.get("title") or "-").replace("|", "\\|")
+        ref = record.get("doi") or record.get("url") or record.get("recordId") or "-"
+        lines.append(f"| {record.get('provider')} | {record.get('year') or '-'} | {title[:160]} | {ref} |")
+    if not report.get("records"):
+        lines.append("| - | - | - | - |")
+    lines.extend([
+        "",
+        "## Warnings",
+        "",
+        *([f"- {warning}" for warning in report.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def _empty_claim_review(
+    plan: dict[str, Any],
+    candidate_id: str,
+    requested: str,
+    ledger_path: str | None,
+    merged_ledger_path: str,
+) -> dict[str, Any]:
+    required_ids = list((plan.get("claimPolicy") or {}).get("requiredEvidenceRequirementIds") or [])
+    evidence_schema = [item for item in plan.get("evidenceSchema") or [] if isinstance(item, dict)]
+    if not required_ids:
+        required_ids = [str(item.get("id")) for item in evidence_schema if item.get("requiredForClaim")]
+    missing = [
+        {
+            "evidenceRequirementId": requirement.get("id"),
+            "label": requirement.get("label"),
+            "requiredEvidenceTypes": requirement.get("evidenceTypes") or [],
+            "propertyKeys": requirement.get("propertyKeys") or [],
+            "reason": "no evidence row exists for this required evidence gate",
+            "rowsSeen": [],
+        }
+        for requirement in evidence_schema
+        if str(requirement.get("id")) in set(required_ids)
+    ]
+    claim_status = {
+        "requestedLevel": requested,
+        "currentLevel": "candidate-hypothesis",
+        "researchGradeClaimAllowed": False,
+        "blockedBy": [item["evidenceRequirementId"] for item in missing],
+        "reason": "No evidence rows were available; research-grade claim remains blocked.",
+    }
+    uncertainty_summary = {
+        "candidateId": candidate_id,
+        "planId": plan.get("planId"),
+        "overallConfidenceScore": 0.0,
+        "overallUncertainty": 1.0,
+        "requirementScores": [],
+        "rowScores": [],
+        "materialConflicts": [],
+        "explicitConflictingRows": [],
+    }
+    return {
+        "evaluationVersion": "claim-policy-evaluator-v1",
+        "generatedAt": int(time.time()),
+        "planId": plan.get("planId"),
+        "candidateId": candidate_id,
+        "ledgerPath": ledger_path,
+        "mergedLedgerPath": merged_ledger_path,
+        "requestedClaimLevel": requested,
+        "claimStatus": claim_status,
+        "requiredEvidenceRequirementIds": required_ids,
+        "satisfiedEvidence": [],
+        "missingEvidence": missing,
+        "blockingEvidence": [],
+        "conflictingEvidence": [],
+        "uncertaintySummary": uncertainty_summary,
+        "auditCertificate": _claim_audit_certificate(
+            plan=plan,
+            candidate_id=candidate_id,
+            requested_claim_level=requested,
+            rows=[],
+            claim_status=claim_status,
+            satisfied=[],
+            missing=missing,
+            blocking=[],
+            conflicts=[],
+            uncertainty_summary=uncertainty_summary,
+            ledger_path=ledger_path,
+            merged_ledger_path=merged_ledger_path,
+        ),
+        "evidenceRowsReviewed": 0,
+        "warnings": ["No evidence rows were available for claim evaluation."],
+    }
+
+
+def _build_evidence_gap_closure_plan(
+    *,
+    plan: dict[str, Any],
+    candidate_id: str,
+    review: dict[str, Any],
+    rows: list[dict[str, Any]],
+    max_literature_queries: int,
+) -> dict[str, Any]:
+    candidate = _candidate_for_plan(plan, candidate_id) or {}
+    actions: list[dict[str, Any]] = []
+    for item in review.get("missingEvidence") or []:
+        requirement = _requirement_by_id(plan, str(item.get("evidenceRequirementId") or ""))
+        actions.extend(_actions_for_missing_requirement(plan, candidate_id, candidate, requirement or item, max_literature_queries))
+    for item in review.get("blockingEvidence") or []:
+        actions.append({
+            "actionId": f"resolve-blocking-{item.get('evidenceRequirementId') or item.get('evidenceId')}",
+            "actionType": "resolve-blocking-evidence",
+            "priority": "blocking",
+            "evidenceRequirementId": item.get("evidenceRequirementId"),
+            "reason": f"Blocking evidence row {item.get('evidenceId')} has status {item.get('status')}.",
+            "nextTool": "materials_ingest_evidence",
+            "expectedOutput": "replacement or follow-up evidence row that explains whether the block is real, waived, or superseded",
+        })
+    uncertainty = review.get("uncertaintySummary") or {}
+    for conflict in uncertainty.get("materialConflicts") or []:
+        actions.append({
+            "actionId": f"resolve-conflict-{_safe_file_stem(str(conflict.get('propertyKey') or 'property'))}",
+            "actionType": "resolve-conflicting-property",
+            "priority": "blocking",
+            "propertyKey": conflict.get("propertyKey"),
+            "reason": conflict.get("reason"),
+            "nextTool": "materials_ingest_evidence",
+            "expectedOutput": "independent evidence row or documented method-selection rationale resolving numeric spread",
+        })
+    actions = _dedupe_gap_actions(actions)
+    return {
+        "closureVersion": "evidence-gap-closure-v1",
+        "generatedAt": int(time.time()),
+        "planId": plan.get("planId"),
+        "candidateId": candidate_id,
+        "candidateFormula": candidate.get("formula"),
+        "researchGradeClaimAllowed": (review.get("claimStatus") or {}).get("researchGradeClaimAllowed", False),
+        "currentLevel": (review.get("claimStatus") or {}).get("currentLevel"),
+        "gapCounts": {
+            "missing": len(review.get("missingEvidence") or []),
+            "blocking": len(review.get("blockingEvidence") or []),
+            "conflicting": len(review.get("conflictingEvidence") or []) + len(uncertainty.get("materialConflicts") or []),
+        },
+        "actions": actions,
+        "nextToolSequence": _gap_closure_tool_sequence(actions),
+        "ledgerRowsReviewed": len(rows),
+    }
+
+
+def _candidate_for_plan(plan: dict[str, Any], candidate_id: str | None) -> dict[str, Any] | None:
+    for candidate in plan.get("selectedCandidates") or []:
+        if isinstance(candidate, dict) and str(candidate.get("materialId")) == str(candidate_id):
+            return candidate
+    return None
+
+
+def _requirement_by_id(plan: dict[str, Any], requirement_id: str) -> dict[str, Any] | None:
+    for requirement in plan.get("evidenceSchema") or []:
+        if isinstance(requirement, dict) and str(requirement.get("id")) == requirement_id:
+            return requirement
+    return None
+
+
+def _actions_for_missing_requirement(
+    plan: dict[str, Any],
+    candidate_id: str,
+    candidate: dict[str, Any],
+    requirement: dict[str, Any],
+    max_literature_queries: int,
+) -> list[dict[str, Any]]:
+    requirement_id = str(requirement.get("id") or requirement.get("evidenceRequirementId") or "evidence")
+    evidence_types = set(str(item) for item in requirement.get("evidenceTypes") or requirement.get("requiredEvidenceTypes") or [])
+    formula = str(candidate.get("formula") or candidate_id)
+    label = str(requirement.get("label") or requirement_id)
+    actions: list[dict[str, Any]] = []
+    if "literature" in evidence_types or requirement_id == "literature-benchmark":
+        base_queries = [
+            f"{formula} {label} materials property",
+            f"{formula} synthesis stability literature",
+            f"{formula} contradictory evidence {label}",
+        ]
+        literature_plan = plan.get("literatureReviewPlan") if isinstance(plan.get("literatureReviewPlan"), dict) else {}
+        base_queries.extend(f"{formula} {query}" for query in _string_list(literature_plan.get("queries"))[:2])
+        for index, query in enumerate(_unique_ordered(base_queries)[:max_literature_queries], start=1):
+            actions.append({
+                "actionId": f"{candidate_id}-{requirement_id}-literature-{index}",
+                "actionType": "search-literature",
+                "priority": "high" if requirement_id == "literature-benchmark" else "medium",
+                "evidenceRequirementId": requirement_id,
+                "query": query,
+                "nextTool": "materials_search_literature",
+                "expectedOutput": "citation-backed literature evidence row with DOI/URL and extracted property/failure claims",
+            })
+    if "database" in evidence_types:
+        actions.append({
+            "actionId": f"{candidate_id}-{requirement_id}-database",
+            "actionType": "search-database-or-fetch-structure",
+            "priority": "high",
+            "evidenceRequirementId": requirement_id,
+            "nextTool": "materials_search_mp" if requirement_id != "structure-validity" else "materials_fetch_structure",
+            "expectedOutput": "live database provenance, structure artifact, or missing-field marker",
+        })
+    if evidence_types.intersection({"dft", "dfpt", "md", "workflow"}):
+        backend = "quantum-espresso" if "dfpt" in evidence_types or "dft" in evidence_types else "atomate2"
+        actions.append({
+            "actionId": f"{candidate_id}-{requirement_id}-backend-prepare",
+            "actionType": "prepare-backend-calculation",
+            "priority": "high",
+            "evidenceRequirementId": requirement_id,
+            "backend": backend,
+            "nextTool": "materials_execute_research_plan",
+            "toolParams": {
+                "backend": backend,
+                "executionMode": "prepare",
+                "maxSteps": 20,
+            },
+            "expectedOutput": "input deck and execution manifest for parser-backed property evidence",
+        })
+        actions.append({
+            "actionId": f"{candidate_id}-{requirement_id}-backend-monitor",
+            "actionType": "monitor-parse-review",
+            "priority": "high",
+            "evidenceRequirementId": requirement_id,
+            "nextTool": "materials_execute_research_plan",
+            "toolParams": {
+                "executionMode": "monitor",
+                "backendConfig": {"parseOutputs": True, "claimReview": True},
+            },
+            "expectedOutput": "parsed evidence ledger rows and updated claim-review audit certificate",
+        })
+    if evidence_types.intersection({"experiment", "safety"}):
+        actions.append({
+            "actionId": f"{candidate_id}-{requirement_id}-experiment-or-safety-import",
+            "actionType": "import-experiment-or-safety-evidence",
+            "priority": "approval-required",
+            "evidenceRequirementId": requirement_id,
+            "nextTool": "materials_ingest_evidence",
+            "expectedOutput": "experiment/safety evidence table with calibration, units, citation/source, and human approval trace",
+        })
+    if not actions:
+        actions.append({
+            "actionId": f"{candidate_id}-{requirement_id}-manual-evidence",
+            "actionType": "define-and-ingest-evidence",
+            "priority": "medium",
+            "evidenceRequirementId": requirement_id,
+            "nextTool": "materials_ingest_evidence",
+            "expectedOutput": "structured evidence row satisfying the requirement propertyKeys and trace policy",
+        })
+    return actions
+
+
+def _dedupe_gap_actions(actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = set()
+    result = []
+    for action in actions:
+        key = json.dumps({
+            "actionType": action.get("actionType"),
+            "evidenceRequirementId": action.get("evidenceRequirementId"),
+            "query": action.get("query"),
+            "nextTool": action.get("nextTool"),
+        }, sort_keys=True)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(action)
+    return result
+
+
+def _gap_closure_tool_sequence(actions: list[dict[str, Any]]) -> list[str]:
+    sequence: list[str] = []
+    for tool in ["materials_search_literature", "materials_search_mp", "materials_fetch_structure", "materials_execute_research_plan", "materials_ingest_evidence", "materials_evaluate_research_claim"]:
+        if any(action.get("nextTool") == tool for action in actions) and tool not in sequence:
+            sequence.append(tool)
+    if "materials_evaluate_research_claim" not in sequence:
+        sequence.append("materials_evaluate_research_claim")
+    return sequence
+
+
+def _evidence_gap_closure_markdown(plan: dict[str, Any]) -> str:
+    status = plan.get("claimStatus") or {}
+    lines = [
+        f"# Evidence Gap Closure Plan: {plan.get('candidateId')}",
+        "",
+        "## Status",
+        "",
+        f"- Current level: `{status.get('currentLevel') or plan.get('currentLevel')}`",
+        f"- Research-grade allowed: `{str(status.get('researchGradeClaimAllowed', plan.get('researchGradeClaimAllowed'))).lower()}`",
+        f"- Evidence ledger: {plan.get('evidenceLedgerPath')}",
+        "",
+        "## Gap Counts",
+        "",
+        f"- Missing: {(plan.get('gapCounts') or {}).get('missing', 0)}",
+        f"- Blocking: {(plan.get('gapCounts') or {}).get('blocking', 0)}",
+        f"- Conflicting: {(plan.get('gapCounts') or {}).get('conflicting', 0)}",
+        "",
+        "## Actions",
+        "",
+        "| Action | Requirement | Type | Priority | Next Tool |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for action in plan.get("actions") or []:
+        lines.append(
+            f"| {action.get('actionId')} | {action.get('evidenceRequirementId')} | "
+            f"{action.get('actionType')} | {action.get('priority')} | {action.get('nextTool')} |"
+        )
+    if not plan.get("actions"):
+        lines.append("| - | - | - | - | - |")
+    lines.extend([
+        "",
+        "## Next Tool Sequence",
+        "",
+        *[f"- {tool}" for tool in plan.get("nextToolSequence") or []],
+        "",
+        "## Warnings",
+        "",
+        *([f"- {warning}" for warning in plan.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def _parse_evidence_artifact(
@@ -1906,6 +2797,9 @@ def _row_supports_requirement(row: dict[str, Any], requirement: dict[str, Any]) 
     if _row_blocks_claim(row) or _row_conflicts(row):
         return False, "row blocks or conflicts with the claim"
     requirement_id = str(requirement.get("id") or "")
+    source_label = str(row.get("source") or "").lower()
+    if any(marker in source_label for marker in ["dev-fixture", "development-fixture", "development fixture", "development-literature-fixture"]):
+        return False, "development fixture evidence cannot satisfy research-grade gates"
     evidence_types = set(str(item).lower() for item in requirement.get("evidenceTypes") or [])
     if requirement_id == "database-provenance":
         if row.get("sourceType") in {"database", "materials-project"} and "dev-fixture" not in str(row.get("source") or "").lower():

@@ -5,8 +5,10 @@ export type BridgeAction =
   | "analyze_structure"
   | "compare_candidates"
   | "plan_research_loop"
+  | "search_literature"
   | "ingest_evidence"
   | "evaluate_research_claim"
+  | "close_evidence_gaps"
   | "execute_research_plan"
   | "ase_relax"
   | "batch_screen"
@@ -277,6 +279,41 @@ export interface PlanResearchLoopResult {
   summaryPath?: string;
 }
 
+export interface SearchLiteraturePayload {
+  planPath?: string;
+  plan?: Record<string, unknown>;
+  candidateId?: string;
+  queries?: string[];
+  query?: string;
+  researchGoal?: string;
+  providers?: Array<"openalex" | "crossref">;
+  maxResultsPerQuery?: number;
+  timeoutSeconds?: number;
+  allowNetwork?: boolean;
+  allowDevelopmentFixtures?: boolean;
+  evidenceRequirementId?: string;
+  evidenceLedgerPath?: string;
+  outputLedgerPath?: string;
+  sourceLabel?: string;
+  artifactDir: string;
+}
+
+export interface SearchLiteratureResult {
+  candidateId?: string;
+  queries: string[];
+  providers: string[];
+  records: Array<Record<string, unknown>>;
+  recordCount: number;
+  evidenceRows: EvidenceLedgerInput[];
+  evidenceRowCount: number;
+  evidenceLedgerPath: string;
+  queryLogPath: string;
+  recordsPath: string;
+  reportPath: string;
+  usedDevelopmentFixtureData?: boolean;
+  warnings: string[];
+}
+
 export interface EvidenceLedgerInput {
   candidateId?: string;
   formula?: string;
@@ -318,6 +355,39 @@ export interface EvaluateResearchClaimResult {
   uncertaintySummary?: Record<string, unknown>;
   auditCertificate?: Record<string, unknown>;
   evidenceRowsReviewed: number;
+}
+
+export interface CloseEvidenceGapsPayload {
+  planPath?: string;
+  plan?: Record<string, unknown>;
+  evidenceLedgerPath?: string;
+  evidenceRows?: EvidenceLedgerInput[];
+  candidateId?: string;
+  requestedClaimLevel?: "candidate-hypothesis" | "proxy-shortlist" | "property-backed-shortlist" | "research-grade-candidate";
+  runLiteratureSearch?: boolean;
+  providers?: Array<"openalex" | "crossref">;
+  allowNetwork?: boolean;
+  allowDevelopmentFixtures?: boolean;
+  maxLiteratureQueries?: number;
+  maxResultsPerQuery?: number;
+  timeoutSeconds?: number;
+  artifactDir: string;
+}
+
+export interface CloseEvidenceGapsResult {
+  candidateId?: string;
+  claimStatus: Record<string, unknown>;
+  missingEvidence: Array<Record<string, unknown>>;
+  blockingEvidence: Array<Record<string, unknown>>;
+  conflictingEvidence?: Array<Record<string, unknown>>;
+  closurePlan: Record<string, unknown>;
+  closurePlanPath: string;
+  reportPath: string;
+  reviewPath: string;
+  reviewReportPath: string;
+  evidenceLedgerPath: string;
+  literatureSearch?: Record<string, unknown>;
+  warnings: string[];
 }
 
 export interface IngestEvidencePayload {

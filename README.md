@@ -14,7 +14,7 @@ This plugin is for OpenClaw users who already have the gateway running and want 
 
 The plugin provides:
 
-- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, dynamic research-protocol compilation, approval-gated execution, note saving, and report export.
+- Native OpenClaw tools for materials search, literature evidence search, structure fetch, structure analysis, candidate comparison, dynamic research-protocol compilation, evidence gap closure, approval-gated execution, note saving, and report export.
 - Optional approval-gated tools for ASE relaxation and batch screening.
 - A bundled research skill under `skills/material-science-research`.
 - A local Python worker under `python/` using stdin/stdout JSON requests.
@@ -156,6 +156,8 @@ Live Materials Project search and structure fetch require a valid key and the `m
 - "Given only this research goal, autonomously compile the protocol, search candidate databases, write a candidate pool, and create an evidence ledger before making any claim."
 - "Use the ranked candidates to compile an evidence schema and validation queue with a 12-calculation budget."
 - "Evaluate whether this candidate's evidence ledger satisfies the claim policy for a research-grade candidate claim."
+- "Search literature evidence for this candidate through OpenAlex/Crossref metadata and append citation provenance to the ledger."
+- "Close this candidate's evidence gaps and give me the next tool sequence required for research-grade review."
 - "Ingest these Quantum ESPRESSO/VASP/MD outputs into the evidence ledger and re-evaluate the claim gate."
 - "Import this literature PDF, markdown note, CSV, or JSON evidence table into the ledger with citation provenance."
 - "Execute that research-loop plan with the dev-smoke backend to validate plumbing without generating research property evidence."
@@ -211,7 +213,9 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - `materials_plan_research_loop` writes a plan and manifest only. It marks DFT/HPC/paid-compute work as blocked until a human explicitly approves a later execution workflow.
 - With only `researchGoal`, `materials_plan_research_loop` now runs the bounded autonomous discovery compiler: it writes a query log, candidate-pool JSONL, evidence-ledger JSONL, and candidate-backed protocol when database candidates are found.
 - Autonomous discovery never upgrades a candidate beyond `candidate-hypothesis`/proxy status; research-grade claims remain blocked until the evidence schema is closed with parsed evidence artifacts.
+- `materials_search_literature` queries public literature metadata providers, writes citation/search provenance, and normalizes records into literature evidence rows. Development fixture literature is explicit and cannot satisfy research-grade gates.
 - `materials_evaluate_research_claim` reads a plan plus evidence ledger or imported evidence rows and emits a claim-review audit certificate with uncertainty/conflict scoring. It only allows `research-grade-candidate` when every required evidence gate has traceable, strong evidence, confidence is above threshold, and no blocking/conflicting rows remain.
+- `materials_close_evidence_gaps` evaluates a candidate against the claim policy and writes the next action queue needed to close missing, blocking, or conflicting evidence gates. It can optionally run bounded literature search, but fixture literature remains non-claim evidence.
 - `materials_ingest_evidence` parses QE/VASP/MD outputs plus literature PDFs/text/markdown and experiment/literature JSON, JSONL, or CSV evidence tables into standard evidence-ledger rows for claim evaluation.
 - `materials_execute_research_plan` supports a non-evidentiary `dev-smoke` backend plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
 - External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided. `executionMode: "monitor"` reads a prior execution manifest, detects completed outputs, parses evidence rows, and can run claim review when requested.

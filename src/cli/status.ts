@@ -50,6 +50,10 @@ export function runStatus(context: MaterialsPluginContext, options: StatusOption
       materials_analyze_structure: "required",
       materials_compare_candidates: "required",
       materials_plan_research_loop: "required",
+      materials_search_literature: "required",
+      materials_ingest_evidence: "required",
+      materials_evaluate_research_claim: "required",
+      materials_close_evidence_gaps: "required",
       materials_save_note: "required",
       materials_export_report: "required",
       materials_ase_relax: config.enableAseTools

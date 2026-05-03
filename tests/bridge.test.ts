@@ -221,6 +221,118 @@ describe("Python bridge", () => {
     expect(await readFile(result.data.reportPath, "utf8")).toContain("Autonomous Discovery");
   });
 
+  it("searches literature metadata into evidence rows using explicit development fixtures", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-literature-search-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    const plan = {
+      planId: "literature-plan",
+      selectedCandidates: [{ materialId: "mp-lit", formula: "NiO" }],
+      literatureReviewPlan: { queries: ["NiO oxygen evolution catalyst benchmark"] },
+      evidenceSchema: [
+        {
+          id: "literature-benchmark",
+          label: "Literature benchmark",
+          propertyKeys: ["literatureBaseline"],
+          evidenceTypes: ["literature"],
+          requiredForClaim: true,
+        },
+      ],
+    };
+
+    const result = await bridge.searchLiterature({
+      artifactDir: path.join(tempDir, "reports", "literature-search"),
+      plan,
+      candidateId: "mp-lit",
+      allowNetwork: false,
+      allowDevelopmentFixtures: true,
+      providers: ["openalex"],
+      maxResultsPerQuery: 2,
+    });
+
+    expect(result.data.usedDevelopmentFixtureData).toBe(true);
+    expect(result.data.recordCount).toBeGreaterThan(0);
+    expect(result.data.evidenceRowCount).toBeGreaterThan(0);
+    expect(result.data.evidenceRows[0]?.source).toBe("development-literature-fixture");
+    expect(await readFile(result.data.reportPath, "utf8")).toContain("Literature Evidence Search");
+  });
+
+  it("builds an evidence gap closure plan and can run fixture literature search without unlocking claims", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-gap-closure-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    const plan = {
+      planId: "gap-closure-plan",
+      selectedCandidates: [{ materialId: "mp-gap", formula: "NiO" }],
+      literatureReviewPlan: { queries: ["NiO catalyst stability benchmark"] },
+      claimPolicy: {
+        requiredEvidenceRequirementIds: ["literature-benchmark", "surface-activity", "reproducibility"],
+      },
+      evidenceSchema: [
+        {
+          id: "literature-benchmark",
+          label: "Literature benchmark",
+          propertyKeys: ["literatureBaseline"],
+          evidenceTypes: ["literature"],
+          requiredForClaim: true,
+        },
+        {
+          id: "surface-activity",
+          label: "Surface activity",
+          propertyKeys: ["adsorptionEnergyEv"],
+          evidenceTypes: ["dft"],
+          requiredForClaim: true,
+        },
+        {
+          id: "reproducibility",
+          label: "Reproducibility",
+          propertyKeys: ["workflowManifest"],
+          evidenceTypes: ["workflow"],
+          requiredForClaim: true,
+        },
+      ],
+    };
+
+    const result = await bridge.closeEvidenceGaps({
+      artifactDir: path.join(tempDir, "reports", "gap-closure"),
+      plan,
+      candidateId: "mp-gap",
+      runLiteratureSearch: true,
+      allowNetwork: false,
+      allowDevelopmentFixtures: true,
+      providers: ["crossref"],
+      maxLiteratureQueries: 2,
+      maxResultsPerQuery: 1,
+    });
+
+    const closurePlan = result.data.closurePlan as Record<string, unknown>;
+    const actions = closurePlan.actions as Array<Record<string, unknown>>;
+    const nextTools = closurePlan.nextToolSequence as string[];
+
+    expect(result.data.claimStatus.researchGradeClaimAllowed).toBe(false);
+    expect(result.data.literatureSearch?.usedDevelopmentFixtureData).toBe(true);
+    expect(actions.some((item) => item.actionType === "prepare-backend-calculation")).toBe(true);
+    expect(nextTools).toContain("materials_search_literature");
+    expect(nextTools).toContain("materials_execute_research_plan");
+    expect(await readFile(result.data.reportPath, "utf8")).toContain("Evidence Gap Closure Plan");
+  });
+
   it("evaluates claim gates from traceable evidence rows", async () => {
     const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-claim-eval-"));
     tempDirs.push(tempDir);

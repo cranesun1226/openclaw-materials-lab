@@ -4,6 +4,7 @@ import type { MaterialsPluginContext } from "../core/runtime-context.js";
 import { createMaterialsAnalyzeStructureTool } from "./materials-analyze-structure.js";
 import { createMaterialsAseRelaxTool } from "./materials-ase-relax.js";
 import { createMaterialsBatchScreenTool } from "./materials-batch-screen.js";
+import { createMaterialsCloseEvidenceGapsTool } from "./materials-close-evidence-gaps.js";
 import { createMaterialsCompareCandidatesTool } from "./materials-compare-candidates.js";
 import { createMaterialsExecuteResearchPlanTool } from "./materials-execute-research-plan.js";
 import { createMaterialsEvaluateResearchClaimTool } from "./materials-evaluate-research-claim.js";
@@ -12,6 +13,7 @@ import { createMaterialsFetchStructureTool } from "./materials-fetch-structure.j
 import { createMaterialsIngestEvidenceTool } from "./materials-ingest-evidence.js";
 import { createMaterialsPlanResearchLoopTool } from "./materials-plan-research-loop.js";
 import { createMaterialsSaveNoteTool } from "./materials-save-note.js";
+import { createMaterialsSearchLiteratureTool } from "./materials-search-literature.js";
 import { createMaterialsSearchTool } from "./materials-search-mp.js";
 
 export function registerMaterialsTools(api: OpenClawPluginApi, context: MaterialsPluginContext): void {
@@ -20,8 +22,10 @@ export function registerMaterialsTools(api: OpenClawPluginApi, context: Material
   api.registerTool(createMaterialsAnalyzeStructureTool(context));
   api.registerTool(createMaterialsCompareCandidatesTool(context));
   api.registerTool(createMaterialsPlanResearchLoopTool(context));
+  api.registerTool(createMaterialsSearchLiteratureTool(context));
   api.registerTool(createMaterialsIngestEvidenceTool(context));
   api.registerTool(createMaterialsEvaluateResearchClaimTool(context));
+  api.registerTool(createMaterialsCloseEvidenceGapsTool(context));
   api.registerTool(createMaterialsSaveNoteTool(context));
   api.registerTool(createMaterialsExportReportTool(context));
   api.registerTool(createMaterialsAseRelaxTool(context), { optional: true });

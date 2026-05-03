@@ -16,6 +16,8 @@ import type {
   BatchScreenResult,
   BridgeAction,
   BridgeSuccess,
+  CloseEvidenceGapsPayload,
+  CloseEvidenceGapsResult,
   CompareCandidatesPayload,
   CompareCandidatesResult,
   ExecuteResearchPlanPayload,
@@ -30,6 +32,8 @@ import type {
   IngestEvidenceResult,
   PlanResearchLoopPayload,
   PlanResearchLoopResult,
+  SearchLiteraturePayload,
+  SearchLiteratureResult,
   SearchMaterialsPayload,
   SearchMaterialsResult,
 } from "../types/bridge.js";
@@ -83,10 +87,20 @@ export class PythonBridgeService {
     return this.call("plan_research_loop", payload);
   }
 
+  public async searchLiterature(payload: SearchLiteraturePayload): Promise<BridgeSuccess<SearchLiteratureResult>> {
+    return this.call("search_literature", payload);
+  }
+
   public async evaluateResearchClaim(
     payload: EvaluateResearchClaimPayload,
   ): Promise<BridgeSuccess<EvaluateResearchClaimResult>> {
     return this.call("evaluate_research_claim", payload);
+  }
+
+  public async closeEvidenceGaps(
+    payload: CloseEvidenceGapsPayload,
+  ): Promise<BridgeSuccess<CloseEvidenceGapsResult>> {
+    return this.call("close_evidence_gaps", payload);
   }
 
   public async ingestEvidence(payload: IngestEvidencePayload): Promise<BridgeSuccess<IngestEvidenceResult>> {

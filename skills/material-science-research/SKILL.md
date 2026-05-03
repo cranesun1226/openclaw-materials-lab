@@ -48,6 +48,22 @@ Use `materials_evaluate_research_claim` after evidence has been imported or pars
 - Check the audit certificate, uncertainty score, and conflict summary. Numeric or explicit evidence conflicts block research-grade claims until resolved.
 - If the review says `researchGradeClaimAllowed: false`, report the missing gates and next evidence needed.
 
+### 2.1.1 Search literature evidence
+
+Use `materials_search_literature` when literature gates are missing or the plan needs citation-backed benchmark context.
+
+- Prefer plan-aware calls with `planPath` and `candidateId` so query expansion uses the compiled literature plan and candidate formula.
+- Use live providers for research work. `allowDevelopmentFixtures: true` is only for smoke tests; fixture literature cannot satisfy research-grade gates.
+- Treat search results as metadata evidence. Full paper/PDF/table extraction should still be ingested with `materials_ingest_evidence` when available.
+
+### 2.1.2 Close evidence gaps
+
+Use `materials_close_evidence_gaps` when a claim review is blocked and the user asks what to do next.
+
+- Pass `planPath`, `evidenceLedgerPath`, and `candidateId`.
+- Set `runLiteratureSearch: true` only when the user wants bounded automatic literature metadata search as part of the closure pass.
+- Follow the generated `nextToolSequence`; it is the bridge from missing gates to search, backend prepare/monitor, ingestion, and renewed claim review.
+
 ### 2.2 Ingest parsed evidence
 
 Use `materials_ingest_evidence` when backend outputs or literature/experiment tables are available.
