@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-03T07:45:32.200Z",
+  "generatedAt": "2026-05-03T08:08:41.185Z",
   "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503",
   "topic": "high-k dielectric oxide proxy screening",
   "liveMaterialsProject": true,
@@ -256,9 +256,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-1143",
         "family": "binary-oxide",
-        "score": 0.919836,
+        "score": 0.891138,
         "primaryScore": 0.921114,
         "secondaryScore": 0.899824,
+        "domainEvidenceScore": 0.681958,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -266,13 +267,15 @@
             "bandGap": 0.935691,
             "density": 0.645583,
             "secondary": 0.899824,
+            "domainEvidence": 0.681958,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.423,
-            "bandGap": 0.35182,
-            "density": 0.091027,
-            "secondary": 0.053989
+            "stability": 0.369,
+            "bandGap": 0.306907,
+            "density": 0.079407,
+            "secondary": 0.053989,
+            "domainEvidence": 0.081835
           },
           "secondary": {
             "bandGapMargin": 0.935691,
@@ -280,17 +283,27 @@
             "densityAlignment": 0.645583,
             "familyPrior": 0.95,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 1,
+            "dielectricResponse": 0.36,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.645583
           }
         },
         "reasons": [
           "stability score 1.000",
           "band-gap alignment 0.936 (target 5.5 eV)",
           "density alignment 0.646 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.900 (domain descriptor 1.000, family prior 0.950, gap margin 0.936)"
+          "secondary tie-breaker 0.900 (domain descriptor 1.000, family prior 0.950, gap margin 0.936)",
+          "research evidence 0.682 (proxy-shortlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 10 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -329,107 +342,103 @@
           "metalAtomicFraction": 0.4,
           "numElements": 2
         },
+        "domainEvidence": {
+          "score": 0.681958,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 5.853700000000001,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.36,
+              "status": "fail",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.85,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 3.873499124580814,
+              "score": 0.645583,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 1,
+            "dielectricResponse": 0.36,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.645583
+          },
+          "passCount": 3,
+          "watchCount": 1,
+          "failCount": 1,
+          "missingCount": 6,
+          "tier": "proxy-shortlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "Al2O3 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.682; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "Al2O3",
         "duplicateCount": 10,
         "screeningLevel": "proxy-screen",
         "rawRank": 1,
         "rank": 1
-      },
-      {
-        "materialId": "mp-733790",
-        "formula": "SiO2",
-        "energyAboveHullEv": 0.006573497500003,
-        "bandGapEv": 5.5868,
-        "densityGcm3": 2.254998357567127,
-        "volume": 1061.8792044143463,
-        "sites": 72,
-        "spacegroup": "P1",
-        "elements": [
-          "O",
-          "Si"
-        ],
-        "source": "materials-project",
-        "notes": [],
-        "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
-        "family": "binary-oxide",
-        "score": 0.883781,
-        "primaryScore": 0.885272,
-        "secondaryScore": 0.860432,
-        "riskPenalty": 0,
-        "scoreComponents": {
-          "raw": {
-            "stability": 0.967133,
-            "bandGap": 0.984218,
-            "density": 0.375833,
-            "secondary": 0.860432,
-            "riskPenalty": 0
-          },
-          "weighted": {
-            "stability": 0.409097,
-            "bandGap": 0.370066,
-            "density": 0.052992,
-            "secondary": 0.051626
-          },
-          "secondary": {
-            "bandGapMargin": 0.984218,
-            "oxideFramework": 1,
-            "densityAlignment": 0.375833,
-            "familyPrior": 0.95,
-            "chemistryRisk": 1
-          }
-        },
-        "reasons": [
-          "stability score 0.967",
-          "band-gap alignment 0.984 (target 5.5 eV)",
-          "density alignment 0.376 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.860 (domain descriptor 1.000, family prior 0.950, gap margin 0.984)"
-        ],
-        "warnings": [
-          "Duplicate reduced-formula group appears 12 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
-        ],
-        "riskProfile": {
-          "riskFlags": [],
-          "warnings": [],
-          "penalty": 0,
-          "excluded": false,
-          "exclusionReasons": [],
-          "compositionDescriptors": {
-            "elements": [
-              "Si",
-              "O"
-            ],
-            "numAtoms": 3,
-            "liAtomicFraction": 0,
-            "hydrogenAtomicFraction": 0,
-            "oxygenAtomicFraction": 0.666667,
-            "halogenAtomicFraction": 0,
-            "chalcogenideAtomicFraction": 0,
-            "heavyAtomicFraction": 0,
-            "metalAtomicFraction": 0,
-            "numElements": 2
-          }
-        },
-        "compositionDescriptors": {
-          "elements": [
-            "Si",
-            "O"
-          ],
-          "numAtoms": 3,
-          "liAtomicFraction": 0,
-          "hydrogenAtomicFraction": 0,
-          "oxygenAtomicFraction": 0.666667,
-          "halogenAtomicFraction": 0,
-          "chalcogenideAtomicFraction": 0,
-          "heavyAtomicFraction": 0,
-          "metalAtomicFraction": 0,
-          "numElements": 2
-        },
-        "duplicateGroup": "SiO2",
-        "duplicateCount": 12,
-        "screeningLevel": "proxy-screen",
-        "rawRank": 2,
-        "rank": 2
       },
       {
         "materialId": "mp-2652",
@@ -448,9 +457,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-2652",
         "family": "binary-oxide",
-        "score": 0.874082,
+        "score": 0.856206,
         "primaryScore": 0.873639,
         "secondaryScore": 0.881027,
+        "domainEvidenceScore": 0.724672,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -458,13 +468,15 @@
             "bandGap": 0.744964,
             "density": 0.837687,
             "secondary": 0.881027,
+            "domainEvidence": 0.724672,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.423,
-            "bandGap": 0.280106,
-            "density": 0.118114,
-            "secondary": 0.052862
+            "stability": 0.369,
+            "bandGap": 0.244348,
+            "density": 0.103036,
+            "secondary": 0.052862,
+            "domainEvidence": 0.086961
           },
           "secondary": {
             "bandGapMargin": 0.744964,
@@ -472,17 +484,27 @@
             "densityAlignment": 0.837687,
             "familyPrior": 0.95,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.81946,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.837687
           }
         },
         "reasons": [
           "stability score 1.000",
           "band-gap alignment 0.745 (target 5.5 eV)",
           "density alignment 0.838 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.881 (domain descriptor 1.000, family prior 0.950, gap margin 0.745)"
+          "secondary tie-breaker 0.881 (domain descriptor 1.000, family prior 0.950, gap margin 0.745)",
+          "research evidence 0.725 (proxy-shortlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 6 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -521,8 +543,301 @@
           "metalAtomicFraction": 0.4,
           "numElements": 2
         },
+        "domainEvidence": {
+          "score": 0.724672,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 4.097300000000001,
+              "score": 0.81946,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.76,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.6,
+              "status": "watch",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 5.026122832858722,
+              "score": 0.837687,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.81946,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.837687
+          },
+          "passCount": 4,
+          "watchCount": 1,
+          "failCount": 0,
+          "missingCount": 6,
+          "tier": "proxy-shortlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "Y2O3 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.725; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "Y2O3",
         "duplicateCount": 6,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 2,
+        "rank": 2
+      },
+      {
+        "materialId": "mp-733790",
+        "formula": "SiO2",
+        "energyAboveHullEv": 0.006573497500003,
+        "bandGapEv": 5.5868,
+        "densityGcm3": 2.254998357567127,
+        "volume": 1061.8792044143463,
+        "sites": 72,
+        "spacegroup": "P1",
+        "elements": [
+          "O",
+          "Si"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
+        "family": "binary-oxide",
+        "score": 0.856147,
+        "primaryScore": 0.885272,
+        "secondaryScore": 0.860432,
+        "domainEvidenceScore": 0.654983,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.967133,
+            "bandGap": 0.984218,
+            "density": 0.375833,
+            "secondary": 0.860432,
+            "domainEvidence": 0.654983,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.356872,
+            "bandGap": 0.322824,
+            "density": 0.046227,
+            "secondary": 0.051626,
+            "domainEvidence": 0.078598
+          },
+          "secondary": {
+            "bandGapMargin": 0.984218,
+            "oxideFramework": 1,
+            "densityAlignment": 0.375833,
+            "familyPrior": 0.95,
+            "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 1,
+            "dielectricResponse": 0.36,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.375833
+          }
+        },
+        "reasons": [
+          "stability score 0.967",
+          "band-gap alignment 0.984 (target 5.5 eV)",
+          "density alignment 0.376 (target 6.0 g/cm3)",
+          "secondary tie-breaker 0.860 (domain descriptor 1.000, family prior 0.950, gap margin 0.984)",
+          "research evidence 0.655 (watchlist, proxy-only)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 12 times.",
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Si",
+              "O"
+            ],
+            "numAtoms": 3,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0,
+            "oxygenAtomicFraction": 0.666667,
+            "halogenAtomicFraction": 0,
+            "chalcogenideAtomicFraction": 0,
+            "heavyAtomicFraction": 0,
+            "metalAtomicFraction": 0,
+            "numElements": 2
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Si",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0,
+          "oxygenAtomicFraction": 0.666667,
+          "halogenAtomicFraction": 0,
+          "chalcogenideAtomicFraction": 0,
+          "heavyAtomicFraction": 0,
+          "metalAtomicFraction": 0,
+          "numElements": 2
+        },
+        "domainEvidence": {
+          "score": 0.654983,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0.006573497500003,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 5.5868,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.36,
+              "status": "fail",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.85,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 2.254998357567127,
+              "score": 0.375833,
+              "status": "fail",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 1,
+            "dielectricResponse": 0.36,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.375833
+          },
+          "passCount": 3,
+          "watchCount": 0,
+          "failCount": 2,
+          "missingCount": 6,
+          "tier": "watchlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "SiO2 is a watchlist candidate in the binary-oxide family with evidence score 0.655; missing 6 research-grade property check(s)."
+        },
+        "duplicateGroup": "SiO2",
+        "duplicateCount": 12,
         "screeningLevel": "proxy-screen",
         "rawRank": 3,
         "rank": 3
@@ -544,9 +859,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-1968",
         "family": "binary-oxide",
-        "score": 0.863706,
+        "score": 0.846673,
         "primaryScore": 0.862787,
         "secondaryScore": 0.878118,
+        "domainEvidenceScore": 0.720839,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -554,13 +870,15 @@
             "bandGap": 0.695418,
             "density": 0.897462,
             "secondary": 0.878118,
+            "domainEvidence": 0.720839,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.423,
-            "bandGap": 0.261477,
-            "density": 0.126542,
-            "secondary": 0.052687
+            "stability": 0.369,
+            "bandGap": 0.228097,
+            "density": 0.110388,
+            "secondary": 0.052687,
+            "domainEvidence": 0.086501
           },
           "secondary": {
             "bandGapMargin": 0.695418,
@@ -568,17 +886,27 @@
             "densityAlignment": 0.897462,
             "familyPrior": 0.95,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.76496,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.897462
           }
         },
         "reasons": [
           "stability score 1.000",
           "band-gap alignment 0.695 (target 5.5 eV)",
           "density alignment 0.897 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.878 (domain descriptor 1.000, family prior 0.950, gap margin 0.695)"
+          "secondary tie-breaker 0.878 (domain descriptor 1.000, family prior 0.950, gap margin 0.695)",
+          "research evidence 0.721 (proxy-shortlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 3 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -617,6 +945,98 @@
           "metalAtomicFraction": 0.4,
           "numElements": 2
         },
+        "domainEvidence": {
+          "score": 0.720839,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 3.824799999999999,
+              "score": 0.76496,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.76,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.6,
+              "status": "watch",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 6.615226585908185,
+              "score": 0.897462,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.76496,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.897462
+          },
+          "passCount": 4,
+          "watchCount": 1,
+          "failCount": 0,
+          "missingCount": 6,
+          "tier": "proxy-shortlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "La2O3 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.721; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "La2O3",
         "duplicateCount": 3,
         "screeningLevel": "proxy-screen",
@@ -640,9 +1060,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-2858",
         "family": "binary-oxide",
-        "score": 0.852756,
+        "score": 0.841419,
         "primaryScore": 0.851321,
         "secondaryScore": 0.875243,
+        "domainEvidenceScore": 0.756848,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -650,13 +1071,15 @@
             "bandGap": 0.642218,
             "density": 0.962889,
             "secondary": 0.875243,
+            "domainEvidence": 0.756848,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.423,
-            "bandGap": 0.241474,
-            "density": 0.135767,
-            "secondary": 0.052515
+            "stability": 0.369,
+            "bandGap": 0.210648,
+            "density": 0.118435,
+            "secondary": 0.052515,
+            "domainEvidence": 0.090822
           },
           "secondary": {
             "bandGapMargin": 0.642218,
@@ -664,17 +1087,27 @@
             "densityAlignment": 0.962889,
             "familyPrior": 0.95,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.70644,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.962889
           }
         },
         "reasons": [
           "stability score 1.000",
           "band-gap alignment 0.642 (target 5.5 eV)",
           "density alignment 0.963 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.875 (domain descriptor 1.000, family prior 0.950, gap margin 0.642)"
+          "secondary tie-breaker 0.875 (domain descriptor 1.000, family prior 0.950, gap margin 0.642)",
+          "research evidence 0.757 (proxy-shortlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 12 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -713,107 +1146,103 @@
           "metalAtomicFraction": 0.333333,
           "numElements": 2
         },
+        "domainEvidence": {
+          "score": 0.756848,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 3.5322,
+              "score": 0.70644,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.76,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.85,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 5.777331384412114,
+              "score": 0.962889,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.70644,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.962889
+          },
+          "passCount": 4,
+          "watchCount": 1,
+          "failCount": 0,
+          "missingCount": 6,
+          "tier": "proxy-shortlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "ZrO2 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.757; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "ZrO2",
         "duplicateCount": 12,
         "screeningLevel": "proxy-screen",
         "rawRank": 6,
         "rank": 5
-      },
-      {
-        "materialId": "mp-352",
-        "formula": "HfO2",
-        "energyAboveHullEv": 0,
-        "bandGapEv": 4.0165,
-        "densityGcm3": 10.24124328616322,
-        "volume": 136.51657937039403,
-        "sites": 12,
-        "spacegroup": "P2_1/c",
-        "elements": [
-          "Hf",
-          "O"
-        ],
-        "source": "materials-project",
-        "notes": [],
-        "materialsProjectUrl": "https://materialsproject.org/materials/mp-352",
-        "family": "binary-oxide",
-        "score": 0.784976,
-        "primaryScore": 0.786078,
-        "secondaryScore": 0.767707,
-        "riskPenalty": 0,
-        "scoreComponents": {
-          "raw": {
-            "stability": 1,
-            "bandGap": 0.730273,
-            "density": 0.293126,
-            "secondary": 0.767707,
-            "riskPenalty": 0
-          },
-          "weighted": {
-            "stability": 0.423,
-            "bandGap": 0.274583,
-            "density": 0.041331,
-            "secondary": 0.046062
-          },
-          "secondary": {
-            "bandGapMargin": 0.730273,
-            "oxideFramework": 1,
-            "densityAlignment": 0.293126,
-            "familyPrior": 0.95,
-            "chemistryRisk": 1
-          }
-        },
-        "reasons": [
-          "stability score 1.000",
-          "band-gap alignment 0.730 (target 5.5 eV)",
-          "density alignment 0.293 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.768 (domain descriptor 1.000, family prior 0.950, gap margin 0.730)"
-        ],
-        "warnings": [
-          "Duplicate reduced-formula group appears 7 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
-        ],
-        "riskProfile": {
-          "riskFlags": [],
-          "warnings": [],
-          "penalty": 0,
-          "excluded": false,
-          "exclusionReasons": [],
-          "compositionDescriptors": {
-            "elements": [
-              "Hf",
-              "O"
-            ],
-            "numAtoms": 3,
-            "liAtomicFraction": 0,
-            "hydrogenAtomicFraction": 0,
-            "oxygenAtomicFraction": 0.666667,
-            "halogenAtomicFraction": 0,
-            "chalcogenideAtomicFraction": 0,
-            "heavyAtomicFraction": 0.333333,
-            "metalAtomicFraction": 0.333333,
-            "numElements": 2
-          }
-        },
-        "compositionDescriptors": {
-          "elements": [
-            "Hf",
-            "O"
-          ],
-          "numAtoms": 3,
-          "liAtomicFraction": 0,
-          "hydrogenAtomicFraction": 0,
-          "oxygenAtomicFraction": 0.666667,
-          "halogenAtomicFraction": 0,
-          "chalcogenideAtomicFraction": 0,
-          "heavyAtomicFraction": 0.333333,
-          "metalAtomicFraction": 0.333333,
-          "numElements": 2
-        },
-        "duplicateGroup": "HfO2",
-        "duplicateCount": 7,
-        "screeningLevel": "proxy-screen",
-        "rawRank": 27,
-        "rank": 6
       },
       {
         "materialId": "mp-5020",
@@ -833,9 +1262,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-5020",
         "family": "perovskite-oxide",
-        "score": 0.781628,
+        "score": 0.775554,
         "primaryScore": 0.779849,
         "secondaryScore": 0.809492,
+        "domainEvidenceScore": 0.72924,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -843,13 +1273,15 @@
             "bandGap": 0.456127,
             "density": 0.983268,
             "secondary": 0.809492,
+            "domainEvidence": 0.72924,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.422913,
-            "bandGap": 0.171504,
-            "density": 0.138641,
-            "secondary": 0.04857
+            "stability": 0.368924,
+            "bandGap": 0.14961,
+            "density": 0.120942,
+            "secondary": 0.04857,
+            "domainEvidence": 0.087509
           },
           "secondary": {
             "bandGapMargin": 0.456127,
@@ -857,17 +1289,27 @@
             "densityAlignment": 0.983268,
             "familyPrior": 0.88,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.50174,
+            "dielectricResponse": 0.923333,
+            "interfaceCompatibility": 0.65,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.983268
           }
         },
         "reasons": [
           "stability score 1.000",
           "band-gap alignment 0.456 (target 5.5 eV)",
           "density alignment 0.983 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.809 (domain descriptor 1.000, family prior 0.880, gap margin 0.456)"
+          "secondary tie-breaker 0.809 (domain descriptor 1.000, family prior 0.880, gap margin 0.456)",
+          "research evidence 0.729 (proxy-shortlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 3 times.",
-          "Material family 'perovskite-oxide' appears 3 times in the candidate pool."
+          "Material family 'perovskite-oxide' appears 3 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -908,10 +1350,303 @@
           "metalAtomicFraction": 0.4,
           "numElements": 3
         },
+        "domainEvidence": {
+          "score": 0.72924,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0.00004098999996848818,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 2.5086999999999993,
+              "score": 0.50174,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.923333,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.65,
+              "status": "watch",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 5.89961040436988,
+              "score": 0.983268,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.50174,
+            "dielectricResponse": 0.923333,
+            "interfaceCompatibility": 0.65,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.983268
+          },
+          "passCount": 3,
+          "watchCount": 2,
+          "failCount": 0,
+          "missingCount": 6,
+          "tier": "proxy-shortlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "BaTiO3 is a proxy-shortlist candidate in the perovskite-oxide family with evidence score 0.729; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "BaTiO3",
         "duplicateCount": 3,
         "screeningLevel": "proxy-screen",
-        "rawRank": 28,
+        "rawRank": 24,
+        "rank": 6
+      },
+      {
+        "materialId": "mp-352",
+        "formula": "HfO2",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 4.0165,
+        "densityGcm3": 10.24124328616322,
+        "volume": 136.51657937039403,
+        "sites": 12,
+        "spacegroup": "P2_1/c",
+        "elements": [
+          "Hf",
+          "O"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-352",
+        "family": "binary-oxide",
+        "score": 0.775523,
+        "primaryScore": 0.786078,
+        "secondaryScore": 0.767707,
+        "domainEvidenceScore": 0.707307,
+        "riskPenalty": 0,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 0.730273,
+            "density": 0.293126,
+            "secondary": 0.767707,
+            "domainEvidence": 0.707307,
+            "riskPenalty": 0
+          },
+          "weighted": {
+            "stability": 0.369,
+            "bandGap": 0.239529,
+            "density": 0.036055,
+            "secondary": 0.046062,
+            "domainEvidence": 0.084877
+          },
+          "secondary": {
+            "bandGapMargin": 0.730273,
+            "oxideFramework": 1,
+            "densityAlignment": 0.293126,
+            "familyPrior": 0.95,
+            "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.8033,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.293126
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap alignment 0.730 (target 5.5 eV)",
+          "density alignment 0.293 (target 6.0 g/cm3)",
+          "secondary tie-breaker 0.768 (domain descriptor 1.000, family prior 0.950, gap margin 0.730)",
+          "research evidence 0.707 (proxy-shortlist, proxy-only)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 7 times.",
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "riskProfile": {
+          "riskFlags": [],
+          "warnings": [],
+          "penalty": 0,
+          "excluded": false,
+          "exclusionReasons": [],
+          "compositionDescriptors": {
+            "elements": [
+              "Hf",
+              "O"
+            ],
+            "numAtoms": 3,
+            "liAtomicFraction": 0,
+            "hydrogenAtomicFraction": 0,
+            "oxygenAtomicFraction": 0.666667,
+            "halogenAtomicFraction": 0,
+            "chalcogenideAtomicFraction": 0,
+            "heavyAtomicFraction": 0.333333,
+            "metalAtomicFraction": 0.333333,
+            "numElements": 2
+          }
+        },
+        "compositionDescriptors": {
+          "elements": [
+            "Hf",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0,
+          "oxygenAtomicFraction": 0.666667,
+          "halogenAtomicFraction": 0,
+          "chalcogenideAtomicFraction": 0,
+          "heavyAtomicFraction": 0.333333,
+          "metalAtomicFraction": 0.333333,
+          "numElements": 2
+        },
+        "domainEvidence": {
+          "score": 0.707307,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 4.0165,
+              "score": 0.8033,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.76,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.85,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 10.24124328616322,
+              "score": 0.293126,
+              "status": "fail",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.8033,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.85,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.293126
+          },
+          "passCount": 4,
+          "watchCount": 0,
+          "failCount": 1,
+          "missingCount": 6,
+          "tier": "proxy-shortlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "HfO2 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.707; missing 6 research-grade property check(s)."
+        },
+        "duplicateGroup": "HfO2",
+        "duplicateCount": 7,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 25,
         "rank": 7
       },
       {
@@ -931,9 +1666,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-1439",
         "family": "binary-oxide",
-        "score": 0.733767,
+        "score": 0.724747,
         "primaryScore": 0.731361,
         "secondaryScore": 0.771466,
+        "domainEvidenceScore": 0.656196,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -941,13 +1677,15 @@
             "bandGap": 0.459655,
             "density": 0.717847,
             "secondary": 0.771466,
+            "domainEvidence": 0.656196,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.413433,
-            "bandGap": 0.17283,
-            "density": 0.101216,
-            "secondary": 0.046288
+            "stability": 0.360654,
+            "bandGap": 0.150767,
+            "density": 0.088295,
+            "secondary": 0.046288,
+            "domainEvidence": 0.078744
           },
           "secondary": {
             "bandGapMargin": 0.459655,
@@ -955,17 +1693,27 @@
             "densityAlignment": 0.717847,
             "familyPrior": 0.95,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.50562,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.717847
           }
         },
         "reasons": [
           "stability score 0.977",
           "band-gap alignment 0.460 (target 5.5 eV)",
           "density alignment 0.718 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.771 (domain descriptor 1.000, family prior 0.950, gap margin 0.460)"
+          "secondary tie-breaker 0.771 (domain descriptor 1.000, family prior 0.950, gap margin 0.460)",
+          "research evidence 0.656 (watchlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 12 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -1004,6 +1752,98 @@
           "metalAtomicFraction": 0.333333,
           "numElements": 2
         },
+        "domainEvidence": {
+          "score": 0.656196,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0.004523600833332001,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 2.5281000000000002,
+              "score": 0.50562,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.76,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.6,
+              "status": "watch",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 4.307081249474625,
+              "score": 0.717847,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.50562,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.717847
+          },
+          "passCount": 2,
+          "watchCount": 3,
+          "failCount": 0,
+          "missingCount": 6,
+          "tier": "watchlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "TiO2 is a watchlist candidate in the binary-oxide family with evidence score 0.656; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "TiO2",
         "duplicateCount": 12,
         "screeningLevel": "proxy-screen",
@@ -1027,9 +1867,10 @@
         "notes": [],
         "materialsProjectUrl": "https://materialsproject.org/materials/mp-1238961",
         "family": "binary-oxide",
-        "score": 0.703502,
+        "score": 0.697727,
         "primaryScore": 0.699562,
         "secondaryScore": 0.765216,
+        "domainEvidenceScore": 0.651439,
         "riskPenalty": 0,
         "scoreComponents": {
           "raw": {
@@ -1037,13 +1878,15 @@
             "bandGap": 0.425636,
             "density": 0.737627,
             "secondary": 0.765216,
+            "domainEvidence": 0.651439,
             "riskPenalty": 0
           },
           "weighted": {
-            "stability": 0.393544,
-            "bandGap": 0.160039,
-            "density": 0.104005,
-            "secondary": 0.045913
+            "stability": 0.343304,
+            "bandGap": 0.139609,
+            "density": 0.090728,
+            "secondary": 0.045913,
+            "domainEvidence": 0.078173
           },
           "secondary": {
             "bandGapMargin": 0.425636,
@@ -1051,17 +1894,27 @@
             "densityAlignment": 0.737627,
             "familyPrior": 0.95,
             "chemistryRisk": 1
+          },
+          "domainEvidence": {
+            "phaseStability": 1,
+            "wideGap": 0.4682,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.737627
           }
         },
         "reasons": [
           "stability score 0.930",
           "band-gap alignment 0.426 (target 5.5 eV)",
           "density alignment 0.738 (target 6.0 g/cm3)",
-          "secondary tie-breaker 0.765 (domain descriptor 1.000, family prior 0.950, gap margin 0.426)"
+          "secondary tie-breaker 0.765 (domain descriptor 1.000, family prior 0.950, gap margin 0.426)",
+          "research evidence 0.651 (watchlist, proxy-only)"
         ],
         "warnings": [
           "Duplicate reduced-formula group appears 7 times.",
-          "Material family 'binary-oxide' appears 69 times in the candidate pool."
+          "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
         ],
         "riskProfile": {
           "riskFlags": [],
@@ -1100,10 +1953,102 @@
           "metalAtomicFraction": 0.285714,
           "numElements": 2
         },
+        "domainEvidence": {
+          "score": 0.651439,
+          "gates": [
+            {
+              "id": "phaseStability",
+              "label": "Phase stability",
+              "value": 0.013927193571428001,
+              "score": 1,
+              "status": "pass",
+              "source": "mp-summary",
+              "threshold": "<=0.05 eV preferred"
+            },
+            {
+              "id": "wideGap",
+              "label": "Leakage band gap proxy",
+              "value": 2.341,
+              "score": 0.4682,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": ">=5 eV preferred"
+            },
+            {
+              "id": "dielectricResponse",
+              "label": "High-k chemistry proxy",
+              "value": null,
+              "score": 0.76,
+              "status": "pass",
+              "source": "composition-proxy",
+              "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+            },
+            {
+              "id": "interfaceCompatibility",
+              "label": "Interface compatibility proxy",
+              "value": null,
+              "score": 0.6,
+              "status": "watch",
+              "source": "composition-proxy",
+              "threshold": "Si/channel interface risk proxy"
+            },
+            {
+              "id": "bandOffset",
+              "label": "Band offset leakage guard",
+              "value": null,
+              "score": 0.3,
+              "status": "missing",
+              "source": "missing-proxy",
+              "threshold": "electron/hole offset >=1 eV"
+            },
+            {
+              "id": "densityPolarizability",
+              "label": "Density/polarizability proxy",
+              "value": 7.574235876861001,
+              "score": 0.737627,
+              "status": "watch",
+              "source": "mp-summary",
+              "threshold": "density near high-k oxide target"
+            }
+          ],
+          "missingProperties": [
+            "dielectricTotal",
+            "dielectricElectronic",
+            "bandOffsetElectronEv",
+            "bandOffsetHoleEv",
+            "interfaceReactionEnergyEv",
+            "phononStability"
+          ],
+          "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates"
+          ],
+          "warnings": [
+            "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+          ],
+          "preset": "high-k-dielectric",
+          "components": {
+            "phaseStability": 1,
+            "wideGap": 0.4682,
+            "dielectricResponse": 0.76,
+            "interfaceCompatibility": 0.6,
+            "bandOffset": 0.3,
+            "densityPolarizability": 0.737627
+          },
+          "passCount": 2,
+          "watchCount": 3,
+          "failCount": 0,
+          "missingCount": 6,
+          "tier": "watchlist",
+          "sourceLevel": "proxy-only",
+          "interpretation": "Ta2O5 is a watchlist candidate in the binary-oxide family with evidence score 0.651; missing 6 research-grade property check(s)."
+        },
         "duplicateGroup": "Ta2O5",
         "duplicateCount": 7,
         "screeningLevel": "proxy-screen",
-        "rawRank": 55,
+        "rawRank": 56,
         "rank": 9
       }
     ],
@@ -1119,6 +2064,7 @@
       "densityScoringMode": "target",
       "densityTargetGcm3": 6,
       "secondaryWeight": 0.06,
+      "evidenceWeight": 0.12,
       "riskPenaltyWeight": 0.2,
       "preferredBandGapEv": 5.5,
       "preferredLiFractionMin": 0,
@@ -1148,6 +2094,7 @@
       "maxPerFamily": 8
     },
     "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.png",
+    "evidencePlotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/domain-evidence.png",
     "tablePaths": [
       "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.csv",
       "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.jsonl"
@@ -1161,6 +2108,41 @@
       "rankedFormulaGroups": 9,
       "excludedByDiversity": 63,
       "largestOriginalFormulaGroup": 12
+    },
+    "domainCoverage": {
+      "tierCounts": {
+        "proxy-shortlist": 6,
+        "watchlist": 3
+      },
+      "sourceLevelCounts": {
+        "proxy-only": 9
+      },
+      "mostCommonMissingProperties": [
+        [
+          "dielectricTotal",
+          9
+        ],
+        [
+          "dielectricElectronic",
+          9
+        ],
+        [
+          "bandOffsetElectronEv",
+          9
+        ],
+        [
+          "bandOffsetHoleEv",
+          9
+        ],
+        [
+          "interfaceReactionEnergyEv",
+          9
+        ],
+        [
+          "phononStability",
+          9
+        ]
+      ]
     },
     "excludedCandidates": []
   },
@@ -1182,9 +2164,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-1143",
       "family": "binary-oxide",
-      "score": 0.919836,
+      "score": 0.891138,
       "primaryScore": 0.921114,
       "secondaryScore": 0.899824,
+      "domainEvidenceScore": 0.681958,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1192,13 +2175,15 @@
           "bandGap": 0.935691,
           "density": 0.645583,
           "secondary": 0.899824,
+          "domainEvidence": 0.681958,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.423,
-          "bandGap": 0.35182,
-          "density": 0.091027,
-          "secondary": 0.053989
+          "stability": 0.369,
+          "bandGap": 0.306907,
+          "density": 0.079407,
+          "secondary": 0.053989,
+          "domainEvidence": 0.081835
         },
         "secondary": {
           "bandGapMargin": 0.935691,
@@ -1206,17 +2191,27 @@
           "densityAlignment": 0.645583,
           "familyPrior": 0.95,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 1,
+          "dielectricResponse": 0.36,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.645583
         }
       },
       "reasons": [
         "stability score 1.000",
         "band-gap alignment 0.936 (target 5.5 eV)",
         "density alignment 0.646 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.900 (domain descriptor 1.000, family prior 0.950, gap margin 0.936)"
+        "secondary tie-breaker 0.900 (domain descriptor 1.000, family prior 0.950, gap margin 0.936)",
+        "research evidence 0.682 (proxy-shortlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 10 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -1255,107 +2250,103 @@
         "metalAtomicFraction": 0.4,
         "numElements": 2
       },
+      "domainEvidence": {
+        "score": 0.681958,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 5.853700000000001,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.36,
+            "status": "fail",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.85,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 3.873499124580814,
+            "score": 0.645583,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 1,
+          "dielectricResponse": 0.36,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.645583
+        },
+        "passCount": 3,
+        "watchCount": 1,
+        "failCount": 1,
+        "missingCount": 6,
+        "tier": "proxy-shortlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "Al2O3 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.682; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "Al2O3",
       "duplicateCount": 10,
       "screeningLevel": "proxy-screen",
       "rawRank": 1,
       "rank": 1
-    },
-    {
-      "materialId": "mp-733790",
-      "formula": "SiO2",
-      "energyAboveHullEv": 0.006573497500003,
-      "bandGapEv": 5.5868,
-      "densityGcm3": 2.254998357567127,
-      "volume": 1061.8792044143463,
-      "sites": 72,
-      "spacegroup": "P1",
-      "elements": [
-        "O",
-        "Si"
-      ],
-      "source": "materials-project",
-      "notes": [],
-      "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
-      "family": "binary-oxide",
-      "score": 0.883781,
-      "primaryScore": 0.885272,
-      "secondaryScore": 0.860432,
-      "riskPenalty": 0,
-      "scoreComponents": {
-        "raw": {
-          "stability": 0.967133,
-          "bandGap": 0.984218,
-          "density": 0.375833,
-          "secondary": 0.860432,
-          "riskPenalty": 0
-        },
-        "weighted": {
-          "stability": 0.409097,
-          "bandGap": 0.370066,
-          "density": 0.052992,
-          "secondary": 0.051626
-        },
-        "secondary": {
-          "bandGapMargin": 0.984218,
-          "oxideFramework": 1,
-          "densityAlignment": 0.375833,
-          "familyPrior": 0.95,
-          "chemistryRisk": 1
-        }
-      },
-      "reasons": [
-        "stability score 0.967",
-        "band-gap alignment 0.984 (target 5.5 eV)",
-        "density alignment 0.376 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.860 (domain descriptor 1.000, family prior 0.950, gap margin 0.984)"
-      ],
-      "warnings": [
-        "Duplicate reduced-formula group appears 12 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
-      ],
-      "riskProfile": {
-        "riskFlags": [],
-        "warnings": [],
-        "penalty": 0,
-        "excluded": false,
-        "exclusionReasons": [],
-        "compositionDescriptors": {
-          "elements": [
-            "Si",
-            "O"
-          ],
-          "numAtoms": 3,
-          "liAtomicFraction": 0,
-          "hydrogenAtomicFraction": 0,
-          "oxygenAtomicFraction": 0.666667,
-          "halogenAtomicFraction": 0,
-          "chalcogenideAtomicFraction": 0,
-          "heavyAtomicFraction": 0,
-          "metalAtomicFraction": 0,
-          "numElements": 2
-        }
-      },
-      "compositionDescriptors": {
-        "elements": [
-          "Si",
-          "O"
-        ],
-        "numAtoms": 3,
-        "liAtomicFraction": 0,
-        "hydrogenAtomicFraction": 0,
-        "oxygenAtomicFraction": 0.666667,
-        "halogenAtomicFraction": 0,
-        "chalcogenideAtomicFraction": 0,
-        "heavyAtomicFraction": 0,
-        "metalAtomicFraction": 0,
-        "numElements": 2
-      },
-      "duplicateGroup": "SiO2",
-      "duplicateCount": 12,
-      "screeningLevel": "proxy-screen",
-      "rawRank": 2,
-      "rank": 2
     },
     {
       "materialId": "mp-2652",
@@ -1374,9 +2365,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-2652",
       "family": "binary-oxide",
-      "score": 0.874082,
+      "score": 0.856206,
       "primaryScore": 0.873639,
       "secondaryScore": 0.881027,
+      "domainEvidenceScore": 0.724672,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1384,13 +2376,15 @@
           "bandGap": 0.744964,
           "density": 0.837687,
           "secondary": 0.881027,
+          "domainEvidence": 0.724672,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.423,
-          "bandGap": 0.280106,
-          "density": 0.118114,
-          "secondary": 0.052862
+          "stability": 0.369,
+          "bandGap": 0.244348,
+          "density": 0.103036,
+          "secondary": 0.052862,
+          "domainEvidence": 0.086961
         },
         "secondary": {
           "bandGapMargin": 0.744964,
@@ -1398,17 +2392,27 @@
           "densityAlignment": 0.837687,
           "familyPrior": 0.95,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.81946,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.837687
         }
       },
       "reasons": [
         "stability score 1.000",
         "band-gap alignment 0.745 (target 5.5 eV)",
         "density alignment 0.838 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.881 (domain descriptor 1.000, family prior 0.950, gap margin 0.745)"
+        "secondary tie-breaker 0.881 (domain descriptor 1.000, family prior 0.950, gap margin 0.745)",
+        "research evidence 0.725 (proxy-shortlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 6 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -1447,8 +2451,301 @@
         "metalAtomicFraction": 0.4,
         "numElements": 2
       },
+      "domainEvidence": {
+        "score": 0.724672,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 4.097300000000001,
+            "score": 0.81946,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.76,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.6,
+            "status": "watch",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 5.026122832858722,
+            "score": 0.837687,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.81946,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.837687
+        },
+        "passCount": 4,
+        "watchCount": 1,
+        "failCount": 0,
+        "missingCount": 6,
+        "tier": "proxy-shortlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "Y2O3 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.725; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "Y2O3",
       "duplicateCount": 6,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 2,
+      "rank": 2
+    },
+    {
+      "materialId": "mp-733790",
+      "formula": "SiO2",
+      "energyAboveHullEv": 0.006573497500003,
+      "bandGapEv": 5.5868,
+      "densityGcm3": 2.254998357567127,
+      "volume": 1061.8792044143463,
+      "sites": 72,
+      "spacegroup": "P1",
+      "elements": [
+        "O",
+        "Si"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-733790",
+      "family": "binary-oxide",
+      "score": 0.856147,
+      "primaryScore": 0.885272,
+      "secondaryScore": 0.860432,
+      "domainEvidenceScore": 0.654983,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.967133,
+          "bandGap": 0.984218,
+          "density": 0.375833,
+          "secondary": 0.860432,
+          "domainEvidence": 0.654983,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.356872,
+          "bandGap": 0.322824,
+          "density": 0.046227,
+          "secondary": 0.051626,
+          "domainEvidence": 0.078598
+        },
+        "secondary": {
+          "bandGapMargin": 0.984218,
+          "oxideFramework": 1,
+          "densityAlignment": 0.375833,
+          "familyPrior": 0.95,
+          "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 1,
+          "dielectricResponse": 0.36,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.375833
+        }
+      },
+      "reasons": [
+        "stability score 0.967",
+        "band-gap alignment 0.984 (target 5.5 eV)",
+        "density alignment 0.376 (target 6.0 g/cm3)",
+        "secondary tie-breaker 0.860 (domain descriptor 1.000, family prior 0.950, gap margin 0.984)",
+        "research evidence 0.655 (watchlist, proxy-only)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 12 times.",
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Si",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0,
+          "oxygenAtomicFraction": 0.666667,
+          "halogenAtomicFraction": 0,
+          "chalcogenideAtomicFraction": 0,
+          "heavyAtomicFraction": 0,
+          "metalAtomicFraction": 0,
+          "numElements": 2
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Si",
+          "O"
+        ],
+        "numAtoms": 3,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0,
+        "oxygenAtomicFraction": 0.666667,
+        "halogenAtomicFraction": 0,
+        "chalcogenideAtomicFraction": 0,
+        "heavyAtomicFraction": 0,
+        "metalAtomicFraction": 0,
+        "numElements": 2
+      },
+      "domainEvidence": {
+        "score": 0.654983,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0.006573497500003,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 5.5868,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.36,
+            "status": "fail",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.85,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 2.254998357567127,
+            "score": 0.375833,
+            "status": "fail",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 1,
+          "dielectricResponse": 0.36,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.375833
+        },
+        "passCount": 3,
+        "watchCount": 0,
+        "failCount": 2,
+        "missingCount": 6,
+        "tier": "watchlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "SiO2 is a watchlist candidate in the binary-oxide family with evidence score 0.655; missing 6 research-grade property check(s)."
+      },
+      "duplicateGroup": "SiO2",
+      "duplicateCount": 12,
       "screeningLevel": "proxy-screen",
       "rawRank": 3,
       "rank": 3
@@ -1470,9 +2767,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-1968",
       "family": "binary-oxide",
-      "score": 0.863706,
+      "score": 0.846673,
       "primaryScore": 0.862787,
       "secondaryScore": 0.878118,
+      "domainEvidenceScore": 0.720839,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1480,13 +2778,15 @@
           "bandGap": 0.695418,
           "density": 0.897462,
           "secondary": 0.878118,
+          "domainEvidence": 0.720839,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.423,
-          "bandGap": 0.261477,
-          "density": 0.126542,
-          "secondary": 0.052687
+          "stability": 0.369,
+          "bandGap": 0.228097,
+          "density": 0.110388,
+          "secondary": 0.052687,
+          "domainEvidence": 0.086501
         },
         "secondary": {
           "bandGapMargin": 0.695418,
@@ -1494,17 +2794,27 @@
           "densityAlignment": 0.897462,
           "familyPrior": 0.95,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.76496,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.897462
         }
       },
       "reasons": [
         "stability score 1.000",
         "band-gap alignment 0.695 (target 5.5 eV)",
         "density alignment 0.897 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.878 (domain descriptor 1.000, family prior 0.950, gap margin 0.695)"
+        "secondary tie-breaker 0.878 (domain descriptor 1.000, family prior 0.950, gap margin 0.695)",
+        "research evidence 0.721 (proxy-shortlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 3 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -1543,6 +2853,98 @@
         "metalAtomicFraction": 0.4,
         "numElements": 2
       },
+      "domainEvidence": {
+        "score": 0.720839,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 3.824799999999999,
+            "score": 0.76496,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.76,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.6,
+            "status": "watch",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 6.615226585908185,
+            "score": 0.897462,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.76496,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.897462
+        },
+        "passCount": 4,
+        "watchCount": 1,
+        "failCount": 0,
+        "missingCount": 6,
+        "tier": "proxy-shortlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "La2O3 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.721; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "La2O3",
       "duplicateCount": 3,
       "screeningLevel": "proxy-screen",
@@ -1566,9 +2968,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-2858",
       "family": "binary-oxide",
-      "score": 0.852756,
+      "score": 0.841419,
       "primaryScore": 0.851321,
       "secondaryScore": 0.875243,
+      "domainEvidenceScore": 0.756848,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1576,13 +2979,15 @@
           "bandGap": 0.642218,
           "density": 0.962889,
           "secondary": 0.875243,
+          "domainEvidence": 0.756848,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.423,
-          "bandGap": 0.241474,
-          "density": 0.135767,
-          "secondary": 0.052515
+          "stability": 0.369,
+          "bandGap": 0.210648,
+          "density": 0.118435,
+          "secondary": 0.052515,
+          "domainEvidence": 0.090822
         },
         "secondary": {
           "bandGapMargin": 0.642218,
@@ -1590,17 +2995,27 @@
           "densityAlignment": 0.962889,
           "familyPrior": 0.95,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.70644,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.962889
         }
       },
       "reasons": [
         "stability score 1.000",
         "band-gap alignment 0.642 (target 5.5 eV)",
         "density alignment 0.963 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.875 (domain descriptor 1.000, family prior 0.950, gap margin 0.642)"
+        "secondary tie-breaker 0.875 (domain descriptor 1.000, family prior 0.950, gap margin 0.642)",
+        "research evidence 0.757 (proxy-shortlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 12 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -1639,107 +3054,103 @@
         "metalAtomicFraction": 0.333333,
         "numElements": 2
       },
+      "domainEvidence": {
+        "score": 0.756848,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 3.5322,
+            "score": 0.70644,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.76,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.85,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 5.777331384412114,
+            "score": 0.962889,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.70644,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.962889
+        },
+        "passCount": 4,
+        "watchCount": 1,
+        "failCount": 0,
+        "missingCount": 6,
+        "tier": "proxy-shortlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "ZrO2 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.757; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "ZrO2",
       "duplicateCount": 12,
       "screeningLevel": "proxy-screen",
       "rawRank": 6,
       "rank": 5
-    },
-    {
-      "materialId": "mp-352",
-      "formula": "HfO2",
-      "energyAboveHullEv": 0,
-      "bandGapEv": 4.0165,
-      "densityGcm3": 10.24124328616322,
-      "volume": 136.51657937039403,
-      "sites": 12,
-      "spacegroup": "P2_1/c",
-      "elements": [
-        "Hf",
-        "O"
-      ],
-      "source": "materials-project",
-      "notes": [],
-      "materialsProjectUrl": "https://materialsproject.org/materials/mp-352",
-      "family": "binary-oxide",
-      "score": 0.784976,
-      "primaryScore": 0.786078,
-      "secondaryScore": 0.767707,
-      "riskPenalty": 0,
-      "scoreComponents": {
-        "raw": {
-          "stability": 1,
-          "bandGap": 0.730273,
-          "density": 0.293126,
-          "secondary": 0.767707,
-          "riskPenalty": 0
-        },
-        "weighted": {
-          "stability": 0.423,
-          "bandGap": 0.274583,
-          "density": 0.041331,
-          "secondary": 0.046062
-        },
-        "secondary": {
-          "bandGapMargin": 0.730273,
-          "oxideFramework": 1,
-          "densityAlignment": 0.293126,
-          "familyPrior": 0.95,
-          "chemistryRisk": 1
-        }
-      },
-      "reasons": [
-        "stability score 1.000",
-        "band-gap alignment 0.730 (target 5.5 eV)",
-        "density alignment 0.293 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.768 (domain descriptor 1.000, family prior 0.950, gap margin 0.730)"
-      ],
-      "warnings": [
-        "Duplicate reduced-formula group appears 7 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
-      ],
-      "riskProfile": {
-        "riskFlags": [],
-        "warnings": [],
-        "penalty": 0,
-        "excluded": false,
-        "exclusionReasons": [],
-        "compositionDescriptors": {
-          "elements": [
-            "Hf",
-            "O"
-          ],
-          "numAtoms": 3,
-          "liAtomicFraction": 0,
-          "hydrogenAtomicFraction": 0,
-          "oxygenAtomicFraction": 0.666667,
-          "halogenAtomicFraction": 0,
-          "chalcogenideAtomicFraction": 0,
-          "heavyAtomicFraction": 0.333333,
-          "metalAtomicFraction": 0.333333,
-          "numElements": 2
-        }
-      },
-      "compositionDescriptors": {
-        "elements": [
-          "Hf",
-          "O"
-        ],
-        "numAtoms": 3,
-        "liAtomicFraction": 0,
-        "hydrogenAtomicFraction": 0,
-        "oxygenAtomicFraction": 0.666667,
-        "halogenAtomicFraction": 0,
-        "chalcogenideAtomicFraction": 0,
-        "heavyAtomicFraction": 0.333333,
-        "metalAtomicFraction": 0.333333,
-        "numElements": 2
-      },
-      "duplicateGroup": "HfO2",
-      "duplicateCount": 7,
-      "screeningLevel": "proxy-screen",
-      "rawRank": 27,
-      "rank": 6
     },
     {
       "materialId": "mp-5020",
@@ -1759,9 +3170,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-5020",
       "family": "perovskite-oxide",
-      "score": 0.781628,
+      "score": 0.775554,
       "primaryScore": 0.779849,
       "secondaryScore": 0.809492,
+      "domainEvidenceScore": 0.72924,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1769,13 +3181,15 @@
           "bandGap": 0.456127,
           "density": 0.983268,
           "secondary": 0.809492,
+          "domainEvidence": 0.72924,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.422913,
-          "bandGap": 0.171504,
-          "density": 0.138641,
-          "secondary": 0.04857
+          "stability": 0.368924,
+          "bandGap": 0.14961,
+          "density": 0.120942,
+          "secondary": 0.04857,
+          "domainEvidence": 0.087509
         },
         "secondary": {
           "bandGapMargin": 0.456127,
@@ -1783,17 +3197,27 @@
           "densityAlignment": 0.983268,
           "familyPrior": 0.88,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.50174,
+          "dielectricResponse": 0.923333,
+          "interfaceCompatibility": 0.65,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.983268
         }
       },
       "reasons": [
         "stability score 1.000",
         "band-gap alignment 0.456 (target 5.5 eV)",
         "density alignment 0.983 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.809 (domain descriptor 1.000, family prior 0.880, gap margin 0.456)"
+        "secondary tie-breaker 0.809 (domain descriptor 1.000, family prior 0.880, gap margin 0.456)",
+        "research evidence 0.729 (proxy-shortlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 3 times.",
-        "Material family 'perovskite-oxide' appears 3 times in the candidate pool."
+        "Material family 'perovskite-oxide' appears 3 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -1834,10 +3258,303 @@
         "metalAtomicFraction": 0.4,
         "numElements": 3
       },
+      "domainEvidence": {
+        "score": 0.72924,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0.00004098999996848818,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 2.5086999999999993,
+            "score": 0.50174,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.923333,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.65,
+            "status": "watch",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 5.89961040436988,
+            "score": 0.983268,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.50174,
+          "dielectricResponse": 0.923333,
+          "interfaceCompatibility": 0.65,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.983268
+        },
+        "passCount": 3,
+        "watchCount": 2,
+        "failCount": 0,
+        "missingCount": 6,
+        "tier": "proxy-shortlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "BaTiO3 is a proxy-shortlist candidate in the perovskite-oxide family with evidence score 0.729; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "BaTiO3",
       "duplicateCount": 3,
       "screeningLevel": "proxy-screen",
-      "rawRank": 28,
+      "rawRank": 24,
+      "rank": 6
+    },
+    {
+      "materialId": "mp-352",
+      "formula": "HfO2",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.0165,
+      "densityGcm3": 10.24124328616322,
+      "volume": 136.51657937039403,
+      "sites": 12,
+      "spacegroup": "P2_1/c",
+      "elements": [
+        "Hf",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-352",
+      "family": "binary-oxide",
+      "score": 0.775523,
+      "primaryScore": 0.786078,
+      "secondaryScore": 0.767707,
+      "domainEvidenceScore": 0.707307,
+      "riskPenalty": 0,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 0.730273,
+          "density": 0.293126,
+          "secondary": 0.767707,
+          "domainEvidence": 0.707307,
+          "riskPenalty": 0
+        },
+        "weighted": {
+          "stability": 0.369,
+          "bandGap": 0.239529,
+          "density": 0.036055,
+          "secondary": 0.046062,
+          "domainEvidence": 0.084877
+        },
+        "secondary": {
+          "bandGapMargin": 0.730273,
+          "oxideFramework": 1,
+          "densityAlignment": 0.293126,
+          "familyPrior": 0.95,
+          "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.8033,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.293126
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.730 (target 5.5 eV)",
+        "density alignment 0.293 (target 6.0 g/cm3)",
+        "secondary tie-breaker 0.768 (domain descriptor 1.000, family prior 0.950, gap margin 0.730)",
+        "research evidence 0.707 (proxy-shortlist, proxy-only)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 7 times.",
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+      ],
+      "riskProfile": {
+        "riskFlags": [],
+        "warnings": [],
+        "penalty": 0,
+        "excluded": false,
+        "exclusionReasons": [],
+        "compositionDescriptors": {
+          "elements": [
+            "Hf",
+            "O"
+          ],
+          "numAtoms": 3,
+          "liAtomicFraction": 0,
+          "hydrogenAtomicFraction": 0,
+          "oxygenAtomicFraction": 0.666667,
+          "halogenAtomicFraction": 0,
+          "chalcogenideAtomicFraction": 0,
+          "heavyAtomicFraction": 0.333333,
+          "metalAtomicFraction": 0.333333,
+          "numElements": 2
+        }
+      },
+      "compositionDescriptors": {
+        "elements": [
+          "Hf",
+          "O"
+        ],
+        "numAtoms": 3,
+        "liAtomicFraction": 0,
+        "hydrogenAtomicFraction": 0,
+        "oxygenAtomicFraction": 0.666667,
+        "halogenAtomicFraction": 0,
+        "chalcogenideAtomicFraction": 0,
+        "heavyAtomicFraction": 0.333333,
+        "metalAtomicFraction": 0.333333,
+        "numElements": 2
+      },
+      "domainEvidence": {
+        "score": 0.707307,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 4.0165,
+            "score": 0.8033,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.76,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.85,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 10.24124328616322,
+            "score": 0.293126,
+            "status": "fail",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.8033,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.85,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.293126
+        },
+        "passCount": 4,
+        "watchCount": 0,
+        "failCount": 1,
+        "missingCount": 6,
+        "tier": "proxy-shortlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "HfO2 is a proxy-shortlist candidate in the binary-oxide family with evidence score 0.707; missing 6 research-grade property check(s)."
+      },
+      "duplicateGroup": "HfO2",
+      "duplicateCount": 7,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 25,
       "rank": 7
     },
     {
@@ -1857,9 +3574,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-1439",
       "family": "binary-oxide",
-      "score": 0.733767,
+      "score": 0.724747,
       "primaryScore": 0.731361,
       "secondaryScore": 0.771466,
+      "domainEvidenceScore": 0.656196,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1867,13 +3585,15 @@
           "bandGap": 0.459655,
           "density": 0.717847,
           "secondary": 0.771466,
+          "domainEvidence": 0.656196,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.413433,
-          "bandGap": 0.17283,
-          "density": 0.101216,
-          "secondary": 0.046288
+          "stability": 0.360654,
+          "bandGap": 0.150767,
+          "density": 0.088295,
+          "secondary": 0.046288,
+          "domainEvidence": 0.078744
         },
         "secondary": {
           "bandGapMargin": 0.459655,
@@ -1881,17 +3601,27 @@
           "densityAlignment": 0.717847,
           "familyPrior": 0.95,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.50562,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.717847
         }
       },
       "reasons": [
         "stability score 0.977",
         "band-gap alignment 0.460 (target 5.5 eV)",
         "density alignment 0.718 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.771 (domain descriptor 1.000, family prior 0.950, gap margin 0.460)"
+        "secondary tie-breaker 0.771 (domain descriptor 1.000, family prior 0.950, gap margin 0.460)",
+        "research evidence 0.656 (watchlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 12 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -1930,6 +3660,98 @@
         "metalAtomicFraction": 0.333333,
         "numElements": 2
       },
+      "domainEvidence": {
+        "score": 0.656196,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0.004523600833332001,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 2.5281000000000002,
+            "score": 0.50562,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.76,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.6,
+            "status": "watch",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 4.307081249474625,
+            "score": 0.717847,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.50562,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.717847
+        },
+        "passCount": 2,
+        "watchCount": 3,
+        "failCount": 0,
+        "missingCount": 6,
+        "tier": "watchlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "TiO2 is a watchlist candidate in the binary-oxide family with evidence score 0.656; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "TiO2",
       "duplicateCount": 12,
       "screeningLevel": "proxy-screen",
@@ -1953,9 +3775,10 @@
       "notes": [],
       "materialsProjectUrl": "https://materialsproject.org/materials/mp-1238961",
       "family": "binary-oxide",
-      "score": 0.703502,
+      "score": 0.697727,
       "primaryScore": 0.699562,
       "secondaryScore": 0.765216,
+      "domainEvidenceScore": 0.651439,
       "riskPenalty": 0,
       "scoreComponents": {
         "raw": {
@@ -1963,13 +3786,15 @@
           "bandGap": 0.425636,
           "density": 0.737627,
           "secondary": 0.765216,
+          "domainEvidence": 0.651439,
           "riskPenalty": 0
         },
         "weighted": {
-          "stability": 0.393544,
-          "bandGap": 0.160039,
-          "density": 0.104005,
-          "secondary": 0.045913
+          "stability": 0.343304,
+          "bandGap": 0.139609,
+          "density": 0.090728,
+          "secondary": 0.045913,
+          "domainEvidence": 0.078173
         },
         "secondary": {
           "bandGapMargin": 0.425636,
@@ -1977,17 +3802,27 @@
           "densityAlignment": 0.737627,
           "familyPrior": 0.95,
           "chemistryRisk": 1
+        },
+        "domainEvidence": {
+          "phaseStability": 1,
+          "wideGap": 0.4682,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.737627
         }
       },
       "reasons": [
         "stability score 0.930",
         "band-gap alignment 0.426 (target 5.5 eV)",
         "density alignment 0.738 (target 6.0 g/cm3)",
-        "secondary tie-breaker 0.765 (domain descriptor 1.000, family prior 0.950, gap margin 0.426)"
+        "secondary tie-breaker 0.765 (domain descriptor 1.000, family prior 0.950, gap margin 0.426)",
+        "research evidence 0.651 (watchlist, proxy-only)"
       ],
       "warnings": [
         "Duplicate reduced-formula group appears 7 times.",
-        "Material family 'binary-oxide' appears 69 times in the candidate pool."
+        "Material family 'binary-oxide' appears 69 times in the candidate pool.",
+        "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
       ],
       "riskProfile": {
         "riskFlags": [],
@@ -2026,10 +3861,102 @@
         "metalAtomicFraction": 0.285714,
         "numElements": 2
       },
+      "domainEvidence": {
+        "score": 0.651439,
+        "gates": [
+          {
+            "id": "phaseStability",
+            "label": "Phase stability",
+            "value": 0.013927193571428001,
+            "score": 1,
+            "status": "pass",
+            "source": "mp-summary",
+            "threshold": "<=0.05 eV preferred"
+          },
+          {
+            "id": "wideGap",
+            "label": "Leakage band gap proxy",
+            "value": 2.341,
+            "score": 0.4682,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": ">=5 eV preferred"
+          },
+          {
+            "id": "dielectricResponse",
+            "label": "High-k chemistry proxy",
+            "value": null,
+            "score": 0.76,
+            "status": "pass",
+            "source": "composition-proxy",
+            "threshold": "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+          },
+          {
+            "id": "interfaceCompatibility",
+            "label": "Interface compatibility proxy",
+            "value": null,
+            "score": 0.6,
+            "status": "watch",
+            "source": "composition-proxy",
+            "threshold": "Si/channel interface risk proxy"
+          },
+          {
+            "id": "bandOffset",
+            "label": "Band offset leakage guard",
+            "value": null,
+            "score": 0.3,
+            "status": "missing",
+            "source": "missing-proxy",
+            "threshold": "electron/hole offset >=1 eV"
+          },
+          {
+            "id": "densityPolarizability",
+            "label": "Density/polarizability proxy",
+            "value": 7.574235876861001,
+            "score": 0.737627,
+            "status": "watch",
+            "source": "mp-summary",
+            "threshold": "density near high-k oxide target"
+          }
+        ],
+        "missingProperties": [
+          "dielectricTotal",
+          "dielectricElectronic",
+          "bandOffsetElectronEv",
+          "bandOffsetHoleEv",
+          "interfaceReactionEnergyEv",
+          "phononStability"
+        ],
+        "nextCalculations": [
+          "DFPT dielectric tensor with electronic and ionic components",
+          "band alignment against Si or the intended channel material",
+          "interface reaction energy and oxygen vacancy formation energy",
+          "phonon stability and leakage/effective-mass follow-up for top candidates"
+        ],
+        "warnings": [
+          "Research evidence is incomplete; missing: dielectricTotal, dielectricElectronic, bandOffsetElectronEv, bandOffsetHoleEv, interfaceReactionEnergyEv."
+        ],
+        "preset": "high-k-dielectric",
+        "components": {
+          "phaseStability": 1,
+          "wideGap": 0.4682,
+          "dielectricResponse": 0.76,
+          "interfaceCompatibility": 0.6,
+          "bandOffset": 0.3,
+          "densityPolarizability": 0.737627
+        },
+        "passCount": 2,
+        "watchCount": 3,
+        "failCount": 0,
+        "missingCount": 6,
+        "tier": "watchlist",
+        "sourceLevel": "proxy-only",
+        "interpretation": "Ta2O5 is a watchlist candidate in the binary-oxide family with evidence score 0.651; missing 6 research-grade property check(s)."
+      },
       "duplicateGroup": "Ta2O5",
       "duplicateCount": 7,
       "screeningLevel": "proxy-screen",
-      "rawRank": 55,
+      "rawRank": 56,
       "rank": 9
     }
   ],
@@ -2066,37 +3993,6 @@
       "usedOfflineData": false
     },
     {
-      "materialId": "mp-733790",
-      "formula": "SiO2",
-      "fetchSummary": "Fetched structure for mp-733790 and wrote 2 artifact(s).",
-      "analysisSummary": "SiO2 has 72 sites, volume 1061.8792 A^3, density 2.255 g/cm^3, and 2 distinct elements.",
-      "summaryMetrics": {
-        "formula": "SiO2",
-        "numSites": 72,
-        "volume": 1061.8792,
-        "densityGcm3": 2.255,
-        "a": 8.6614,
-        "b": 8.6568,
-        "c": 16.4442,
-        "alpha": 88.538,
-        "beta": 91.483,
-        "gamma": 120.503,
-        "numElements": 2,
-        "liCount": 0,
-        "liFraction": 0,
-        "liNumberDensityPerA3": 0,
-        "minLiLiDistanceA": null,
-        "medianLiLiDistanceA": null,
-        "liNearestNeighborCountWithin3A": 0,
-        "avgLiNeighborsWithin3A": 0,
-        "liConnectivityProxy": "insufficient-li-sites"
-      },
-      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.json",
-      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.cif",
-      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/structure-metrics.png",
-      "usedOfflineData": false
-    },
-    {
       "materialId": "mp-2652",
       "formula": "Y2O3",
       "fetchSummary": "Fetched structure for mp-2652 and wrote 2 artifact(s).",
@@ -2125,6 +4021,37 @@
       "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.json",
       "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.cif",
       "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-733790",
+      "formula": "SiO2",
+      "fetchSummary": "Fetched structure for mp-733790 and wrote 2 artifact(s).",
+      "analysisSummary": "SiO2 has 72 sites, volume 1061.8792 A^3, density 2.255 g/cm^3, and 2 distinct elements.",
+      "summaryMetrics": {
+        "formula": "SiO2",
+        "numSites": 72,
+        "volume": 1061.8792,
+        "densityGcm3": 2.255,
+        "a": 8.6614,
+        "b": 8.6568,
+        "c": 16.4442,
+        "alpha": 88.538,
+        "beta": 91.483,
+        "gamma": 120.503,
+        "numElements": 2,
+        "liCount": 0,
+        "liFraction": 0,
+        "liNumberDensityPerA3": 0,
+        "minLiLiDistanceA": null,
+        "medianLiLiDistanceA": null,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "insufficient-li-sites"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/structure-metrics.png",
       "usedOfflineData": false
     },
     {
@@ -2160,21 +4087,22 @@
     }
   ],
   "structureFailures": [],
-  "notePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/notes/2026-05-03T07-45-29-380Z-live-materials-project-high-k-dielectric-oxide-screening-process.md",
+  "notePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/notes/2026-05-03T08-08-38-319Z-live-materials-project-high-k-dielectric-oxide-screening-process.md",
   "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/live-high-k-dielectric-e2e-report.md",
   "artifactPaths": [
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/domain-evidence.png",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.csv",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.jsonl",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/mp-1143.json",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/mp-1143.cif",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1143/structure-metrics.png",
-    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.json",
-    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.cif",
-    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/structure-metrics.png",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.json",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/mp-2652.cif",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-2652/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/mp-733790.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-733790/structure-metrics.png",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/mp-1968.json",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/mp-1968.cif",
     "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/structures/mp-1968/structure-metrics.png"
@@ -2188,7 +4116,7 @@
     "structuresAnalyzed": 4,
     "requiredArtifactsExist": {
       "ok": true,
-      "checked": 17,
+      "checked": 18,
       "missing": []
     }
   }

@@ -1,6 +1,6 @@
 # Live OpenClaw Materials Lab High-k Dielectric E2E Process
 
-Generated: 2026-05-03T07:45:32.200Z
+Generated: 2026-05-03T08:08:41.185Z
 
 ## Question
 
@@ -20,20 +20,20 @@ Can Materials Lab produce a useful live proxy shortlist for stable wide-bandgap 
 
 - Summary JSON: /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/live-high-k-dielectric-e2e-summary.json
 - Final report: /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/reports/live-high-k-dielectric-e2e-report.md
-- Process note: /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/notes/2026-05-03T07-45-29-380Z-live-materials-project-high-k-dielectric-oxide-screening-process.md
-- Ranking/table artifacts: /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.png, /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.csv, /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.jsonl
+- Process note: /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/notes/2026-05-03T08-08-38-319Z-live-materials-project-high-k-dielectric-oxide-screening-process.md
+- Ranking/table artifacts: /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.png, /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/domain-evidence.png, /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.csv, /Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/high-k-dielectric-live-e2e-20260503/plots/high-k-dielectric-ranking/candidate-ranking.jsonl
 
 ## Top Candidates
 
-- 1. mp-1143 (Al2O3) score=0.919836, bandGap=5.853700000000001, eHull=0
-- 2. mp-733790 (SiO2) score=0.883781, bandGap=5.5868, eHull=0.006573497500003
-- 3. mp-2652 (Y2O3) score=0.874082, bandGap=4.097300000000001, eHull=0
-- 4. mp-1968 (La2O3) score=0.863706, bandGap=3.824799999999999, eHull=0
-- 5. mp-2858 (ZrO2) score=0.852756, bandGap=3.5322, eHull=0
-- 6. mp-352 (HfO2) score=0.784976, bandGap=4.0165, eHull=0
-- 7. mp-5020 (BaTiO3) score=0.781628, bandGap=2.5086999999999993, eHull=0.00004098999996848818
-- 8. mp-1439 (TiO2) score=0.733767, bandGap=2.5281000000000002, eHull=0.004523600833332001
-- 9. mp-1238961 (Ta2O5) score=0.703502, bandGap=2.341, eHull=0.013927193571428001
+- 1. mp-1143 (Al2O3) score=0.891138, bandGap=5.853700000000001, eHull=0
+- 2. mp-2652 (Y2O3) score=0.856206, bandGap=4.097300000000001, eHull=0
+- 3. mp-733790 (SiO2) score=0.856147, bandGap=5.5868, eHull=0.006573497500003
+- 4. mp-1968 (La2O3) score=0.846673, bandGap=3.824799999999999, eHull=0
+- 5. mp-2858 (ZrO2) score=0.841419, bandGap=3.5322, eHull=0
+- 6. mp-5020 (BaTiO3) score=0.775554, bandGap=2.5086999999999993, eHull=0.00004098999996848818
+- 7. mp-352 (HfO2) score=0.775523, bandGap=4.0165, eHull=0
+- 8. mp-1439 (TiO2) score=0.724747, bandGap=2.5281000000000002, eHull=0.004523600833332001
+- 9. mp-1238961 (Ta2O5) score=0.697727, bandGap=2.341, eHull=0.013927193571428001
 
 ## Structure Fetch Failures
 

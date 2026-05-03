@@ -62,6 +62,22 @@ export interface CandidateSummary {
   screeningLevel?: string;
   riskProfile?: Record<string, unknown>;
   compositionDescriptors?: Record<string, unknown>;
+  dielectricTotal?: number;
+  dielectricElectronic?: number;
+  bandOffsetElectronEv?: number;
+  bandOffsetHoleEv?: number;
+  interfaceReactionEnergyEv?: number;
+  ionicConductivityScm?: number;
+  migrationBarrierEv?: number;
+  electrochemicalWindowV?: number;
+  absorptionCoefficientCm1?: number;
+  directBandGapEv?: number;
+  effectiveMassElectron?: number;
+  effectiveMassHole?: number;
+  seebeckUvK?: number;
+  powerFactorUwCmK2?: number;
+  latticeThermalConductivityWmK?: number;
+  carrierConcentrationCm3?: number;
 }
 
 export interface SearchMaterialsPayload {
@@ -125,6 +141,7 @@ export interface CompareCriteria {
   densityScoringMode?: "target" | "advisory" | "none";
   densityTargetGcm3?: number;
   secondaryWeight?: number;
+  evidenceWeight?: number;
   riskPenaltyWeight?: number;
   preferredBandGapEv?: number;
   preferredLiFractionMin?: number;
@@ -152,13 +169,17 @@ export interface ComparedCandidate extends CandidateSummary {
   score: number;
   primaryScore?: number;
   secondaryScore?: number;
+  domainEvidenceScore?: number;
   riskPenalty?: number;
+  domainEvidence?: Record<string, unknown>;
   rawRank?: number;
   reasons: string[];
   rank: number;
   scoreComponents?: {
     raw?: Record<string, number>;
     weighted?: Record<string, number>;
+    secondary?: Record<string, number>;
+    domainEvidence?: Record<string, number>;
   };
 }
 
@@ -166,9 +187,11 @@ export interface CompareCandidatesResult {
   ranked: ComparedCandidate[];
   criteria: Required<CompareCriteria>;
   plotPath?: string;
+  evidencePlotPath?: string;
   tablePaths?: string[];
   screeningLevel?: string;
   diversity?: Record<string, unknown>;
+  domainCoverage?: Record<string, unknown>;
   excludedCandidates?: Array<Record<string, unknown>>;
 }
 

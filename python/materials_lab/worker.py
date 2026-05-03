@@ -11,7 +11,7 @@ from typing import Any
 from . import __version__
 from .ase_ops import run_relaxation
 from .mp_client import fetch_material, search_materials
-from .plotting import write_candidate_score_plot, write_metric_bar_chart
+from .plotting import write_candidate_score_plot, write_domain_evidence_plot, write_metric_bar_chart
 from .pymatgen_ops import analyze_structure, write_cif, write_structure_json
 from .report import write_markdown_report
 from .schemas import (
@@ -203,18 +203,23 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
     top_k = int(payload.get("topK") or len(ranked))
     ranked = ranked[:top_k]
     plot_path = write_candidate_score_plot(ranked, str(artifact_dir / "candidate-ranking.png"))
+    evidence_plot_path = write_domain_evidence_plot(ranked, str(artifact_dir / "domain-evidence.png"))
     table_paths = _write_candidate_table_artifacts(ranked, artifact_dir)
     warnings = _ranking_warnings(rankable_candidates, ranked, merged_criteria, excluded_candidates)
     if plot_path is None:
         warnings.append("Candidate ranking plot was skipped because matplotlib is unavailable.")
+    if evidence_plot_path is None:
+        warnings.append("Domain evidence plot was skipped because matplotlib is unavailable or evidence scores were unavailable.")
 
     data = {
         "ranked": ranked,
         "criteria": merged_criteria,
         "plotPath": plot_path,
+        "evidencePlotPath": evidence_plot_path,
         "tablePaths": table_paths,
         "screeningLevel": merged_criteria["screeningLevel"],
         "diversity": _diversity_report(rankable_candidates, ranked, merged_criteria),
+        "domainCoverage": _domain_coverage_report(ranked),
         "excludedCandidates": excluded_candidates,
     }
     return success(
@@ -222,7 +227,7 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
         request_id=request_id,
         summary=f"Ranked {len(ranked)} candidate materials.",
         data=data,
-        artifacts=[artifact for artifact in [plot_path, *table_paths] if artifact],
+        artifacts=[artifact for artifact in [plot_path, evidence_plot_path, *table_paths] if artifact],
         warnings=warnings,
     )
 
@@ -383,28 +388,39 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
         risk_profile = _candidate_risk_profile(candidate, criteria)
         secondary = _secondary_score(candidate, criteria, risk_profile)
         secondary_weight = max(0.0, min(float(criteria.get("secondaryWeight") or 0.0), 0.5))
-        primary_scale = 1.0 - secondary_weight
+        evidence_weight = max(0.0, min(float(criteria.get("evidenceWeight") or 0.0), 0.35))
+        primary_scale = max(0.0, 1.0 - secondary_weight - evidence_weight)
+        family = _infer_material_family(candidate, criteria)
+        domain_evidence = _domain_evidence_profile(
+            candidate,
+            criteria,
+            family=family,
+            risk_profile=risk_profile,
+            raw_scores={"stability": stability, "bandGap": band_gap, "density": density, "secondary": secondary["score"]},
+        )
         weighted = {
             "stability": round(stability * stability_weight * primary_scale, 6),
             "bandGap": round(band_gap * band_gap_weight * primary_scale, 6),
             "density": round(density * density_weight * primary_scale, 6),
             "secondary": round(secondary["score"] * secondary_weight, 6),
+            "domainEvidence": round(domain_evidence["score"] * evidence_weight, 6),
         }
         primary_score = stability * stability_weight + band_gap * band_gap_weight + density * density_weight
-        score = _final_score(primary_score, secondary["score"], risk_profile["penalty"], criteria)
-        family = _infer_material_family(candidate, criteria)
+        score = _final_score(primary_score, secondary["score"], domain_evidence["score"], risk_profile["penalty"], criteria)
         formula_group = _formula_group(candidate)
-        reasons = _score_reasons(stability, band_gap, density, secondary, risk_profile, criteria)
+        reasons = _score_reasons(stability, band_gap, density, secondary, domain_evidence, risk_profile, criteria)
         warnings = list(candidate.get("warnings") or [])
         if formula_counts[formula_group] > 1:
             warnings.append(f"Duplicate reduced-formula group appears {formula_counts[formula_group]} times.")
         if family_counts[family] > 1:
             warnings.append(f"Material family '{family}' appears {family_counts[family]} times in the candidate pool.")
         warnings.extend(risk_profile["warnings"])
+        warnings.extend(domain_evidence["warnings"])
         enriched = dict(candidate)
         enriched["score"] = round(score, 6)
         enriched["primaryScore"] = round(primary_score, 6)
         enriched["secondaryScore"] = round(secondary["score"], 6)
+        enriched["domainEvidenceScore"] = round(domain_evidence["score"], 6)
         enriched["riskPenalty"] = round(risk_profile["penalty"], 6)
         enriched["scoreComponents"] = {
             "raw": {
@@ -412,15 +428,18 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
                 "bandGap": round(band_gap, 6),
                 "density": round(density, 6),
                 "secondary": round(secondary["score"], 6),
+                "domainEvidence": round(domain_evidence["score"], 6),
                 "riskPenalty": round(risk_profile["penalty"], 6),
             },
             "weighted": weighted,
             "secondary": secondary["components"],
+            "domainEvidence": domain_evidence["components"],
         }
         enriched["reasons"] = reasons
         enriched["warnings"] = warnings
         enriched["riskProfile"] = risk_profile
         enriched["compositionDescriptors"] = risk_profile["compositionDescriptors"]
+        enriched["domainEvidence"] = domain_evidence
         enriched["family"] = family
         enriched["duplicateGroup"] = formula_group
         enriched["duplicateCount"] = formula_counts[formula_group]
@@ -432,6 +451,7 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
     ranked.sort(
         key=lambda item: (
             item["score"],
+            item.get("domainEvidenceScore", 0),
             item.get("secondaryScore", 0),
             -float(item.get("energyAboveHullEv") or 0.0),
             item.get("bandGapEv") or 0.0,
@@ -461,6 +481,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "densityScoringMode": "advisory",
             "densityTargetGcm3": 3.0,
             "secondaryWeight": 0.10,
+            "evidenceWeight": 0.10,
             "riskPenaltyWeight": 0.30,
             "preferredBandGapEv": 4.0,
             "preferredLiFractionMin": 0.10,
@@ -489,6 +510,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "densityScoringMode": "target",
             "densityTargetGcm3": 6.0,
             "secondaryWeight": 0.06,
+            "evidenceWeight": 0.12,
             "riskPenaltyWeight": 0.20,
             "preferredBandGapEv": 5.5,
             "preferredLiFractionMin": 0.0,
@@ -517,6 +539,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "densityScoringMode": "advisory",
             "densityTargetGcm3": 5.0,
             "secondaryWeight": 0.08,
+            "evidenceWeight": 0.12,
             "riskPenaltyWeight": 0.20,
             "preferredBandGapEv": 1.45,
             "preferredLiFractionMin": 0.0,
@@ -545,6 +568,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "densityScoringMode": "target",
             "densityTargetGcm3": 7.0,
             "secondaryWeight": 0.10,
+            "evidenceWeight": 0.12,
             "riskPenaltyWeight": 0.15,
             "preferredBandGapEv": 0.35,
             "preferredLiFractionMin": 0.0,
@@ -573,6 +597,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "densityScoringMode": "target",
             "densityTargetGcm3": 5.0,
             "secondaryWeight": 0.0,
+            "evidenceWeight": 0.0,
             "riskPenaltyWeight": 0.0,
             "preferredBandGapEv": 3.0,
             "preferredLiFractionMin": 0.0,
@@ -597,6 +622,7 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
         "bandGapTargetEv",
         "densityTargetGcm3",
         "secondaryWeight",
+        "evidenceWeight",
         "riskPenaltyWeight",
         "preferredBandGapEv",
         "preferredLiFractionMin",
@@ -666,10 +692,13 @@ def _filter_candidates_for_ranking(candidates: list[dict[str, Any]], criteria: d
     return rankable, excluded
 
 
-def _final_score(primary_score: float, secondary_score: float, risk_penalty: float, criteria: dict[str, Any]) -> float:
+def _final_score(primary_score: float, secondary_score: float, evidence_score: float, risk_penalty: float, criteria: dict[str, Any]) -> float:
     secondary_weight = max(0.0, min(float(criteria.get("secondaryWeight") or 0.0), 0.5))
+    evidence_weight = max(0.0, min(float(criteria.get("evidenceWeight") or 0.0), 0.35))
     risk_weight = max(0.0, float(criteria.get("riskPenaltyWeight") or 0.0))
-    score = primary_score * (1.0 - secondary_weight) + secondary_score * secondary_weight
+    score = primary_score * max(0.0, 1.0 - secondary_weight - evidence_weight)
+    score += secondary_score * secondary_weight
+    score += evidence_score * evidence_weight
     score -= risk_penalty * risk_weight
     return max(0.0, min(score, 1.0))
 
@@ -779,6 +808,7 @@ def _score_reasons(
     band_gap: float,
     density: float,
     secondary: dict[str, Any],
+    domain_evidence: dict[str, Any],
     risk_profile: dict[str, Any],
     criteria: dict[str, Any],
 ) -> list[str]:
@@ -801,6 +831,13 @@ def _score_reasons(
             f"family prior {components.get('familyPrior', 0):.3f}, "
             f"gap margin {components.get('bandGapMargin', 0):.3f})"
         )
+    if float(criteria.get("evidenceWeight") or 0.0) > 0:
+        reasons.append(
+            "research evidence "
+            f"{domain_evidence['score']:.3f} "
+            f"({domain_evidence.get('tier', 'unknown')}, "
+            f"{domain_evidence.get('sourceLevel', 'proxy')})"
+        )
     if risk_profile["penalty"] > 0:
         reasons.append(f"chemistry risk penalty {risk_profile['penalty']:.3f}")
     return reasons
@@ -812,6 +849,483 @@ def _secondary_descriptor_value(components: dict[str, Any]) -> float:
         if isinstance(value, (int, float)):
             return float(value)
     return 0.0
+
+
+def _domain_evidence_profile(
+    candidate: dict[str, Any],
+    criteria: dict[str, Any],
+    *,
+    family: str,
+    risk_profile: dict[str, Any],
+    raw_scores: dict[str, float],
+) -> dict[str, Any]:
+    preset = str(criteria.get("preset") or "generic")
+    descriptors = risk_profile.get("compositionDescriptors") or {}
+    elements = set(str(item) for item in descriptors.get("elements") or _candidate_elements(candidate))
+
+    if preset == "solid-electrolyte":
+        profile = _solid_electrolyte_evidence(candidate, descriptors, risk_profile, raw_scores)
+    elif preset == "high-k-dielectric":
+        profile = _high_k_evidence(candidate, descriptors, elements, family, risk_profile, raw_scores)
+    elif preset == "photovoltaic-absorber":
+        profile = _photovoltaic_evidence(candidate, descriptors, elements, family, risk_profile, raw_scores)
+    elif preset == "thermoelectric":
+        profile = _thermoelectric_evidence(candidate, descriptors, elements, family, risk_profile, raw_scores)
+    else:
+        profile = _generic_evidence(candidate, risk_profile, raw_scores)
+
+    profile["preset"] = preset
+    profile["score"] = round(float(profile.get("score") or 0.0), 6)
+    profile["components"] = {
+        str(gate["id"]): round(float(gate.get("score") or 0.0), 6)
+        for gate in profile.get("gates") or []
+    }
+    profile["passCount"] = sum(1 for gate in profile.get("gates") or [] if gate.get("status") == "pass")
+    profile["watchCount"] = sum(1 for gate in profile.get("gates") or [] if gate.get("status") == "watch")
+    profile["failCount"] = sum(1 for gate in profile.get("gates") or [] if gate.get("status") == "fail")
+    profile["missingCount"] = len(profile.get("missingProperties") or [])
+    profile["tier"] = _evidence_tier(profile)
+    profile["sourceLevel"] = _evidence_source_level(profile.get("gates") or [])
+    profile["interpretation"] = _evidence_interpretation(profile, candidate, family)
+    return profile
+
+
+def _solid_electrolyte_evidence(
+    candidate: dict[str, Any],
+    descriptors: dict[str, Any],
+    risk_profile: dict[str, Any],
+    raw_scores: dict[str, float],
+) -> dict[str, Any]:
+    ionic_conductivity = _candidate_number(candidate, "ionicConductivityScm", "ionic_conductivity_scm")
+    migration_barrier = _candidate_number(candidate, "migrationBarrierEv", "migration_barrier_ev")
+    electrochemical_window = _candidate_number(candidate, "electrochemicalWindowV", "electrochemical_window_v")
+    li_fraction = float(descriptors.get("liAtomicFraction") or 0.0)
+    framework_score = max(
+        float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.85,
+        float(descriptors.get("chalcogenideAtomicFraction") or 0.0),
+        float(descriptors.get("halogenAtomicFraction") or 0.0) * 0.75,
+    )
+    gates = [
+        _evidence_gate("phaseStability", "Phase stability", candidate.get("energyAboveHullEv"), raw_scores["stability"], "mp-summary", "<=0.05 eV preferred"),
+        _evidence_gate("wideGapProxy", "Electronic insulation proxy", candidate.get("bandGapEv"), raw_scores["bandGap"], "mp-summary", ">=2 eV minimum proxy"),
+        _evidence_gate("liContent", "Li carrier content", li_fraction, _range_score(li_fraction, 0.10, 0.45), "composition", "0.10-0.45 Li atomic fraction"),
+        _evidence_gate("frameworkChemistry", "Framework chemistry", None, framework_score, "composition-proxy", "oxide/sulfide/halide framework proxy"),
+        _evidence_gate(
+            "ionicConductivity",
+            "Ionic conductivity",
+            ionic_conductivity,
+            _minimum_score(ionic_conductivity, 1e-4) if ionic_conductivity is not None else 0.35,
+            "property" if ionic_conductivity is not None else "missing-proxy",
+            ">=1e-4 S/cm screen; >=1e-3 S/cm target",
+        ),
+        _evidence_gate(
+            "migrationBarrier",
+            "Li migration barrier",
+            migration_barrier,
+            _maximum_score(migration_barrier, 0.50, 0.50) if migration_barrier is not None else 0.35,
+            "property" if migration_barrier is not None else "missing-proxy",
+            "<=0.50 eV preferred",
+        ),
+        _evidence_gate(
+            "electrochemicalWindow",
+            "Electrochemical window",
+            electrochemical_window,
+            _minimum_score(electrochemical_window, 4.0) if electrochemical_window is not None else 0.30,
+            "property" if electrochemical_window is not None else "missing-proxy",
+            ">=4 V preferred",
+        ),
+    ]
+    missing = _missing_properties(
+        {
+            "ionicConductivityScm": ionic_conductivity,
+            "migrationBarrierEv": migration_barrier,
+            "electrochemicalWindowV": electrochemical_window,
+            "interfaceStability": _candidate_number(candidate, "interfaceReactionEnergyEv", "interfaceStabilityEv"),
+        }
+    )
+    return {
+        "score": _weighted_gate_score(gates, [0.16, 0.12, 0.14, 0.12, 0.18, 0.14, 0.14]),
+        "gates": gates,
+        "missingProperties": missing,
+        "nextCalculations": [
+            "NEB or bond-valence migration barrier for mobile Li pathways",
+            "AIMD ionic conductivity at target temperature",
+            "grand-potential electrochemical window and electrode interface reactions",
+            "phonon/dynamic stability check for shortlisted phases",
+        ],
+        "warnings": _evidence_warnings(risk_profile, missing),
+    }
+
+
+def _high_k_evidence(
+    candidate: dict[str, Any],
+    descriptors: dict[str, Any],
+    elements: set[str],
+    family: str,
+    risk_profile: dict[str, Any],
+    raw_scores: dict[str, float],
+) -> dict[str, Any]:
+    dielectric_total = _candidate_number(candidate, "dielectricTotal", "dielectricTotalK", "staticDielectric", "dielectricConstant")
+    dielectric_electronic = _candidate_number(candidate, "dielectricElectronic", "electronicDielectric")
+    electron_offset = _candidate_number(candidate, "bandOffsetElectronEv", "conductionBandOffsetEv")
+    hole_offset = _candidate_number(candidate, "bandOffsetHoleEv", "valenceBandOffsetEv")
+    dielectric_score = _minimum_score(dielectric_total, 15.0) if dielectric_total is not None else _high_k_chemistry_score(elements, descriptors, family)
+    dielectric_label = "Static dielectric response" if dielectric_total is not None else "High-k chemistry proxy"
+    dielectric_source = "property" if dielectric_total is not None else "composition-proxy"
+    dielectric_threshold = "k_total >=15 preferred" if dielectric_total is not None else "Hf/Zr/Ti/Ta/Nb/rare-earth/perovskite oxide proxy"
+    offset_score = _offset_score(electron_offset, hole_offset)
+    interface_score = _high_k_interface_score(elements, family)
+    gates = [
+        _evidence_gate("phaseStability", "Phase stability", candidate.get("energyAboveHullEv"), _maximum_score(candidate.get("energyAboveHullEv"), 0.05, 0.15), "mp-summary", "<=0.05 eV preferred"),
+        _evidence_gate("wideGap", "Leakage band gap proxy", candidate.get("bandGapEv"), _minimum_score(candidate.get("bandGapEv"), 5.0), "mp-summary", ">=5 eV preferred"),
+        _evidence_gate(
+            "dielectricResponse",
+            dielectric_label,
+            dielectric_total,
+            dielectric_score,
+            dielectric_source,
+            dielectric_threshold,
+        ),
+        _evidence_gate("interfaceCompatibility", "Interface compatibility proxy", None, interface_score, "composition-proxy", "Si/channel interface risk proxy"),
+        _evidence_gate("bandOffset", "Band offset leakage guard", _first_present(electron_offset, hole_offset), offset_score, "property" if electron_offset is not None or hole_offset is not None else "missing-proxy", "electron/hole offset >=1 eV"),
+        _evidence_gate("densityPolarizability", "Density/polarizability proxy", candidate.get("densityGcm3"), raw_scores["density"], "mp-summary", "density near high-k oxide target"),
+    ]
+    missing = _missing_properties(
+        {
+            "dielectricTotal": dielectric_total,
+            "dielectricElectronic": dielectric_electronic,
+            "bandOffsetElectronEv": electron_offset,
+            "bandOffsetHoleEv": hole_offset,
+            "interfaceReactionEnergyEv": _candidate_number(candidate, "interfaceReactionEnergyEv"),
+            "phononStability": _candidate_number(candidate, "imaginaryPhononFrequencyCm1", "phononStability"),
+        }
+    )
+    return {
+        "score": _weighted_gate_score(gates, [0.17, 0.18, 0.24, 0.16, 0.15, 0.10]),
+        "gates": gates,
+        "missingProperties": missing,
+        "nextCalculations": [
+            "DFPT dielectric tensor with electronic and ionic components",
+            "band alignment against Si or the intended channel material",
+            "interface reaction energy and oxygen vacancy formation energy",
+            "phonon stability and leakage/effective-mass follow-up for top candidates",
+        ],
+        "warnings": _evidence_warnings(risk_profile, missing),
+    }
+
+
+def _photovoltaic_evidence(
+    candidate: dict[str, Any],
+    descriptors: dict[str, Any],
+    elements: set[str],
+    family: str,
+    risk_profile: dict[str, Any],
+    raw_scores: dict[str, float],
+) -> dict[str, Any]:
+    absorption = _candidate_number(candidate, "absorptionCoefficientCm1", "absorptionCm1")
+    direct_gap = _candidate_number(candidate, "directBandGapEv", "direct_gap_ev")
+    electron_mass = _candidate_number(candidate, "effectiveMassElectron", "electronEffectiveMass")
+    hole_mass = _candidate_number(candidate, "effectiveMassHole", "holeEffectiveMass")
+    gap_value = direct_gap if direct_gap is not None else candidate.get("bandGapEv")
+    absorber_score = max(
+        float(descriptors.get("chalcogenideAtomicFraction") or 0.0),
+        float(descriptors.get("halogenAtomicFraction") or 0.0) * 0.85,
+        float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.50,
+    )
+    transport_score = _carrier_mass_score(electron_mass, hole_mass)
+    gates = [
+        _evidence_gate("phaseStability", "Phase stability", candidate.get("energyAboveHullEv"), _maximum_score(candidate.get("energyAboveHullEv"), 0.05, 0.20), "mp-summary", "<=0.05 eV preferred"),
+        _evidence_gate("opticalGap", "Optical gap alignment", gap_value, _target_score(gap_value, 1.45), "property" if direct_gap is not None else "mp-summary", "near 1.45 eV"),
+        _evidence_gate(
+            "absorption",
+            "Absorption strength",
+            absorption,
+            _minimum_score(absorption, 1e4) if absorption is not None else absorber_score,
+            "property" if absorption is not None else "composition-proxy",
+            ">=1e4 cm^-1 preferred",
+        ),
+        _evidence_gate("absorberChemistry", "Absorber chemistry", None, absorber_score, "composition-proxy", "chalcogenide/halide/oxide absorber proxy"),
+        _evidence_gate("carrierTransport", "Carrier transport proxy", _first_present(electron_mass, hole_mass), transport_score, "property" if electron_mass is not None or hole_mass is not None else "missing-proxy", "low balanced effective masses"),
+        _evidence_gate("chemistryRisk", "Toxicity/supply risk", None, max(0.0, 1.0 - float(risk_profile.get("penalty") or 0.0)), "composition", "risk flags penalized"),
+    ]
+    missing = _missing_properties(
+        {
+            "absorptionCoefficientCm1": absorption,
+            "directBandGapEv": direct_gap,
+            "bandEdgeAlignment": _candidate_number(candidate, "cbmEv", "vbmEv"),
+            "defectTolerance": _candidate_number(candidate, "defectToleranceScore"),
+            "effectiveMassElectron": electron_mass,
+            "effectiveMassHole": hole_mass,
+        }
+    )
+    warnings = _evidence_warnings(risk_profile, missing)
+    if "Pb" in elements or "Cd" in elements:
+        warnings.append("PV absorber contains Pb or Cd; performance may be plausible but deployment risk needs explicit treatment.")
+    if family == "oxide-absorber":
+        warnings.append("Oxide absorber candidates often require absorption/defect validation because wide or indirect gaps are common.")
+    return {
+        "score": _weighted_gate_score(gates, [0.16, 0.24, 0.20, 0.12, 0.14, 0.14]),
+        "gates": gates,
+        "missingProperties": missing,
+        "nextCalculations": [
+            "optical absorption spectrum and direct/indirect gap confirmation",
+            "absolute band-edge alignment for target device stack",
+            "dominant defect formation energies and non-radiative recombination risk",
+            "carrier effective masses and exciton binding energy for top candidates",
+        ],
+        "warnings": warnings,
+    }
+
+
+def _thermoelectric_evidence(
+    candidate: dict[str, Any],
+    descriptors: dict[str, Any],
+    elements: set[str],
+    family: str,
+    risk_profile: dict[str, Any],
+    raw_scores: dict[str, float],
+) -> dict[str, Any]:
+    seebeck = _candidate_number(candidate, "seebeckUvK", "seebeck_uV_K")
+    power_factor = _candidate_number(candidate, "powerFactorUwCmK2", "powerFactor")
+    thermal_conductivity = _candidate_number(candidate, "latticeThermalConductivityWmK", "kappaLatticeWmK")
+    heavy_score = float(descriptors.get("heavyAtomicFraction") or 0.0)
+    complexity_score = min(1.0, float(descriptors.get("numElements") or 0.0) / 4.0)
+    transport_score = _transport_property_score(seebeck, power_factor, thermal_conductivity)
+    gates = [
+        _evidence_gate("phaseStability", "Phase/metastability", candidate.get("energyAboveHullEv"), _maximum_score(candidate.get("energyAboveHullEv"), 0.08, 0.25), "mp-summary", "<=0.08 eV preferred"),
+        _evidence_gate("narrowGap", "Narrow-gap electronic structure", candidate.get("bandGapEv"), _target_score(candidate.get("bandGapEv"), 0.35), "mp-summary", "near 0.35 eV"),
+        _evidence_gate("heavyElements", "Heavy-element phonon proxy", None, heavy_score, "composition-proxy", "heavy atoms favor low lattice thermal conductivity"),
+        _evidence_gate("structuralComplexity", "Complexity proxy", descriptors.get("numElements"), complexity_score, "composition-proxy", "multi-element complexity proxy"),
+        _evidence_gate("transport", "Transport coefficients", _first_present(power_factor, seebeck, thermal_conductivity), transport_score, "property" if any(value is not None for value in [seebeck, power_factor, thermal_conductivity]) else "missing-proxy", "Seebeck/power factor/kappa"),
+        _evidence_gate("chemistryRisk", "Chemistry risk", None, max(0.0, 1.0 - float(risk_profile.get("penalty") or 0.0)), "composition", "risk flags penalized"),
+    ]
+    missing = _missing_properties(
+        {
+            "seebeckUvK": seebeck,
+            "powerFactorUwCmK2": power_factor,
+            "latticeThermalConductivityWmK": thermal_conductivity,
+            "carrierConcentrationCm3": _candidate_number(candidate, "carrierConcentrationCm3"),
+            "phononStability": _candidate_number(candidate, "imaginaryPhononFrequencyCm1", "phononStability"),
+        }
+    )
+    warnings = _evidence_warnings(risk_profile, missing)
+    if "Pb" in elements:
+        warnings.append("Pb-containing thermoelectrics need explicit toxicity and regulation handling even when transport proxies are strong.")
+    if family == "oxide-thermoelectric":
+        warnings.append("Oxide thermoelectrics can be robust but often need high-temperature transport validation.")
+    return {
+        "score": _weighted_gate_score(gates, [0.16, 0.20, 0.18, 0.12, 0.22, 0.12]),
+        "gates": gates,
+        "missingProperties": missing,
+        "nextCalculations": [
+            "Boltzmann transport for Seebeck, conductivity, and power factor versus carrier concentration",
+            "lattice thermal conductivity or phonon scattering proxy",
+            "dopability and defect compensation analysis",
+            "high-temperature phase stability and oxidation risk checks",
+        ],
+        "warnings": warnings,
+    }
+
+
+def _generic_evidence(candidate: dict[str, Any], risk_profile: dict[str, Any], raw_scores: dict[str, float]) -> dict[str, Any]:
+    gates = [
+        _evidence_gate("phaseStability", "Phase stability", candidate.get("energyAboveHullEv"), raw_scores["stability"], "mp-summary", "lower eHull preferred"),
+        _evidence_gate("bandGap", "Band gap criterion", candidate.get("bandGapEv"), raw_scores["bandGap"], "mp-summary", "configured criterion"),
+        _evidence_gate("density", "Density criterion", candidate.get("densityGcm3"), raw_scores["density"], "mp-summary", "configured criterion"),
+        _evidence_gate("chemistryRisk", "Chemistry risk", None, max(0.0, 1.0 - float(risk_profile.get("penalty") or 0.0)), "composition", "risk flags penalized"),
+    ]
+    return {
+        "score": _weighted_gate_score(gates, [0.35, 0.25, 0.20, 0.20]),
+        "gates": gates,
+        "missingProperties": ["domain-specific-property-model"],
+        "nextCalculations": ["select a domain preset and add domain-specific property calculations"],
+        "warnings": _evidence_warnings(risk_profile, ["domain-specific-property-model"]),
+    }
+
+
+def _evidence_gate(id_: str, label: str, value: Any, score: float, source: str, threshold: str) -> dict[str, Any]:
+    bounded = max(0.0, min(float(score), 1.0))
+    if source == "missing-proxy":
+        status = "missing"
+    elif bounded >= 0.75:
+        status = "pass"
+    elif bounded >= 0.45:
+        status = "watch"
+    else:
+        status = "fail"
+    return {
+        "id": id_,
+        "label": label,
+        "value": _json_scalar(value),
+        "score": round(bounded, 6),
+        "status": status,
+        "source": source,
+        "threshold": threshold,
+    }
+
+
+def _weighted_gate_score(gates: list[dict[str, Any]], weights: list[float]) -> float:
+    if not gates:
+        return 0.0
+    normalized = weights[: len(gates)]
+    if len(normalized) < len(gates):
+        normalized.extend([1.0] * (len(gates) - len(normalized)))
+    total = sum(normalized)
+    if total <= 0:
+        return 0.0
+    return sum(float(gate.get("score") or 0.0) * weight for gate, weight in zip(gates, normalized)) / total
+
+
+def _evidence_tier(profile: dict[str, Any]) -> str:
+    score = float(profile.get("score") or 0.0)
+    missing_count = len(profile.get("missingProperties") or [])
+    fail_count = sum(1 for gate in profile.get("gates") or [] if gate.get("status") == "fail")
+    property_gates = [gate for gate in profile.get("gates") or [] if gate.get("source") == "property"]
+    if score >= 0.78 and fail_count == 0 and missing_count <= 2 and len(property_gates) >= 2:
+        return "research-shortlist"
+    if score >= 0.68 and fail_count <= 1:
+        return "proxy-shortlist"
+    if score >= 0.48:
+        return "watchlist"
+    if missing_count >= 4 and score < 0.55:
+        return "insufficient-data"
+    return "low-confidence"
+
+
+def _evidence_source_level(gates: list[dict[str, Any]]) -> str:
+    if not gates:
+        return "none"
+    property_count = sum(1 for gate in gates if gate.get("source") == "property")
+    proxy_count = sum(1 for gate in gates if str(gate.get("source") or "").endswith("proxy") or gate.get("source") == "composition-proxy")
+    if property_count >= max(2, len(gates) // 2):
+        return "property-backed"
+    if property_count > 0:
+        return "mixed-property-proxy"
+    if proxy_count:
+        return "proxy-only"
+    return "summary-only"
+
+
+def _evidence_interpretation(profile: dict[str, Any], candidate: dict[str, Any], family: str) -> str:
+    formula = candidate.get("formula") or candidate.get("materialId") or "candidate"
+    tier = profile.get("tier", "unknown")
+    score = float(profile.get("score") or 0.0)
+    missing = profile.get("missingProperties") or []
+    if missing:
+        return f"{formula} is a {tier} candidate in the {family} family with evidence score {score:.3f}; missing {len(missing)} research-grade property check(s)."
+    return f"{formula} is a {tier} candidate in the {family} family with evidence score {score:.3f}; no required evidence fields were missing."
+
+
+def _evidence_warnings(risk_profile: dict[str, Any], missing: list[str]) -> list[str]:
+    warnings = []
+    if missing:
+        warnings.append(f"Research evidence is incomplete; missing: {', '.join(missing[:5])}.")
+    if risk_profile.get("riskFlags"):
+        warnings.append("Chemistry risk flags are present and should be resolved before experimental prioritization.")
+    return warnings
+
+
+def _missing_properties(values: dict[str, Any]) -> list[str]:
+    return [key for key, value in values.items() if value is None]
+
+
+def _candidate_number(candidate: dict[str, Any], *keys: str) -> float | None:
+    for key in keys:
+        value = candidate.get(key)
+        if isinstance(value, bool) or value is None:
+            continue
+        try:
+            return float(value)
+        except Exception:
+            continue
+    return None
+
+
+def _first_present(*values: Any) -> Any:
+    for value in values:
+        if value is not None:
+            return value
+    return None
+
+
+def _json_scalar(value: Any) -> Any:
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    try:
+        return float(value)
+    except Exception:
+        return str(value)
+
+
+def _maximum_score(value: Any, maximum: float, tolerance: float) -> float:
+    if value is None:
+        return 0.2
+    try:
+        numeric = float(value)
+    except Exception:
+        return 0.2
+    if numeric <= maximum:
+        return 1.0
+    if tolerance <= 0:
+        return 0.0
+    return max(0.0, 1.0 - min((numeric - maximum) / tolerance, 1.0))
+
+
+def _offset_score(electron_offset: float | None, hole_offset: float | None) -> float:
+    values = [value for value in [electron_offset, hole_offset] if value is not None]
+    if not values:
+        return 0.30
+    return min(_minimum_score(value, 1.0) for value in values)
+
+
+def _carrier_mass_score(electron_mass: float | None, hole_mass: float | None) -> float:
+    values = [value for value in [electron_mass, hole_mass] if value is not None]
+    if not values:
+        return 0.35
+    scores = [_maximum_score(value, 0.50, 1.50) for value in values]
+    imbalance = abs((electron_mass or values[0]) - (hole_mass or values[-1])) if len(values) == 2 else 0.25
+    return max(0.0, min(sum(scores) / len(scores) - min(imbalance / 4.0, 0.20), 1.0))
+
+
+def _transport_property_score(seebeck: float | None, power_factor: float | None, thermal_conductivity: float | None) -> float:
+    scores = []
+    if seebeck is not None:
+        scores.append(_minimum_score(abs(seebeck), 150.0))
+    if power_factor is not None:
+        scores.append(_minimum_score(power_factor, 20.0))
+    if thermal_conductivity is not None:
+        scores.append(_maximum_score(thermal_conductivity, 2.0, 6.0))
+    if not scores:
+        return 0.35
+    return sum(scores) / len(scores)
+
+
+def _high_k_chemistry_score(elements: set[str], descriptors: dict[str, Any], family: str) -> float:
+    strong_high_k_elements = {"Hf", "Zr", "Ti", "Ta", "Nb", "La", "Y", "Sr", "Ba"}
+    low_k_network_formers = {"Al", "Si", "B", "P"}
+    strong_hits = len(elements.intersection(strong_high_k_elements))
+    low_k_hits = len(elements.intersection(low_k_network_formers))
+    denominator = max(len(elements), 1)
+    strong_fraction = strong_hits / denominator
+    low_k_fraction = low_k_hits / denominator
+    oxide_bonus = 0.15 if float(descriptors.get("oxygenAtomicFraction") or 0.0) > 0.35 else 0.0
+    family_bonus = 0.14 if family in {"perovskite-oxide", "complex-oxide"} else 0.08 if family == "binary-oxide" else 0.0
+    score = 0.22 + strong_fraction * 0.62 + oxide_bonus + family_bonus - low_k_fraction * 0.18
+    if strong_hits == 0:
+        score = min(score, 0.55)
+    return max(0.0, min(score, 1.0))
+
+
+def _high_k_interface_score(elements: set[str], family: str) -> float:
+    if elements.intersection({"Hf", "Zr", "Al", "Si"}) and "O" in elements:
+        return 0.85
+    if family == "perovskite-oxide":
+        return 0.65
+    if elements.intersection({"Ti", "Ta", "La", "Y", "Sr", "Ba"}) and "O" in elements:
+        return 0.60
+    if "O" in elements:
+        return 0.50
+    return 0.25
 
 
 def _candidate_risk_profile(candidate: dict[str, Any], criteria: dict[str, Any]) -> dict[str, Any]:
@@ -1093,6 +1607,12 @@ def _ranking_warnings(
         warnings.append("Candidate pool contains repeated formulas; use diversity controls for research shortlists.")
     if criteria.get("preset") == "solid-electrolyte":
         warnings.append("Solid-electrolyte preset is a proxy screen and does not compute ionic conductivity, migration barriers, or electrochemical windows.")
+    elif criteria.get("preset") == "high-k-dielectric":
+        warnings.append("High-k preset still requires dielectric tensors, band offsets, interface reactions, and defect/leakage checks before device prioritization.")
+    elif criteria.get("preset") == "photovoltaic-absorber":
+        warnings.append("Photovoltaic preset still requires optical absorption, band-edge alignment, defect tolerance, and transport validation before device prioritization.")
+    elif criteria.get("preset") == "thermoelectric":
+        warnings.append("Thermoelectric preset still requires transport coefficients, carrier concentration sweeps, and lattice thermal conductivity validation.")
     if len(ranked) < len(original) and (criteria.get("maxPerFormula") or criteria.get("maxPerFamily")):
         warnings.append("Some high raw-score candidates were excluded by formula/family diversity controls.")
     if excluded_candidates:
@@ -1124,11 +1644,18 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
         "score",
         "primaryScore",
         "secondaryScore",
+        "domainEvidenceScore",
+        "evidenceTier",
+        "evidenceSourceLevel",
         "riskPenalty",
         "stabilityComponent",
         "bandGapComponent",
         "densityComponent",
+        "domainEvidenceComponent",
         "riskFlags",
+        "domainGates",
+        "missingProperties",
+        "nextCalculations",
         "liAtomicFraction",
         "hydrogenAtomicFraction",
         "duplicateGroup",
@@ -1141,6 +1668,7 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
         writer.writeheader()
         for candidate in ranked:
             weighted = ((candidate.get("scoreComponents") or {}).get("weighted") or {})
+            evidence = candidate.get("domainEvidence") or {}
             writer.writerow({
                 "rank": candidate.get("rank"),
                 "rawRank": candidate.get("rawRank"),
@@ -1154,11 +1682,21 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
                 "score": candidate.get("score"),
                 "primaryScore": candidate.get("primaryScore"),
                 "secondaryScore": candidate.get("secondaryScore"),
+                "domainEvidenceScore": candidate.get("domainEvidenceScore"),
+                "evidenceTier": evidence.get("tier"),
+                "evidenceSourceLevel": evidence.get("sourceLevel"),
                 "riskPenalty": candidate.get("riskPenalty"),
                 "stabilityComponent": weighted.get("stability"),
                 "bandGapComponent": weighted.get("bandGap"),
                 "densityComponent": weighted.get("density"),
+                "domainEvidenceComponent": weighted.get("domainEvidence"),
                 "riskFlags": ",".join(((candidate.get("riskProfile") or {}).get("riskFlags") or [])),
+                "domainGates": ";".join(
+                    f"{gate.get('id')}:{gate.get('status')}:{gate.get('score')}"
+                    for gate in (evidence.get("gates") or [])
+                ),
+                "missingProperties": ",".join(evidence.get("missingProperties") or []),
+                "nextCalculations": " | ".join(evidence.get("nextCalculations") or []),
                 "liAtomicFraction": ((candidate.get("compositionDescriptors") or {}).get("liAtomicFraction")),
                 "hydrogenAtomicFraction": ((candidate.get("compositionDescriptors") or {}).get("hydrogenAtomicFraction")),
                 "duplicateGroup": candidate.get("duplicateGroup"),
@@ -1170,6 +1708,21 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
         for candidate in ranked:
             handle.write(json.dumps(candidate, sort_keys=True) + "\n")
     return [str(csv_path), str(jsonl_path)]
+
+
+def _domain_coverage_report(ranked: list[dict[str, Any]]) -> dict[str, Any]:
+    tiers = Counter(str(((candidate.get("domainEvidence") or {}).get("tier")) or "unknown") for candidate in ranked)
+    source_levels = Counter(str(((candidate.get("domainEvidence") or {}).get("sourceLevel")) or "unknown") for candidate in ranked)
+    missing = Counter()
+    for candidate in ranked:
+        evidence = candidate.get("domainEvidence") or {}
+        for item in evidence.get("missingProperties") or []:
+            missing[str(item)] += 1
+    return {
+        "tierCounts": dict(tiers),
+        "sourceLevelCounts": dict(source_levels),
+        "mostCommonMissingProperties": missing.most_common(10),
+    }
 
 
 def _infer_material_family(candidate: dict[str, Any], criteria: dict[str, Any] | None = None) -> str:

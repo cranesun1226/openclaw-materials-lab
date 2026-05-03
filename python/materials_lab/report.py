@@ -39,6 +39,10 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
         "",
         _candidate_table(ranked_candidates),
         "",
+        "## Domain Evidence Matrix",
+        "",
+        _domain_evidence_table(ranked_candidates),
+        "",
         "## Ranked Candidates",
         "",
     ]
@@ -53,6 +57,7 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
                 f"- Score: {candidate['score']}",
                 f"- Primary score: {_format_value(candidate.get('primaryScore'))}",
                 f"- Secondary score: {_format_value(candidate.get('secondaryScore'))}",
+                f"- Domain evidence: {_format_value(candidate.get('domainEvidenceScore'))} ({_evidence_tier(candidate)})",
                 f"- Risk penalty: {_format_value(candidate.get('riskPenalty'))}",
                 f"- Source: {candidate['source']}",
                 f"- Family: {candidate.get('family', 'unknown')}",
@@ -62,6 +67,9 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
                 f"- Density: {_format_value(candidate.get('densityGcm3'))} g/cm3",
                 f"- Duplicate group: {candidate.get('duplicateGroup', candidate.get('formula'))} ({candidate.get('duplicateCount', 1)} candidate(s))",
                 f"- Risk flags: {_risk_flags(candidate)}",
+                f"- Evidence source level: {_evidence_source_level(candidate)}",
+                f"- Missing research properties: {_missing_properties(candidate)}",
+                f"- Next calculations: {_next_calculations(candidate)}",
                 *[f"- Weighted {key}: {_format_value(value)}" for key, value in (weighted or {}).items()],
                 *[f"- {reason}" for reason in candidate.get("reasons") or []],
                 *[f"- Warning: {warning}" for warning in _dedupe(candidate.get("warnings") or [])],
@@ -109,8 +117,8 @@ def _candidate_table(candidates: list[dict[str, Any]]) -> str:
     if not candidates:
         return "No ranked candidates were provided."
     lines = [
-        "| Rank | Material | Formula | Family | eHull eV | Gap eV | Score | Secondary | Risk | Flags |",
-        "| ---: | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |",
+        "| Rank | Material | Formula | Family | eHull eV | Gap eV | Score | Evidence | Tier | Risk | Flags |",
+        "| ---: | --- | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | --- |",
     ]
     for candidate in candidates:
         flags = []
@@ -119,7 +127,7 @@ def _candidate_table(candidates: list[dict[str, Any]]) -> str:
         if candidate.get("warnings"):
             flags.append("warning")
         lines.append(
-            "| {rank} | {material} | {formula} | {family} | {ehull} | {gap} | {score} | {secondary} | {risk} | {flags} |".format(
+            "| {rank} | {material} | {formula} | {family} | {ehull} | {gap} | {score} | {evidence} | {tier} | {risk} | {flags} |".format(
                 rank=candidate.get("rank", ""),
                 material=_candidate_link(candidate),
                 formula=candidate.get("formula", ""),
@@ -127,9 +135,38 @@ def _candidate_table(candidates: list[dict[str, Any]]) -> str:
                 ehull=_format_value(candidate.get("energyAboveHullEv")),
                 gap=_format_value(candidate.get("bandGapEv")),
                 score=_format_value(candidate.get("score")),
-                secondary=_format_value(candidate.get("secondaryScore")),
+                evidence=_format_value(candidate.get("domainEvidenceScore")),
+                tier=_evidence_tier(candidate),
                 risk=_format_value(candidate.get("riskPenalty")),
                 flags=", ".join(flags) if flags else "-",
+            )
+        )
+    return "\n".join(lines)
+
+
+def _domain_evidence_table(candidates: list[dict[str, Any]]) -> str:
+    if not candidates:
+        return "No ranked candidates were provided."
+    lines = [
+        "| Rank | Material | Evidence Tier | Source Level | Passing Gates | Missing Properties | Main Next Step |",
+        "| ---: | --- | --- | --- | ---: | --- | --- |",
+    ]
+    for candidate in candidates:
+        evidence = candidate.get("domainEvidence") or {}
+        pass_count = evidence.get("passCount", 0)
+        gates = evidence.get("gates") or []
+        missing = evidence.get("missingProperties") or []
+        next_steps = evidence.get("nextCalculations") or []
+        lines.append(
+            "| {rank} | {material} | {tier} | {source} | {passes}/{total} | {missing} | {next_step} |".format(
+                rank=candidate.get("rank", ""),
+                material=_candidate_link(candidate),
+                tier=evidence.get("tier", "unknown"),
+                source=evidence.get("sourceLevel", "unknown"),
+                passes=pass_count,
+                total=len(gates),
+                missing=", ".join(str(item) for item in missing[:4]) if missing else "-",
+                next_step=str(next_steps[0]) if next_steps else "-",
             )
         )
     return "\n".join(lines)
@@ -148,6 +185,10 @@ def _failure_table(candidates: list[dict[str, Any]]) -> str:
         risks = []
         if risk_flags != "-":
             risks.append(risk_flags)
+        evidence = candidate.get("domainEvidence") or {}
+        missing = evidence.get("missingProperties") or []
+        if missing:
+            risks.append(f"missing research evidence: {', '.join(str(item) for item in missing[:3])}")
         risks.extend(warnings[:3])
         if not risks:
             risks.append("No heuristic risk flag; still needs transport and electrochemical validation.")
@@ -159,6 +200,28 @@ def _risk_flags(candidate: dict[str, Any]) -> str:
     risk_profile = candidate.get("riskProfile") or {}
     flags = risk_profile.get("riskFlags") or []
     return ", ".join(str(flag) for flag in flags) if flags else "-"
+
+
+def _evidence_tier(candidate: dict[str, Any]) -> str:
+    evidence = candidate.get("domainEvidence") or {}
+    return str(evidence.get("tier") or "unknown")
+
+
+def _evidence_source_level(candidate: dict[str, Any]) -> str:
+    evidence = candidate.get("domainEvidence") or {}
+    return str(evidence.get("sourceLevel") or "unknown")
+
+
+def _missing_properties(candidate: dict[str, Any]) -> str:
+    evidence = candidate.get("domainEvidence") or {}
+    missing = evidence.get("missingProperties") or []
+    return ", ".join(str(item) for item in missing) if missing else "-"
+
+
+def _next_calculations(candidate: dict[str, Any]) -> str:
+    evidence = candidate.get("domainEvidence") or {}
+    steps = evidence.get("nextCalculations") or []
+    return "; ".join(str(item) for item in steps[:3]) if steps else "-"
 
 
 def _candidate_link(candidate: dict[str, Any]) -> str:

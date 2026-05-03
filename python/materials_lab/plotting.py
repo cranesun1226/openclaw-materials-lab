@@ -56,6 +56,41 @@ def write_candidate_score_plot(ranked: list[dict[str, Any]], output_path: str) -
     return str(path)
 
 
+def write_domain_evidence_plot(ranked: list[dict[str, Any]], output_path: str) -> str | None:
+    if plt is None:
+        return None
+
+    labels = [_candidate_label(candidate) for candidate in ranked]
+    scores = [
+        float(((candidate.get("domainEvidence") or {}).get("score")) or 0.0)
+        for candidate in ranked
+    ]
+    if not ranked or not any(scores):
+        return None
+
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    colors = [
+        _evidence_color(str(((candidate.get("domainEvidence") or {}).get("tier")) or "proxy-only"))
+        for candidate in ranked
+    ]
+    figure = plt.figure(figsize=(10, 5.2))
+    ax = figure.add_subplot(111)
+    ax.bar(labels, scores, color=colors)
+    ax.axhline(0.75, color="#4f772d", linewidth=1.1, linestyle="--", alpha=0.8)
+    ax.axhline(0.50, color="#b08900", linewidth=1.1, linestyle="--", alpha=0.8)
+    ax.set_ylim(0.0, 1.02)
+    ax.set_ylabel("Evidence score")
+    ax.set_title("Domain Evidence Readiness")
+    ax.tick_params(axis="x", labelrotation=35)
+    ax.grid(axis="y", alpha=0.25)
+    figure.tight_layout()
+    figure.savefig(path, dpi=160)
+    plt.close(figure)
+    return str(path)
+
+
 def write_metric_bar_chart(metrics: dict[str, Any], output_path: str) -> str | None:
     if plt is None:
         return None
@@ -110,7 +145,18 @@ def _component_label(key: str) -> str:
         "bandGap": "Band gap",
         "density": "Density",
         "secondary": "Secondary",
+        "domainEvidence": "Domain evidence",
     }.get(key, key)
+
+
+def _evidence_color(tier: str) -> str:
+    return {
+        "research-shortlist": "#2f5d62",
+        "proxy-shortlist": "#5f8d4e",
+        "watchlist": "#d9a441",
+        "low-confidence": "#9a3412",
+        "insufficient-data": "#8c8c8c",
+    }.get(tier, "#8c8c8c")
 
 
 def _metric_groups(metrics: dict[str, Any]) -> list[tuple[str, list[tuple[str, float]]]]:
