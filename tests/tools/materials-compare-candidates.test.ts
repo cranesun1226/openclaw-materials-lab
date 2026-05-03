@@ -56,10 +56,25 @@ describe("materials_compare_candidates", () => {
         { materialId: "mp-mock-hfo2", formula: "HfO2", source: "mock" },
         { materialId: "mp-mock-al2o3", formula: "Al2O3", source: "mock" },
       ],
+      criteria: {
+        preset: "solid-electrolyte",
+        bandGapScoringMode: "minimum",
+        minimumBandGapEv: 2,
+        diversifyBy: "formula",
+        maxPerFormula: 1,
+      },
       topK: 2,
     });
 
-    expect(bridge.compareCandidates).toHaveBeenCalled();
+    expect(bridge.compareCandidates).toHaveBeenCalledWith(
+      expect.objectContaining({
+        criteria: expect.objectContaining({
+          preset: "solid-electrolyte",
+          diversifyBy: "formula",
+          maxPerFormula: 1,
+        }),
+      }),
+    );
     expect(result.structuredContent.data.ranked[0]?.rank).toBe(1);
     expect(result.structuredContent.artifacts[0]?.kind).toBe("plot");
   });

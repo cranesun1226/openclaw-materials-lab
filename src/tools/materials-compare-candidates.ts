@@ -18,6 +18,12 @@ const CandidateSchema = Type.Object(
     elements: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 20 })),
     source: Type.Union([Type.Literal("materials-project"), Type.Literal("mock")]),
     notes: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 200 }), { maxItems: 20 })),
+    materialsProjectUrl: Type.Optional(Type.String({ minLength: 1, maxLength: 300 })),
+    family: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
+    duplicateGroup: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
+    duplicateCount: Type.Optional(Type.Number({ minimum: 1 })),
+    warnings: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 50 })),
+    screeningLevel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
   },
   { additionalProperties: false },
 );
@@ -28,11 +34,33 @@ const CompareSchema = Type.Object(
     criteria: Type.Optional(
       Type.Object(
         {
+          preset: Type.Optional(Type.Union([Type.Literal("generic"), Type.Literal("solid-electrolyte")])),
+          screeningLevel: Type.Optional(
+            Type.Union([
+              Type.Literal("technical-smoke"),
+              Type.Literal("proxy-screen"),
+              Type.Literal("research-shortlist"),
+              Type.Literal("validated-candidate"),
+            ]),
+          ),
           stabilityWeight: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
           bandGapWeight: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
           densityWeight: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
+          bandGapScoringMode: Type.Optional(Type.Union([Type.Literal("target"), Type.Literal("minimum")])),
+          minimumBandGapEv: Type.Optional(Type.Number({ minimum: 0 })),
           bandGapTargetEv: Type.Optional(Type.Number({ minimum: 0 })),
+          densityScoringMode: Type.Optional(Type.Union([Type.Literal("target"), Type.Literal("advisory"), Type.Literal("none")])),
           densityTargetGcm3: Type.Optional(Type.Number({ minimum: 0 })),
+          diversifyBy: Type.Optional(
+            Type.Union([
+              Type.Literal("none"),
+              Type.Literal("formula"),
+              Type.Literal("family"),
+              Type.Literal("formula-and-family"),
+            ]),
+          ),
+          maxPerFormula: Type.Optional(Type.Number({ minimum: 0, maximum: 50 })),
+          maxPerFamily: Type.Optional(Type.Number({ minimum: 0, maximum: 50 })),
         },
         { additionalProperties: false },
       ),

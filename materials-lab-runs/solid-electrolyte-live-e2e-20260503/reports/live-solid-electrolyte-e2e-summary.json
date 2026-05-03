@@ -1,0 +1,389 @@
+{
+  "generatedAt": "2026-05-03T06:39:05.825Z",
+  "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503",
+  "topic": "solid-state lithium battery electrolyte screening",
+  "liveMaterialsProject": true,
+  "searches": [
+    {
+      "label": "Li-La-Zr-O garnet electrolyte family",
+      "summary": "Found 1 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 1,
+      "candidateIds": [
+        "mp-942733"
+      ]
+    },
+    {
+      "label": "Li-P-S thiophosphate electrolyte family",
+      "summary": "Found 10 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 10,
+      "candidateIds": [
+        "mp-2646995",
+        "mp-1211324",
+        "mp-1097036",
+        "mp-985583",
+        "mp-985582",
+        "mp-985591",
+        "mp-985592",
+        "mp-1040450",
+        "mp-11175",
+        "mp-950995"
+      ]
+    },
+    {
+      "label": "Li-Ge-P-S LGPS-like electrolyte family",
+      "summary": "Found 2 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 2,
+      "candidateIds": [
+        "mp-696138",
+        "mp-696128"
+      ]
+    },
+    {
+      "label": "Li-Al-Ti-P-O NASICON-like electrolyte family",
+      "summary": "Found 4 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 4,
+      "candidateIds": [
+        "mp-776520",
+        "mp-776523",
+        "mp-769073",
+        "mp-769074"
+      ]
+    },
+    {
+      "label": "Li-Zr-P-O phosphate electrolyte family",
+      "summary": "Found 10 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 10,
+      "candidateIds": [
+        "mp-766132",
+        "mp-753649",
+        "mp-773074",
+        "mp-10499",
+        "mp-541661",
+        "mp-759280",
+        "mp-681439",
+        "mp-773068",
+        "mp-1222872",
+        "mp-1223743"
+      ]
+    }
+  ],
+  "totalUniqueCandidates": 27,
+  "rankedCandidates": [
+    {
+      "materialId": "mp-759280",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0.008086010555556,
+      "bandGapEv": 4.430700000000001,
+      "densityGcm3": 3.019747915508751,
+      "volume": 521.632153244983,
+      "sites": 36,
+      "spacegroup": "P-1",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.938947,
+      "reasons": [
+        "stability score 0.960",
+        "band-gap alignment 0.886",
+        "density alignment 0.993"
+      ],
+      "rank": 1
+    },
+    {
+      "materialId": "mp-10499",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.253299999999999,
+      "densityGcm3": 3.219703708075803,
+      "volume": 978.4736424490853,
+      "sites": 72,
+      "spacegroup": "P2_1/c",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.936746,
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.851",
+        "density alignment 0.927"
+      ],
+      "rank": 2
+    },
+    {
+      "materialId": "mp-773068",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0.01110233388889,
+      "bandGapEv": 4.3114,
+      "densityGcm3": 3.00242168184461,
+      "volume": 524.6423635124157,
+      "sites": 36,
+      "spacegroup": "Cc",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.923921,
+      "reasons": [
+        "stability score 0.944",
+        "band-gap alignment 0.862",
+        "density alignment 0.999"
+      ],
+      "rank": 3
+    },
+    {
+      "materialId": "mp-681439",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0.015936290555558,
+      "bandGapEv": 4.230700000000001,
+      "densityGcm3": 2.956081897261653,
+      "volume": 532.8667006428518,
+      "sites": 36,
+      "spacegroup": "C2",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.904112,
+      "reasons": [
+        "stability score 0.920",
+        "band-gap alignment 0.846",
+        "density alignment 0.985"
+      ],
+      "rank": 4
+    },
+    {
+      "materialId": "mp-541661",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0.017819505555557003,
+      "bandGapEv": 4.1404,
+      "densityGcm3": 3.210365724396355,
+      "volume": 490.6598632839761,
+      "sites": 36,
+      "spacegroup": "R-3c",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.884761,
+      "reasons": [
+        "stability score 0.911",
+        "band-gap alignment 0.828",
+        "density alignment 0.930"
+      ],
+      "rank": 5
+    },
+    {
+      "materialId": "mp-1223743",
+      "formula": "Li2Zr4As3(PO8)3",
+      "energyAboveHullEv": 0.011972235277777,
+      "bandGapEv": 3.9866,
+      "densityGcm3": 3.330035659050192,
+      "volume": 1077.5433639713228,
+      "sites": 72,
+      "spacegroup": "Pc",
+      "elements": [
+        "As",
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.88263,
+      "reasons": [
+        "stability score 0.940",
+        "band-gap alignment 0.797",
+        "density alignment 0.890"
+      ],
+      "rank": 6
+    },
+    {
+      "materialId": "mp-773074",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0.031341712500003005,
+      "bandGapEv": 4.3898,
+      "densityGcm3": 2.993270859593413,
+      "volume": 526.2462641412424,
+      "sites": 36,
+      "spacegroup": "P1",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.878595,
+      "reasons": [
+        "stability score 0.843",
+        "band-gap alignment 0.878",
+        "density alignment 0.998"
+      ],
+      "rank": 7
+    },
+    {
+      "materialId": "mp-1222872",
+      "formula": "Li2Zr4As3(PO8)3",
+      "energyAboveHullEv": 0.020345674027778003,
+      "bandGapEv": 3.7144999999999992,
+      "densityGcm3": 3.296465576259844,
+      "volume": 544.2583493119058,
+      "sites": 36,
+      "spacegroup": "R32",
+      "elements": [
+        "As",
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.844328,
+      "reasons": [
+        "stability score 0.898",
+        "band-gap alignment 0.743",
+        "density alignment 0.901"
+      ],
+      "rank": 8
+    },
+    {
+      "materialId": "mp-942733",
+      "formula": "Li7La3Zr2O12",
+      "energyAboveHullEv": 0.006846009531249001,
+      "bandGapEv": 4.168800000000001,
+      "densityGcm3": 5.013095012638695,
+      "volume": 1112.6284765324503,
+      "sites": 96,
+      "spacegroup": "I4_1/acd",
+      "elements": [
+        "La",
+        "Li",
+        "O",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.824046,
+      "reasons": [
+        "stability score 0.966",
+        "band-gap alignment 0.834",
+        "density alignment 0.329"
+      ],
+      "rank": 9
+    },
+    {
+      "materialId": "mp-11175",
+      "formula": "LiZnPS4",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.731199999999999,
+      "densityGcm3": 2.497266967183973,
+      "volume": 153.98989737362206,
+      "sites": 7,
+      "spacegroup": "I-4",
+      "elements": [
+        "Li",
+        "P",
+        "S",
+        "Zn"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.816047,
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.546",
+        "density alignment 0.832"
+      ],
+      "rank": 10
+    }
+  ],
+  "structuresAnalyzed": [
+    {
+      "materialId": "mp-759280",
+      "formula": "LiZr2(PO4)3",
+      "fetchSummary": "Fetched structure for mp-759280 and wrote 2 artifact(s).",
+      "analysisSummary": "LiZr2(PO4)3 has 36 sites, volume 521.6322 A^3, density 3.0197 g/cm^3, and 4 distinct elements.",
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-759280/mp-759280.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-759280/mp-759280.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-759280/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-10499",
+      "formula": "LiZr2(PO4)3",
+      "fetchSummary": "Fetched structure for mp-10499 and wrote 2 artifact(s).",
+      "analysisSummary": "LiZr2(PO4)3 has 72 sites, volume 978.4736 A^3, density 3.2197 g/cm^3, and 4 distinct elements.",
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-10499/mp-10499.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-10499/mp-10499.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-10499/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-773068",
+      "formula": "LiZr2(PO4)3",
+      "fetchSummary": "Fetched structure for mp-773068 and wrote 2 artifact(s).",
+      "analysisSummary": "LiZr2(PO4)3 has 36 sites, volume 524.6424 A^3, density 3.0024 g/cm^3, and 4 distinct elements.",
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-773068/mp-773068.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-773068/mp-773068.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-773068/structure-metrics.png",
+      "usedOfflineData": false
+    }
+  ],
+  "structureFailures": [],
+  "notePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/notes/2026-05-03T06-39-02-325Z-live-materials-project-solid-state-electrolyte-screening-process.md",
+  "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/reports/live-solid-electrolyte-e2e-report.md",
+  "artifactPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/plots/solid-electrolyte-ranking/candidate-ranking.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-759280/mp-759280.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-759280/mp-759280.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-759280/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-10499/mp-10499.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-10499/mp-10499.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-10499/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-773068/mp-773068.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-773068/mp-773068.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-20260503/structures/mp-773068/structure-metrics.png"
+  ],
+  "validation": {
+    "usedOfflineDataAnywhere": false,
+    "searchFamilies": 5,
+    "totalUniqueCandidates": 27,
+    "rankedCandidates": 10,
+    "structuresAnalyzed": 3,
+    "requiredArtifactsExist": {
+      "ok": true,
+      "checked": 12,
+      "missing": []
+    }
+  }
+}

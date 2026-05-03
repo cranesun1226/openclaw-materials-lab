@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import csv
 import json
 import os
 import sys
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -183,34 +185,30 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
         raise WorkerError("INVALID_PARAMS", "compare_candidates requires at least two candidate objects.")
 
     criteria = ensure_dict(payload.get("criteria") or {}, field="criteria")
-    defaults = {
-        "stabilityWeight": 0.45,
-        "bandGapWeight": 0.35,
-        "densityWeight": 0.20,
-        "bandGapTargetEv": 3.0,
-        "densityTargetGcm3": 5.0,
-    }
-    merged_criteria = {
-        key: criteria.get(key, value)
-        for key, value in defaults.items()
-    }
+    merged_criteria = _prepare_compare_criteria(criteria)
     ranked = _rank_candidates(candidates, merged_criteria)
     top_k = int(payload.get("topK") or len(ranked))
     ranked = ranked[:top_k]
     plot_path = write_candidate_score_plot(ranked, str(artifact_dir / "candidate-ranking.png"))
-    warnings = [] if plot_path else ["Candidate ranking plot was skipped because matplotlib is unavailable."]
+    table_paths = _write_candidate_table_artifacts(ranked, artifact_dir)
+    warnings = _ranking_warnings(candidates, ranked, merged_criteria)
+    if plot_path is None:
+        warnings.append("Candidate ranking plot was skipped because matplotlib is unavailable.")
 
     data = {
         "ranked": ranked,
         "criteria": merged_criteria,
         "plotPath": plot_path,
+        "tablePaths": table_paths,
+        "screeningLevel": merged_criteria["screeningLevel"],
+        "diversity": _diversity_report(candidates, ranked, merged_criteria),
     }
     return success(
         action="compare_candidates",
         request_id=request_id,
         summary=f"Ranked {len(ranked)} candidate materials.",
         data=data,
-        artifacts=[plot_path] if plot_path else [],
+        artifacts=[artifact for artifact in [plot_path, *table_paths] if artifact],
         warnings=warnings,
     )
 
@@ -272,14 +270,15 @@ def handle_batch_screen(*, request_id: str, payload: dict[str, Any], api_key: st
         used_offline = used_offline or offline
         materials.append(_candidate_summary(material))
 
-    ranked = _rank_candidates(materials, {
+    ranked = _rank_candidates(materials, _prepare_compare_criteria({
         "stabilityWeight": 0.5,
         "bandGapWeight": 0.3,
         "densityWeight": 0.2,
         "bandGapTargetEv": 3.0,
         "densityTargetGcm3": 5.0,
-    })
+    }))
     plot_path = write_candidate_score_plot(ranked, str(artifact_dir / "batch-screen-ranking.png"))
+    table_paths = _write_candidate_table_artifacts(ranked, artifact_dir, prefix="batch-screen-ranking")
     return success(
         action="batch_screen",
         request_id=request_id,
@@ -287,9 +286,10 @@ def handle_batch_screen(*, request_id: str, payload: dict[str, Any], api_key: st
         data={
             "screened": materials,
             "ranked": ranked,
+            "tablePaths": table_paths,
             "usedOfflineData": used_offline,
         },
-        artifacts=[plot_path] if plot_path else [],
+        artifacts=[artifact for artifact in [plot_path, *table_paths] if artifact],
         warnings=["Using offline mock data."] if used_offline else [],
     )
 
@@ -311,6 +311,10 @@ def handle_export_report(*, request_id: str, payload: dict[str, Any]) -> dict[st
         "notePaths": payload.get("notePaths") or [],
         "artifactPaths": payload.get("artifactPaths") or [],
         "outputPath": output_path,
+        "screeningLevel": payload.get("screeningLevel"),
+        "domainWarnings": payload.get("domainWarnings") or [],
+        "methodNotes": payload.get("methodNotes") or [],
+        "provenance": payload.get("provenance") or {},
     })
     return success(
         action="export_report",
@@ -322,9 +326,12 @@ def handle_export_report(*, request_id: str, payload: dict[str, Any]) -> dict[st
 
 
 def _candidate_summary(item: dict[str, Any]) -> dict[str, Any]:
-    return {
+    material_id = item.get("material_id") or item.get("materialId")
+    formula = item.get("formula")
+    source = item.get("source", "mock")
+    summary = {
         "materialId": item.get("material_id"),
-        "formula": item.get("formula"),
+        "formula": formula,
         "energyAboveHullEv": item.get("energy_above_hull_ev"),
         "bandGapEv": item.get("band_gap_ev"),
         "densityGcm3": item.get("density_gcm3"),
@@ -332,38 +339,267 @@ def _candidate_summary(item: dict[str, Any]) -> dict[str, Any]:
         "sites": item.get("sites"),
         "spacegroup": item.get("spacegroup"),
         "elements": item.get("elements") or [],
-        "source": item.get("source", "mock"),
+        "source": source,
         "notes": item.get("notes") or [],
     }
+    if item.get("materialId") and not summary["materialId"]:
+        summary["materialId"] = item.get("materialId")
+    if source == "materials-project" and material_id:
+        summary["materialsProjectUrl"] = f"https://materialsproject.org/materials/{material_id}"
+    if formula:
+        summary["family"] = _infer_material_family(summary)
+    return summary
 
 
 def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any]) -> list[dict[str, Any]]:
+    formula_counts = Counter(_formula_group(candidate) for candidate in candidates)
+    family_counts = Counter(_infer_material_family(candidate) for candidate in candidates)
     ranked = []
-    stability_weight = float(criteria.get("stabilityWeight", 0.45))
-    band_gap_weight = float(criteria.get("bandGapWeight", 0.35))
-    density_weight = float(criteria.get("densityWeight", 0.20))
-    band_gap_target = float(criteria.get("bandGapTargetEv", 3.0))
-    density_target = float(criteria.get("densityTargetGcm3", 5.0))
+    stability_weight = float(criteria["stabilityWeight"])
+    band_gap_weight = float(criteria["bandGapWeight"])
+    density_weight = float(criteria["densityWeight"])
 
     for candidate in candidates:
         stability = _stability_score(candidate.get("energyAboveHullEv"))
-        band_gap = _target_score(candidate.get("bandGapEv"), band_gap_target)
-        density = _target_score(candidate.get("densityGcm3"), density_target)
+        band_gap = _band_gap_score(candidate.get("bandGapEv"), criteria)
+        density = _density_score(candidate.get("densityGcm3"), criteria)
+        weighted = {
+            "stability": round(stability * stability_weight, 6),
+            "bandGap": round(band_gap * band_gap_weight, 6),
+            "density": round(density * density_weight, 6),
+        }
         score = stability * stability_weight + band_gap * band_gap_weight + density * density_weight
-        reasons = [
-            f"stability score {stability:.3f}",
-            f"band-gap alignment {band_gap:.3f}",
-            f"density alignment {density:.3f}",
-        ]
+        family = _infer_material_family(candidate)
+        formula_group = _formula_group(candidate)
+        reasons = _score_reasons(stability, band_gap, density, criteria)
+        warnings = list(candidate.get("warnings") or [])
+        if formula_counts[formula_group] > 1:
+            warnings.append(f"Duplicate reduced-formula group appears {formula_counts[formula_group]} times.")
+        if family_counts[family] > 1:
+            warnings.append(f"Material family '{family}' appears {family_counts[family]} times in the candidate pool.")
         enriched = dict(candidate)
         enriched["score"] = round(score, 6)
+        enriched["scoreComponents"] = {
+            "raw": {
+                "stability": round(stability, 6),
+                "bandGap": round(band_gap, 6),
+                "density": round(density, 6),
+            },
+            "weighted": weighted,
+        }
         enriched["reasons"] = reasons
+        enriched["warnings"] = warnings
+        enriched["family"] = family
+        enriched["duplicateGroup"] = formula_group
+        enriched["duplicateCount"] = formula_counts[formula_group]
+        enriched["screeningLevel"] = criteria["screeningLevel"]
+        if enriched.get("source") == "materials-project" and enriched.get("materialId"):
+            enriched["materialsProjectUrl"] = f"https://materialsproject.org/materials/{enriched['materialId']}"
         ranked.append(enriched)
 
     ranked.sort(key=lambda item: item["score"], reverse=True)
     for index, candidate in enumerate(ranked, start=1):
+        candidate["rawRank"] = index
+    ranked = _apply_diversity_controls(ranked, criteria)
+    for index, candidate in enumerate(ranked, start=1):
         candidate["rank"] = index
     return ranked
+
+
+def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
+    preset = str(criteria.get("preset") or "generic").strip().lower()
+    if preset in {"solid-electrolyte", "solid_electrolyte", "solid electrolyte"}:
+        defaults: dict[str, Any] = {
+            "preset": "solid-electrolyte",
+            "screeningLevel": "proxy-screen",
+            "stabilityWeight": 0.65,
+            "bandGapWeight": 0.35,
+            "densityWeight": 0.0,
+            "bandGapScoringMode": "minimum",
+            "minimumBandGapEv": 2.0,
+            "bandGapTargetEv": 5.0,
+            "densityScoringMode": "advisory",
+            "densityTargetGcm3": 3.0,
+            "diversifyBy": "formula",
+            "maxPerFormula": 1,
+            "maxPerFamily": 3,
+        }
+    else:
+        defaults = {
+            "preset": "generic",
+            "screeningLevel": "proxy-screen",
+            "stabilityWeight": 0.45,
+            "bandGapWeight": 0.35,
+            "densityWeight": 0.20,
+            "bandGapScoringMode": "target",
+            "minimumBandGapEv": 0.0,
+            "bandGapTargetEv": 3.0,
+            "densityScoringMode": "target",
+            "densityTargetGcm3": 5.0,
+            "diversifyBy": "none",
+            "maxPerFormula": 0,
+            "maxPerFamily": 0,
+        }
+    merged = {key: criteria.get(key, value) for key, value in defaults.items()}
+    for key in ["stabilityWeight", "bandGapWeight", "densityWeight", "minimumBandGapEv", "bandGapTargetEv", "densityTargetGcm3"]:
+        merged[key] = float(merged[key])
+    for key in ["maxPerFormula", "maxPerFamily"]:
+        merged[key] = int(merged[key] or 0)
+    return merged
+
+
+def _band_gap_score(value: Any, criteria: dict[str, Any]) -> float:
+    mode = str(criteria.get("bandGapScoringMode") or "target").lower()
+    if mode == "minimum":
+        return _minimum_score(value, float(criteria.get("minimumBandGapEv") or 0.0))
+    return _target_score(value, float(criteria.get("bandGapTargetEv") or 0.0))
+
+
+def _density_score(value: Any, criteria: dict[str, Any]) -> float:
+    mode = str(criteria.get("densityScoringMode") or "target").lower()
+    if mode in {"none", "advisory"} and float(criteria.get("densityWeight") or 0.0) <= 0:
+        return _target_score(value, float(criteria.get("densityTargetGcm3") or 0.0))
+    return _target_score(value, float(criteria.get("densityTargetGcm3") or 0.0))
+
+
+def _score_reasons(stability: float, band_gap: float, density: float, criteria: dict[str, Any]) -> list[str]:
+    reasons = [f"stability score {stability:.3f}"]
+    if str(criteria.get("bandGapScoringMode")).lower() == "minimum":
+        reasons.append(f"band-gap minimum screen {band_gap:.3f} (min {criteria['minimumBandGapEv']} eV)")
+    else:
+        reasons.append(f"band-gap alignment {band_gap:.3f} (target {criteria['bandGapTargetEv']} eV)")
+    if float(criteria.get("densityWeight") or 0.0) > 0:
+        reasons.append(f"density alignment {density:.3f} (target {criteria['densityTargetGcm3']} g/cm3)")
+    else:
+        reasons.append(f"density advisory {density:.3f} (not weighted)")
+    return reasons
+
+
+def _apply_diversity_controls(ranked: list[dict[str, Any]], criteria: dict[str, Any]) -> list[dict[str, Any]]:
+    diversify_by = str(criteria.get("diversifyBy") or "none").lower()
+    max_per_formula = int(criteria.get("maxPerFormula") or 0)
+    max_per_family = int(criteria.get("maxPerFamily") or 0)
+    if diversify_by == "none" and max_per_formula <= 0 and max_per_family <= 0:
+        return ranked
+
+    formula_seen: defaultdict[str, int] = defaultdict(int)
+    family_seen: defaultdict[str, int] = defaultdict(int)
+    selected: list[dict[str, Any]] = []
+    for candidate in ranked:
+        formula_group = str(candidate.get("duplicateGroup") or _formula_group(candidate))
+        family = str(candidate.get("family") or _infer_material_family(candidate))
+        formula_limited = max_per_formula > 0 and formula_seen[formula_group] >= max_per_formula
+        family_limited = max_per_family > 0 and family_seen[family] >= max_per_family
+        if formula_limited or family_limited:
+            continue
+        selected.append(candidate)
+        formula_seen[formula_group] += 1
+        family_seen[family] += 1
+    return selected
+
+
+def _diversity_report(original: list[dict[str, Any]], ranked: list[dict[str, Any]], criteria: dict[str, Any]) -> dict[str, Any]:
+    original_formulas = Counter(_formula_group(candidate) for candidate in original)
+    ranked_formulas = Counter(_formula_group(candidate) for candidate in ranked)
+    return {
+        "diversifyBy": criteria.get("diversifyBy"),
+        "maxPerFormula": criteria.get("maxPerFormula"),
+        "maxPerFamily": criteria.get("maxPerFamily"),
+        "originalFormulaGroups": len(original_formulas),
+        "rankedFormulaGroups": len(ranked_formulas),
+        "excludedByDiversity": max(0, len(original) - len(ranked)),
+        "largestOriginalFormulaGroup": max(original_formulas.values()) if original_formulas else 0,
+    }
+
+
+def _ranking_warnings(original: list[dict[str, Any]], ranked: list[dict[str, Any]], criteria: dict[str, Any]) -> list[str]:
+    warnings = []
+    formula_counts = Counter(_formula_group(candidate) for candidate in original)
+    largest_group = max(formula_counts.values()) if formula_counts else 0
+    if largest_group > 1:
+        warnings.append("Candidate pool contains repeated formulas; use diversity controls for research shortlists.")
+    if criteria.get("preset") == "solid-electrolyte":
+        warnings.append("Solid-electrolyte preset is a proxy screen and does not compute ionic conductivity, migration barriers, or electrochemical windows.")
+    if len(ranked) < len(original) and (criteria.get("maxPerFormula") or criteria.get("maxPerFamily")):
+        warnings.append("Some high raw-score candidates were excluded by formula/family diversity controls.")
+    return warnings
+
+
+def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir: Path, prefix: str = "candidate-ranking") -> list[str]:
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = artifact_dir / f"{prefix}.csv"
+    jsonl_path = artifact_dir / f"{prefix}.jsonl"
+    fields = [
+        "rank",
+        "rawRank",
+        "materialId",
+        "formula",
+        "family",
+        "spacegroup",
+        "energyAboveHullEv",
+        "bandGapEv",
+        "densityGcm3",
+        "score",
+        "stabilityComponent",
+        "bandGapComponent",
+        "densityComponent",
+        "duplicateGroup",
+        "duplicateCount",
+        "screeningLevel",
+        "materialsProjectUrl",
+    ]
+    with csv_path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for candidate in ranked:
+            weighted = ((candidate.get("scoreComponents") or {}).get("weighted") or {})
+            writer.writerow({
+                "rank": candidate.get("rank"),
+                "rawRank": candidate.get("rawRank"),
+                "materialId": candidate.get("materialId"),
+                "formula": candidate.get("formula"),
+                "family": candidate.get("family"),
+                "spacegroup": candidate.get("spacegroup"),
+                "energyAboveHullEv": candidate.get("energyAboveHullEv"),
+                "bandGapEv": candidate.get("bandGapEv"),
+                "densityGcm3": candidate.get("densityGcm3"),
+                "score": candidate.get("score"),
+                "stabilityComponent": weighted.get("stability"),
+                "bandGapComponent": weighted.get("bandGap"),
+                "densityComponent": weighted.get("density"),
+                "duplicateGroup": candidate.get("duplicateGroup"),
+                "duplicateCount": candidate.get("duplicateCount"),
+                "screeningLevel": candidate.get("screeningLevel"),
+                "materialsProjectUrl": candidate.get("materialsProjectUrl"),
+            })
+    with jsonl_path.open("w", encoding="utf-8") as handle:
+        for candidate in ranked:
+            handle.write(json.dumps(candidate, sort_keys=True) + "\n")
+    return [str(csv_path), str(jsonl_path)]
+
+
+def _infer_material_family(candidate: dict[str, Any]) -> str:
+    formula = str(candidate.get("formula") or "").lower()
+    elements = {str(item) for item in candidate.get("elements") or []}
+    if {"Li", "La", "Zr", "O"}.issubset(elements):
+        return "garnet-oxide"
+    if {"Li", "Ge", "P", "S"}.issubset(elements):
+        return "lgps-like-sulfide"
+    if {"Li", "P", "S"}.issubset(elements):
+        return "thiophosphate-sulfide"
+    if {"Li", "Al", "Ti", "P", "O"}.issubset(elements):
+        return "nasicon-oxide"
+    if {"Li", "Zr", "P", "O"}.issubset(elements):
+        return "zirconium-phosphate"
+    if {"Li", "Cl"}.issubset(elements) or {"Li", "Br"}.issubset(elements) or {"Li", "I"}.issubset(elements):
+        return "halide"
+    if "li" in formula:
+        return "lithium-containing"
+    return "generic"
+
+
+def _formula_group(candidate: dict[str, Any]) -> str:
+    return str(candidate.get("formula") or candidate.get("materialId") or "unknown").replace(" ", "")
 
 
 def _stability_score(energy_above_hull: Any) -> float:
@@ -387,6 +623,18 @@ def _target_score(value: Any, target: float) -> float:
         return 1.0
     delta = abs(numeric - target)
     return max(0.0, 1.0 - min(delta / target, 1.0))
+
+
+def _minimum_score(value: Any, minimum: float) -> float:
+    if value is None:
+        return 0.2
+    try:
+        numeric = float(value)
+    except Exception:
+        return 0.2
+    if minimum <= 0:
+        return 1.0
+    return max(0.0, min(numeric / minimum, 1.0))
 
 
 def _write_json(payload: dict[str, Any]) -> int:

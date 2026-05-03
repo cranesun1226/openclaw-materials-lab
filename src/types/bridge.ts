@@ -54,6 +54,12 @@ export interface CandidateSummary {
   elements?: string[];
   source: "materials-project" | "mock";
   notes?: string[];
+  materialsProjectUrl?: string;
+  family?: string;
+  duplicateGroup?: string;
+  duplicateCount?: number;
+  warnings?: string[];
+  screeningLevel?: string;
 }
 
 export interface SearchMaterialsPayload {
@@ -106,11 +112,19 @@ export interface AnalyzeStructureResult {
 }
 
 export interface CompareCriteria {
+  preset?: "generic" | "solid-electrolyte";
+  screeningLevel?: "technical-smoke" | "proxy-screen" | "research-shortlist" | "validated-candidate";
   stabilityWeight?: number;
   bandGapWeight?: number;
   densityWeight?: number;
+  bandGapScoringMode?: "target" | "minimum";
+  minimumBandGapEv?: number;
   bandGapTargetEv?: number;
+  densityScoringMode?: "target" | "advisory" | "none";
   densityTargetGcm3?: number;
+  diversifyBy?: "none" | "formula" | "family" | "formula-and-family";
+  maxPerFormula?: number;
+  maxPerFamily?: number;
 }
 
 export interface CompareCandidatesPayload {
@@ -122,14 +136,22 @@ export interface CompareCandidatesPayload {
 
 export interface ComparedCandidate extends CandidateSummary {
   score: number;
+  rawRank?: number;
   reasons: string[];
   rank: number;
+  scoreComponents?: {
+    raw?: Record<string, number>;
+    weighted?: Record<string, number>;
+  };
 }
 
 export interface CompareCandidatesResult {
   ranked: ComparedCandidate[];
   criteria: Required<CompareCriteria>;
   plotPath?: string;
+  tablePaths?: string[];
+  screeningLevel?: string;
+  diversity?: Record<string, unknown>;
 }
 
 export interface AseRelaxPayload {
@@ -159,6 +181,7 @@ export interface BatchScreenPayload {
 export interface BatchScreenResult {
   screened: CandidateSummary[];
   ranked: ComparedCandidate[];
+  tablePaths?: string[];
   usedOfflineData: boolean;
 }
 
@@ -170,6 +193,10 @@ export interface ExportReportPayload {
   notePaths?: string[];
   artifactPaths?: string[];
   outputPath: string;
+  screeningLevel?: string;
+  domainWarnings?: string[];
+  methodNotes?: string[];
+  provenance?: Record<string, unknown>;
 }
 
 export interface ExportReportResult {

@@ -58,17 +58,36 @@ describe("materials_export_report", () => {
           source: "mock",
           score: 0.91,
           rank: 1,
+          rawRank: 2,
           reasons: ["stable"],
+          family: "zirconium-phosphate",
+          duplicateGroup: "LiZr2(PO4)3",
+          duplicateCount: 3,
+          materialsProjectUrl: "https://materialsproject.org/materials/mp-mock-hfo2",
+          warnings: ["proxy only"],
+          screeningLevel: "proxy-screen",
+          scoreComponents: {
+            raw: { stability: 1, bandGap: 0.9, density: 0.2 },
+            weighted: { stability: 0.65, bandGap: 0.315, density: 0 },
+          },
         },
       ],
       notePaths: [notePath],
       artifactPaths: [artifactPath],
+      screeningLevel: "proxy-screen",
+      domainWarnings: ["Does not compute ion mobility."],
+      methodNotes: ["Formula diversity was enabled."],
+      provenance: { source: "test" },
     });
 
     expect(bridge.exportReport).toHaveBeenCalledWith(
       expect.objectContaining({
         notePaths: [notePath],
         artifactPaths: [artifactPath],
+        screeningLevel: "proxy-screen",
+        domainWarnings: ["Does not compute ion mobility."],
+        methodNotes: ["Formula diversity was enabled."],
+        provenance: { source: "test" },
       }),
     );
     expect(result.structuredContent.artifacts[0]?.kind).toBe("report");

@@ -13,17 +13,42 @@ def write_candidate_score_plot(ranked: list[dict[str, Any]], output_path: str) -
     if plt is None:
         return None
 
-    labels = [candidate["materialId"] for candidate in ranked]
-    scores = [candidate["score"] for candidate in ranked]
+    labels = [_candidate_label(candidate) for candidate in ranked]
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    figure = plt.figure(figsize=(8, 4.5))
+    figure = plt.figure(figsize=(10, 5.5))
     ax = figure.add_subplot(111)
-    ax.bar(labels, scores, color="#2f5d62")
+    weighted_components = [_weighted_components(candidate) for candidate in ranked]
+    if any(weighted_components):
+        bottoms = [0.0 for _ in ranked]
+        colors = {
+            "stability": "#2f5d62",
+            "bandGap": "#5f8d4e",
+            "density": "#d9a441",
+        }
+        labels_seen: set[str] = set()
+        for key in ["stability", "bandGap", "density"]:
+            values = [components.get(key, 0.0) for components in weighted_components]
+            if not any(values):
+                continue
+            legend_label = _component_label(key)
+            ax.bar(
+                labels,
+                values,
+                bottom=bottoms,
+                color=colors.get(key, "#8c8c8c"),
+                label=legend_label if legend_label not in labels_seen else None,
+            )
+            labels_seen.add(legend_label)
+            bottoms = [bottom + value for bottom, value in zip(bottoms, values)]
+        ax.legend(loc="upper right")
+    else:
+        scores = [candidate["score"] for candidate in ranked]
+        ax.bar(labels, scores, color="#2f5d62")
     ax.set_ylabel("Score")
     ax.set_title("Candidate Ranking")
-    ax.tick_params(axis="x", labelrotation=30)
+    ax.tick_params(axis="x", labelrotation=35)
     figure.tight_layout()
     figure.savefig(path, dpi=160)
     plt.close(figure)
@@ -34,21 +59,74 @@ def write_metric_bar_chart(metrics: dict[str, Any], output_path: str) -> str | N
     if plt is None:
         return None
 
-    numeric_items = [(key, value) for key, value in metrics.items() if isinstance(value, (int, float))]
-    if not numeric_items:
+    groups = _metric_groups(metrics)
+    if not groups:
         return None
 
-    labels = [item[0] for item in numeric_items]
-    values = [item[1] for item in numeric_items]
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    figure = plt.figure(figsize=(8, 4.5))
-    ax = figure.add_subplot(111)
-    ax.bar(labels, values, color="#7d9d9c")
-    ax.set_title("Structure Metrics")
-    ax.tick_params(axis="x", labelrotation=45)
+    figure, axes = plt.subplots(len(groups), 1, figsize=(9, max(4.5, 2.1 * len(groups))))
+    if len(groups) == 1:
+        axes = [axes]
+    figure.suptitle("Structure Metrics", fontsize=14)
+    for ax, (title, items) in zip(axes, groups):
+        labels = [key for key, _ in items]
+        values = [value for _, value in items]
+        ax.bar(labels, values, color="#7d9d9c")
+        ax.set_title(title, loc="left", fontsize=10)
+        ax.tick_params(axis="x", labelrotation=25)
+        ax.grid(axis="y", alpha=0.25)
     figure.tight_layout()
     figure.savefig(path, dpi=160)
     plt.close(figure)
     return str(path)
+
+
+def _candidate_label(candidate: dict[str, Any]) -> str:
+    formula = str(candidate.get("formula") or "").strip()
+    material_id = str(candidate.get("materialId") or "").strip()
+    return f"{material_id}\n{formula}" if formula else material_id
+
+
+def _weighted_components(candidate: dict[str, Any]) -> dict[str, float]:
+    components = candidate.get("scoreComponents")
+    if not isinstance(components, dict):
+        return {}
+    weighted = components.get("weighted")
+    if not isinstance(weighted, dict):
+        return {}
+    result: dict[str, float] = {}
+    for key, value in weighted.items():
+        if isinstance(value, (int, float)):
+            result[str(key)] = float(value)
+    return result
+
+
+def _component_label(key: str) -> str:
+    return {
+        "stability": "Stability",
+        "bandGap": "Band gap",
+        "density": "Density",
+    }.get(key, key)
+
+
+def _metric_groups(metrics: dict[str, Any]) -> list[tuple[str, list[tuple[str, float]]]]:
+    group_specs = [
+        ("Counts", ["numSites", "numElements", "liCount", "liNearestNeighborCountWithin3A"]),
+        ("Li transport proxies", ["liFraction", "avgLiNeighborsWithin3A"]),
+        ("Lengths (A)", ["a", "b", "c", "minLiLiDistanceA", "medianLiLiDistanceA"]),
+        ("Angles (deg)", ["alpha", "beta", "gamma"]),
+        ("Volume (A^3)", ["volume"]),
+        ("Densities", ["densityGcm3", "liNumberDensityPerA3"]),
+    ]
+    groups: list[tuple[str, list[tuple[str, float]]]] = []
+    for title, keys in group_specs:
+        items = [
+            (key, float(metrics[key]))
+            for key in keys
+            if isinstance(metrics.get(key), (int, float))
+        ]
+        if items:
+            groups.append((title, items))
+    return groups
