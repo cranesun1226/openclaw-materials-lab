@@ -176,6 +176,14 @@ const comparison = await bridge.compareCandidates({
     minimumBandGapEv: 2.0,
     densityScoringMode: "advisory",
     densityWeight: 0.0,
+    secondaryWeight: 0.10,
+    riskPenaltyWeight: 0.30,
+    preferredBandGapEv: 4.0,
+    preferredLiFractionMin: 0.10,
+    preferredLiFractionMax: 0.45,
+    excludeToxicElements: true,
+    excludeRiskyChemistry: true,
+    filterMolecularSalts: true,
     diversifyBy: "formula",
     maxPerFormula: 1,
     maxPerFamily: 3,
@@ -192,8 +200,9 @@ if (ranked.length < 3) {
 const structureRuns = [];
 const structureFailures = [];
 const artifactPaths = [...(comparison.artifacts ?? [])];
+const structureCandidates = selectFamilyBalancedCandidates(ranked, 4);
 
-for (const candidate of ranked.slice(0, Math.min(8, ranked.length))) {
+for (const candidate of structureCandidates) {
   if (structureRuns.length >= 4) {
     break;
   }
@@ -260,10 +269,11 @@ const note = await noteService.saveNote({
     "2. Disabled offline fallback in every live MP query and structure fetch.",
     "3. Merged duplicate material ids across searches.",
     "4. Ranked candidates with the new solid-electrolyte preset: stability gate, minimum band-gap screen, density advisory, and formula/family diversity controls.",
-    "5. Exported score component plot plus CSV/JSONL ranking tables.",
-    "6. Fetched JSON/CIF structures for diverse top candidates.",
-    "7. Ran pymatgen-based structure analysis with Li sublattice proxy descriptors and unit-aware metric plots.",
-    "8. Exported an enhanced markdown report plus a machine-readable validation summary.",
+    "5. Applied chemistry risk filters and secondary tie-breaker scoring to reduce score saturation.",
+    "6. Exported score component plot plus CSV/JSONL ranking tables.",
+    "7. Fetched JSON/CIF structures with family-balanced candidate selection.",
+    "8. Ran pymatgen-based structure analysis with Li sublattice proxy descriptors and unit-aware metric plots.",
+    "9. Exported an enhanced markdown report plus a machine-readable validation summary.",
   ].join("\n"),
 });
 
@@ -276,8 +286,10 @@ const report = await bridge.exportReport({
     "Energy above hull <= 0.1 eV for preliminary thermodynamic stability screening.",
     "Band gap is treated as a minimum electronic-insulation screen, not as a rigid target alignment.",
     "Density is advisory and not weighted in the solid-electrolyte preset.",
+    "Secondary tie-breaker scoring uses composition-level Li fraction, family priors, band-gap margin, and chemistry-risk signals.",
+    "Toxic/high-risk elements and molecular-salt-like compositions are filtered or penalized by default.",
     "Formula diversity is enforced with maxPerFormula=1 and maxPerFamily=3.",
-    "Top candidates must have retrievable structures for downstream Li proxy analysis.",
+    "Structures are selected with a family-balanced pass before downstream Li proxy analysis.",
     "This run still does not compute ionic conductivity, migration barriers, electrochemical windows, or electrode interface reactivity.",
   ],
   rankedCandidates: ranked,
@@ -292,6 +304,7 @@ const report = await bridge.exportReport({
   methodNotes: [
     "Compared against the earlier E2E weakness where one formula family dominated the top ranks.",
     "Formula diversity was enabled to force a shortlist of distinct hypotheses.",
+    "Family-balanced structure selection was enabled to avoid analyzing only the first ranked family.",
     "CSV and JSONL ranking artifacts were required for downstream researcher review.",
   ],
   provenance: {
@@ -320,6 +333,8 @@ const validation = {
   rankedCandidates: ranked.length,
   structuresAnalyzed: structureRuns.length,
   structuresWithLiProxyMetrics: structureRuns.filter((run) => typeof run.summaryMetrics?.liCount === "number").length,
+  excludedByRiskFilters: comparison.data.excludedCandidates?.length ?? 0,
+  selectedStructureFamilies: [...new Set(structureRuns.map((run) => run.family ?? "unknown"))].sort(),
   requiredArtifactsExist: await validateArtifacts([
     ...(comparison.artifacts ?? []),
     ...structureRuns.flatMap((run) => [run.structurePath, run.cifPath, run.plotPath].filter(Boolean)),
@@ -337,6 +352,12 @@ const summary = {
   totalUniqueCandidates: candidates.length,
   comparison: comparison.data,
   rankedCandidates: ranked,
+  structureCandidates: structureCandidates.map((candidate) => ({
+    materialId: candidate.materialId,
+    formula: candidate.formula,
+    family: candidate.family,
+    rank: candidate.rank,
+  })),
   formulaCounts,
   familyCounts,
   structuresAnalyzed: structureRuns,
@@ -368,6 +389,8 @@ await fs.writeFile(
     `- Density unweighted/advisory: ${validation.densityUnweighted}`,
     `- Formula diversity max multiplicity: ${validation.rankedMaxFormulaMultiplicity}`,
     `- Ranking artifacts include table exports: ${(comparison.data.tablePaths ?? []).length >= 2}`,
+    `- Candidates excluded by chemistry risk filters: ${validation.excludedByRiskFilters}`,
+    `- Family-balanced structure families: ${validation.selectedStructureFamilies.join(", ")}`,
     `- Structures with Li proxy metrics: ${validation.structuresWithLiProxyMetrics}`,
     "",
     "## Validation",
@@ -464,4 +487,35 @@ function slugForPath(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function selectFamilyBalancedCandidates(ranked, limit) {
+  const selected = [];
+  const selectedIds = new Set();
+  const byFamily = new Map();
+  for (const candidate of ranked) {
+    const family = candidate.family ?? "unknown";
+    if (!byFamily.has(family)) {
+      byFamily.set(family, []);
+    }
+    byFamily.get(family).push(candidate);
+  }
+  for (const candidates of byFamily.values()) {
+    if (selected.length >= limit) {
+      break;
+    }
+    const candidate = candidates[0];
+    selected.push(candidate);
+    selectedIds.add(candidate.materialId);
+  }
+  for (const candidate of ranked) {
+    if (selected.length >= limit) {
+      break;
+    }
+    if (selectedIds.has(candidate.materialId)) {
+      continue;
+    }
+    selected.push(candidate);
+  }
+  return selected;
 }

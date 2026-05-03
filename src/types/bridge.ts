@@ -60,6 +60,8 @@ export interface CandidateSummary {
   duplicateCount?: number;
   warnings?: string[];
   screeningLevel?: string;
+  riskProfile?: Record<string, unknown>;
+  compositionDescriptors?: Record<string, unknown>;
 }
 
 export interface SearchMaterialsPayload {
@@ -122,6 +124,17 @@ export interface CompareCriteria {
   bandGapTargetEv?: number;
   densityScoringMode?: "target" | "advisory" | "none";
   densityTargetGcm3?: number;
+  secondaryWeight?: number;
+  riskPenaltyWeight?: number;
+  preferredBandGapEv?: number;
+  preferredLiFractionMin?: number;
+  preferredLiFractionMax?: number;
+  excludeToxicElements?: boolean;
+  excludeRiskyChemistry?: boolean;
+  filterMolecularSalts?: boolean;
+  excludedElements?: string[];
+  flaggedElements?: string[];
+  maxHydrogenAtomicFraction?: number;
   diversifyBy?: "none" | "formula" | "family" | "formula-and-family";
   maxPerFormula?: number;
   maxPerFamily?: number;
@@ -136,6 +149,9 @@ export interface CompareCandidatesPayload {
 
 export interface ComparedCandidate extends CandidateSummary {
   score: number;
+  primaryScore?: number;
+  secondaryScore?: number;
+  riskPenalty?: number;
   rawRank?: number;
   reasons: string[];
   rank: number;
@@ -152,6 +168,7 @@ export interface CompareCandidatesResult {
   tablePaths?: string[];
   screeningLevel?: string;
   diversity?: Record<string, unknown>;
+  excludedCandidates?: Array<Record<string, unknown>>;
 }
 
 export interface AseRelaxPayload {
@@ -182,6 +199,7 @@ export interface BatchScreenResult {
   screened: CandidateSummary[];
   ranked: ComparedCandidate[];
   tablePaths?: string[];
+  excludedCandidates?: Array<Record<string, unknown>>;
   usedOfflineData: boolean;
 }
 

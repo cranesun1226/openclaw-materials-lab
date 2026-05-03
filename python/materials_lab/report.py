@@ -51,6 +51,9 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
                 f"### {candidate['rank']}. {_candidate_link(candidate)} ({candidate['formula']})",
                 "",
                 f"- Score: {candidate['score']}",
+                f"- Primary score: {_format_value(candidate.get('primaryScore'))}",
+                f"- Secondary score: {_format_value(candidate.get('secondaryScore'))}",
+                f"- Risk penalty: {_format_value(candidate.get('riskPenalty'))}",
                 f"- Source: {candidate['source']}",
                 f"- Family: {candidate.get('family', 'unknown')}",
                 f"- Space group: {candidate.get('spacegroup', 'unknown')}",
@@ -58,6 +61,7 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
                 f"- Band gap: {_format_value(candidate.get('bandGapEv'))} eV",
                 f"- Density: {_format_value(candidate.get('densityGcm3'))} g/cm3",
                 f"- Duplicate group: {candidate.get('duplicateGroup', candidate.get('formula'))} ({candidate.get('duplicateCount', 1)} candidate(s))",
+                f"- Risk flags: {_risk_flags(candidate)}",
                 *[f"- Weighted {key}: {_format_value(value)}" for key, value in (weighted or {}).items()],
                 *[f"- {reason}" for reason in candidate.get("reasons") or []],
                 *[f"- Warning: {warning}" for warning in _dedupe(candidate.get("warnings") or [])],
@@ -67,6 +71,10 @@ def write_markdown_report(payload: dict[str, Any]) -> tuple[str, list[str]]:
 
     content.extend(
         [
+            "## Why Candidates Might Fail",
+            "",
+            _failure_table(ranked_candidates),
+            "",
             "## Method Notes",
             "",
             *([f"- {item}" for item in method_notes] or ["- No additional method notes were provided."]),
@@ -101,8 +109,8 @@ def _candidate_table(candidates: list[dict[str, Any]]) -> str:
     if not candidates:
         return "No ranked candidates were provided."
     lines = [
-        "| Rank | Material | Formula | Family | eHull eV | Gap eV | Density g/cm3 | Score | Flags |",
-        "| ---: | --- | --- | --- | ---: | ---: | ---: | ---: | --- |",
+        "| Rank | Material | Formula | Family | eHull eV | Gap eV | Score | Secondary | Risk | Flags |",
+        "| ---: | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for candidate in candidates:
         flags = []
@@ -111,19 +119,46 @@ def _candidate_table(candidates: list[dict[str, Any]]) -> str:
         if candidate.get("warnings"):
             flags.append("warning")
         lines.append(
-            "| {rank} | {material} | {formula} | {family} | {ehull} | {gap} | {density} | {score} | {flags} |".format(
+            "| {rank} | {material} | {formula} | {family} | {ehull} | {gap} | {score} | {secondary} | {risk} | {flags} |".format(
                 rank=candidate.get("rank", ""),
                 material=_candidate_link(candidate),
                 formula=candidate.get("formula", ""),
                 family=candidate.get("family", ""),
                 ehull=_format_value(candidate.get("energyAboveHullEv")),
                 gap=_format_value(candidate.get("bandGapEv")),
-                density=_format_value(candidate.get("densityGcm3")),
                 score=_format_value(candidate.get("score")),
+                secondary=_format_value(candidate.get("secondaryScore")),
+                risk=_format_value(candidate.get("riskPenalty")),
                 flags=", ".join(flags) if flags else "-",
             )
         )
     return "\n".join(lines)
+
+
+def _failure_table(candidates: list[dict[str, Any]]) -> str:
+    if not candidates:
+        return "No ranked candidates were provided."
+    lines = [
+        "| Rank | Material | Main Failure Risks |",
+        "| ---: | --- | --- |",
+    ]
+    for candidate in candidates:
+        risk_flags = _risk_flags(candidate)
+        warnings = _dedupe(candidate.get("warnings") or [])
+        risks = []
+        if risk_flags != "-":
+            risks.append(risk_flags)
+        risks.extend(warnings[:3])
+        if not risks:
+            risks.append("No heuristic risk flag; still needs transport and electrochemical validation.")
+        lines.append(f"| {candidate.get('rank', '')} | {_candidate_link(candidate)} | {'; '.join(risks)} |")
+    return "\n".join(lines)
+
+
+def _risk_flags(candidate: dict[str, Any]) -> str:
+    risk_profile = candidate.get("riskProfile") or {}
+    flags = risk_profile.get("riskFlags") or []
+    return ", ".join(str(flag) for flag in flags) if flags else "-"
 
 
 def _candidate_link(candidate: dict[str, Any]) -> str:

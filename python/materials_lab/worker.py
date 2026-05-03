@@ -24,6 +24,11 @@ from .schemas import (
     success,
 )
 
+try:
+    from pymatgen.core import Composition  # type: ignore
+except Exception:  # pragma: no cover - optional runtime dependency
+    Composition = None
+
 
 def main() -> int:
     raw_input = sys.stdin.read()
@@ -186,12 +191,20 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
 
     criteria = ensure_dict(payload.get("criteria") or {}, field="criteria")
     merged_criteria = _prepare_compare_criteria(criteria)
-    ranked = _rank_candidates(candidates, merged_criteria)
+    rankable_candidates, excluded_candidates = _filter_candidates_for_ranking(candidates, merged_criteria)
+    if not rankable_candidates:
+        raise WorkerError(
+            "NO_RANKABLE_CANDIDATES",
+            "All candidate materials were excluded by the requested chemistry filters.",
+            hint="Relax excludeToxicElements, excludeRiskyChemistry, or filterMolecularSalts.",
+        )
+
+    ranked = _rank_candidates(rankable_candidates, merged_criteria)
     top_k = int(payload.get("topK") or len(ranked))
     ranked = ranked[:top_k]
     plot_path = write_candidate_score_plot(ranked, str(artifact_dir / "candidate-ranking.png"))
     table_paths = _write_candidate_table_artifacts(ranked, artifact_dir)
-    warnings = _ranking_warnings(candidates, ranked, merged_criteria)
+    warnings = _ranking_warnings(rankable_candidates, ranked, merged_criteria, excluded_candidates)
     if plot_path is None:
         warnings.append("Candidate ranking plot was skipped because matplotlib is unavailable.")
 
@@ -201,7 +214,8 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
         "plotPath": plot_path,
         "tablePaths": table_paths,
         "screeningLevel": merged_criteria["screeningLevel"],
-        "diversity": _diversity_report(candidates, ranked, merged_criteria),
+        "diversity": _diversity_report(rankable_candidates, ranked, merged_criteria),
+        "excludedCandidates": excluded_candidates,
     }
     return success(
         action="compare_candidates",
@@ -270,13 +284,15 @@ def handle_batch_screen(*, request_id: str, payload: dict[str, Any], api_key: st
         used_offline = used_offline or offline
         materials.append(_candidate_summary(material))
 
-    ranked = _rank_candidates(materials, _prepare_compare_criteria({
+    batch_criteria = _prepare_compare_criteria({
         "stabilityWeight": 0.5,
         "bandGapWeight": 0.3,
         "densityWeight": 0.2,
         "bandGapTargetEv": 3.0,
         "densityTargetGcm3": 5.0,
-    }))
+    })
+    rankable_materials, excluded_candidates = _filter_candidates_for_ranking(materials, batch_criteria)
+    ranked = _rank_candidates(rankable_materials, batch_criteria)
     plot_path = write_candidate_score_plot(ranked, str(artifact_dir / "batch-screen-ranking.png"))
     table_paths = _write_candidate_table_artifacts(ranked, artifact_dir, prefix="batch-screen-ranking")
     return success(
@@ -287,6 +303,7 @@ def handle_batch_screen(*, request_id: str, payload: dict[str, Any], api_key: st
             "screened": materials,
             "ranked": ranked,
             "tablePaths": table_paths,
+            "excludedCandidates": excluded_candidates,
             "usedOfflineData": used_offline,
         },
         artifacts=[artifact for artifact in [plot_path, *table_paths] if artifact],
@@ -363,32 +380,47 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
         stability = _stability_score(candidate.get("energyAboveHullEv"))
         band_gap = _band_gap_score(candidate.get("bandGapEv"), criteria)
         density = _density_score(candidate.get("densityGcm3"), criteria)
+        risk_profile = _candidate_risk_profile(candidate, criteria)
+        secondary = _secondary_score(candidate, criteria, risk_profile)
+        secondary_weight = max(0.0, min(float(criteria.get("secondaryWeight") or 0.0), 0.5))
+        primary_scale = 1.0 - secondary_weight
         weighted = {
-            "stability": round(stability * stability_weight, 6),
-            "bandGap": round(band_gap * band_gap_weight, 6),
-            "density": round(density * density_weight, 6),
+            "stability": round(stability * stability_weight * primary_scale, 6),
+            "bandGap": round(band_gap * band_gap_weight * primary_scale, 6),
+            "density": round(density * density_weight * primary_scale, 6),
+            "secondary": round(secondary["score"] * secondary_weight, 6),
         }
-        score = stability * stability_weight + band_gap * band_gap_weight + density * density_weight
+        primary_score = stability * stability_weight + band_gap * band_gap_weight + density * density_weight
+        score = _final_score(primary_score, secondary["score"], risk_profile["penalty"], criteria)
         family = _infer_material_family(candidate)
         formula_group = _formula_group(candidate)
-        reasons = _score_reasons(stability, band_gap, density, criteria)
+        reasons = _score_reasons(stability, band_gap, density, secondary, risk_profile, criteria)
         warnings = list(candidate.get("warnings") or [])
         if formula_counts[formula_group] > 1:
             warnings.append(f"Duplicate reduced-formula group appears {formula_counts[formula_group]} times.")
         if family_counts[family] > 1:
             warnings.append(f"Material family '{family}' appears {family_counts[family]} times in the candidate pool.")
+        warnings.extend(risk_profile["warnings"])
         enriched = dict(candidate)
         enriched["score"] = round(score, 6)
+        enriched["primaryScore"] = round(primary_score, 6)
+        enriched["secondaryScore"] = round(secondary["score"], 6)
+        enriched["riskPenalty"] = round(risk_profile["penalty"], 6)
         enriched["scoreComponents"] = {
             "raw": {
                 "stability": round(stability, 6),
                 "bandGap": round(band_gap, 6),
                 "density": round(density, 6),
+                "secondary": round(secondary["score"], 6),
+                "riskPenalty": round(risk_profile["penalty"], 6),
             },
             "weighted": weighted,
+            "secondary": secondary["components"],
         }
         enriched["reasons"] = reasons
         enriched["warnings"] = warnings
+        enriched["riskProfile"] = risk_profile
+        enriched["compositionDescriptors"] = risk_profile["compositionDescriptors"]
         enriched["family"] = family
         enriched["duplicateGroup"] = formula_group
         enriched["duplicateCount"] = formula_counts[formula_group]
@@ -397,7 +429,15 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
             enriched["materialsProjectUrl"] = f"https://materialsproject.org/materials/{enriched['materialId']}"
         ranked.append(enriched)
 
-    ranked.sort(key=lambda item: item["score"], reverse=True)
+    ranked.sort(
+        key=lambda item: (
+            item["score"],
+            item.get("secondaryScore", 0),
+            -float(item.get("energyAboveHullEv") or 0.0),
+            item.get("bandGapEv") or 0.0,
+        ),
+        reverse=True,
+    )
     for index, candidate in enumerate(ranked, start=1):
         candidate["rawRank"] = index
     ranked = _apply_diversity_controls(ranked, criteria)
@@ -420,6 +460,17 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "bandGapTargetEv": 5.0,
             "densityScoringMode": "advisory",
             "densityTargetGcm3": 3.0,
+            "secondaryWeight": 0.10,
+            "riskPenaltyWeight": 0.30,
+            "preferredBandGapEv": 4.0,
+            "preferredLiFractionMin": 0.10,
+            "preferredLiFractionMax": 0.45,
+            "excludeToxicElements": True,
+            "excludeRiskyChemistry": True,
+            "filterMolecularSalts": True,
+            "excludedElements": ["Be", "Cd", "Hg", "Pb", "Tl", "Th", "U"],
+            "flaggedElements": ["As", "Cr", "Sb", "Se"],
+            "maxHydrogenAtomicFraction": 0.15,
             "diversifyBy": "formula",
             "maxPerFormula": 1,
             "maxPerFamily": 3,
@@ -436,15 +487,43 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "bandGapTargetEv": 3.0,
             "densityScoringMode": "target",
             "densityTargetGcm3": 5.0,
+            "secondaryWeight": 0.0,
+            "riskPenaltyWeight": 0.0,
+            "preferredBandGapEv": 3.0,
+            "preferredLiFractionMin": 0.0,
+            "preferredLiFractionMax": 1.0,
+            "excludeToxicElements": False,
+            "excludeRiskyChemistry": False,
+            "filterMolecularSalts": False,
+            "excludedElements": [],
+            "flaggedElements": [],
+            "maxHydrogenAtomicFraction": 1.0,
             "diversifyBy": "none",
             "maxPerFormula": 0,
             "maxPerFamily": 0,
         }
     merged = {key: criteria.get(key, value) for key, value in defaults.items()}
-    for key in ["stabilityWeight", "bandGapWeight", "densityWeight", "minimumBandGapEv", "bandGapTargetEv", "densityTargetGcm3"]:
+    for key in [
+        "stabilityWeight",
+        "bandGapWeight",
+        "densityWeight",
+        "minimumBandGapEv",
+        "bandGapTargetEv",
+        "densityTargetGcm3",
+        "secondaryWeight",
+        "riskPenaltyWeight",
+        "preferredBandGapEv",
+        "preferredLiFractionMin",
+        "preferredLiFractionMax",
+        "maxHydrogenAtomicFraction",
+    ]:
         merged[key] = float(merged[key])
     for key in ["maxPerFormula", "maxPerFamily"]:
         merged[key] = int(merged[key] or 0)
+    for key in ["excludeToxicElements", "excludeRiskyChemistry", "filterMolecularSalts"]:
+        merged[key] = bool(merged[key])
+    for key in ["excludedElements", "flaggedElements"]:
+        merged[key] = [str(item) for item in (merged.get(key) or [])]
     return merged
 
 
@@ -462,7 +541,67 @@ def _density_score(value: Any, criteria: dict[str, Any]) -> float:
     return _target_score(value, float(criteria.get("densityTargetGcm3") or 0.0))
 
 
-def _score_reasons(stability: float, band_gap: float, density: float, criteria: dict[str, Any]) -> list[str]:
+def _filter_candidates_for_ranking(candidates: list[dict[str, Any]], criteria: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    rankable = []
+    excluded = []
+    for candidate in candidates:
+        risk_profile = _candidate_risk_profile(candidate, criteria)
+        if risk_profile["excluded"]:
+            excluded.append({
+                "materialId": candidate.get("materialId"),
+                "formula": candidate.get("formula"),
+                "family": _infer_material_family(candidate),
+                "riskFlags": risk_profile["riskFlags"],
+                "exclusionReasons": risk_profile["exclusionReasons"],
+            })
+            continue
+        rankable.append(candidate)
+    return rankable, excluded
+
+
+def _final_score(primary_score: float, secondary_score: float, risk_penalty: float, criteria: dict[str, Any]) -> float:
+    secondary_weight = max(0.0, min(float(criteria.get("secondaryWeight") or 0.0), 0.5))
+    risk_weight = max(0.0, float(criteria.get("riskPenaltyWeight") or 0.0))
+    score = primary_score * (1.0 - secondary_weight) + secondary_score * secondary_weight
+    score -= risk_penalty * risk_weight
+    return max(0.0, min(score, 1.0))
+
+
+def _secondary_score(candidate: dict[str, Any], criteria: dict[str, Any], risk_profile: dict[str, Any]) -> dict[str, Any]:
+    family = _infer_material_family(candidate)
+    descriptors = risk_profile["compositionDescriptors"]
+    band_gap_margin = _target_score(candidate.get("bandGapEv"), float(criteria.get("preferredBandGapEv") or 4.0))
+    li_fraction = descriptors.get("liAtomicFraction")
+    li_fraction_score = _range_score(
+        li_fraction,
+        float(criteria.get("preferredLiFractionMin") or 0.0),
+        float(criteria.get("preferredLiFractionMax") or 1.0),
+    )
+    family_prior = _family_prior_score(family)
+    chemistry = 1.0 - min(risk_profile["penalty"], 1.0)
+    components = {
+        "bandGapMargin": round(band_gap_margin, 6),
+        "liFraction": round(li_fraction_score, 6),
+        "familyPrior": round(family_prior, 6),
+        "chemistryRisk": round(chemistry, 6),
+    }
+    score = (
+        band_gap_margin * 0.25
+        + li_fraction_score * 0.30
+        + family_prior * 0.30
+        + chemistry * 0.15
+    )
+    return {"score": max(0.0, min(score, 1.0)), "components": components}
+
+
+def _score_reasons(
+    stability: float,
+    band_gap: float,
+    density: float,
+    secondary: dict[str, Any],
+    risk_profile: dict[str, Any],
+    criteria: dict[str, Any],
+) -> list[str]:
     reasons = [f"stability score {stability:.3f}"]
     if str(criteria.get("bandGapScoringMode")).lower() == "minimum":
         reasons.append(f"band-gap minimum screen {band_gap:.3f} (min {criteria['minimumBandGapEv']} eV)")
@@ -472,7 +611,148 @@ def _score_reasons(stability: float, band_gap: float, density: float, criteria: 
         reasons.append(f"density alignment {density:.3f} (target {criteria['densityTargetGcm3']} g/cm3)")
     else:
         reasons.append(f"density advisory {density:.3f} (not weighted)")
+    if float(criteria.get("secondaryWeight") or 0.0) > 0:
+        components = secondary.get("components") or {}
+        reasons.append(
+            "secondary tie-breaker "
+            f"{secondary['score']:.3f} "
+            f"(Li fraction {components.get('liFraction', 0):.3f}, "
+            f"family prior {components.get('familyPrior', 0):.3f}, "
+            f"gap margin {components.get('bandGapMargin', 0):.3f})"
+        )
+    if risk_profile["penalty"] > 0:
+        reasons.append(f"chemistry risk penalty {risk_profile['penalty']:.3f}")
     return reasons
+
+
+def _candidate_risk_profile(candidate: dict[str, Any], criteria: dict[str, Any]) -> dict[str, Any]:
+    elements = set(_candidate_elements(candidate))
+    descriptors = _composition_descriptors(candidate)
+    risk_flags: list[str] = []
+    warnings: list[str] = []
+    exclusion_reasons: list[str] = []
+    penalty = 0.0
+
+    excluded_elements = set(criteria.get("excludedElements") or [])
+    flagged_elements = set(criteria.get("flaggedElements") or [])
+    toxic_hits = sorted(elements.intersection(excluded_elements))
+    flagged_hits = sorted(elements.intersection(flagged_elements))
+    if toxic_hits:
+        risk_flags.append(f"excluded-toxic-elements:{','.join(toxic_hits)}")
+        warnings.append(f"Contains excluded toxic/high-risk element(s): {', '.join(toxic_hits)}.")
+        penalty += 1.0
+        if criteria.get("excludeToxicElements"):
+            exclusion_reasons.append(f"excluded toxic/high-risk element(s): {', '.join(toxic_hits)}")
+    if flagged_hits:
+        risk_flags.append(f"flagged-risk-elements:{','.join(flagged_hits)}")
+        warnings.append(f"Contains flagged risk element(s): {', '.join(flagged_hits)}.")
+        penalty += 0.35
+
+    h_fraction = float(descriptors.get("hydrogenAtomicFraction") or 0.0)
+    max_h_fraction = float(criteria.get("maxHydrogenAtomicFraction") or 1.0)
+    if h_fraction > max_h_fraction:
+        risk_flags.append("hydrogen-rich-composition")
+        warnings.append(f"Hydrogen atomic fraction {h_fraction:.3f} exceeds configured limit {max_h_fraction:.3f}.")
+        penalty += 0.65
+        if criteria.get("excludeRiskyChemistry"):
+            exclusion_reasons.append("hydrogen-rich composition is outside the default inorganic solid-electrolyte screen")
+
+    if criteria.get("filterMolecularSalts") and _looks_like_molecular_salt(candidate, elements):
+        risk_flags.append("molecular-salt-or-oxidizer-like")
+        warnings.append("Composition looks like a molecular salt or oxidizer rather than a ceramic/glassy solid-electrolyte framework.")
+        penalty += 0.75
+        if criteria.get("excludeRiskyChemistry"):
+            exclusion_reasons.append("molecular-salt or oxidizer-like composition")
+
+    if "Li" not in elements:
+        risk_flags.append("no-lithium")
+        warnings.append("No Li was detected in the candidate composition.")
+        penalty += 1.0
+        if criteria.get("excludeRiskyChemistry"):
+            exclusion_reasons.append("no lithium detected")
+
+    penalty = max(0.0, min(penalty, 1.0))
+    return {
+        "riskFlags": risk_flags,
+        "warnings": warnings,
+        "penalty": penalty,
+        "excluded": bool(exclusion_reasons),
+        "exclusionReasons": exclusion_reasons,
+        "compositionDescriptors": descriptors,
+    }
+
+
+def _candidate_elements(candidate: dict[str, Any]) -> list[str]:
+    elements = [str(item) for item in candidate.get("elements") or [] if item]
+    if elements:
+        return elements
+    descriptors = _composition_descriptors(candidate)
+    return [str(item) for item in descriptors.get("elements") or []]
+
+
+def _composition_descriptors(candidate: dict[str, Any]) -> dict[str, Any]:
+    formula = str(candidate.get("formula") or "")
+    if not formula:
+        return {"elements": [], "liAtomicFraction": 0.0, "hydrogenAtomicFraction": 0.0}
+    if Composition is not None:
+        try:
+            composition = Composition(formula)
+            total = float(composition.num_atoms)
+            elements = [str(element.symbol) for element in composition.elements]
+            return {
+                "elements": elements,
+                "numAtoms": total,
+                "liAtomicFraction": round(float(composition.get_atomic_fraction("Li")), 6),
+                "hydrogenAtomicFraction": round(float(composition.get_atomic_fraction("H")), 6),
+            }
+        except Exception:
+            pass
+    elements = [str(item) for item in candidate.get("elements") or []]
+    return {
+        "elements": elements,
+        "liAtomicFraction": 1.0 / max(len(elements), 1) if "Li" in elements else 0.0,
+        "hydrogenAtomicFraction": 1.0 / max(len(elements), 1) if "H" in elements else 0.0,
+    }
+
+
+def _looks_like_molecular_salt(candidate: dict[str, Any], elements: set[str]) -> bool:
+    family = _infer_material_family(candidate)
+    if family in {"garnet-oxide", "lgps-like-sulfide", "nasicon-oxide", "thiophosphate-sulfide", "zirconium-phosphate"}:
+        return False
+    if {"Li", "Cl", "O"}.issubset(elements) and not {"P", "S", "B", "Si", "Ge", "La", "Zr", "Ti", "Al", "Y", "In", "Sc"}.intersection(elements):
+        return True
+    if {"Li", "N", "H"}.issubset(elements):
+        return True
+    return False
+
+
+def _family_prior_score(family: str) -> float:
+    return {
+        "lgps-like-sulfide": 1.00,
+        "garnet-oxide": 0.95,
+        "nasicon-oxide": 0.92,
+        "thiophosphate-sulfide": 0.90,
+        "halide": 0.88,
+        "zirconium-phosphate": 0.78,
+        "lithium-containing": 0.55,
+        "generic": 0.40,
+    }.get(family, 0.45)
+
+
+def _range_score(value: Any, lower: float, upper: float) -> float:
+    if value is None:
+        return 0.2
+    try:
+        numeric = float(value)
+    except Exception:
+        return 0.2
+    if lower <= numeric <= upper:
+        return 1.0
+    if numeric < lower:
+        return max(0.0, numeric / lower) if lower > 0 else 1.0
+    if upper <= 0:
+        return 1.0
+    return max(0.0, 1.0 - min((numeric - upper) / upper, 1.0))
 
 
 def _apply_diversity_controls(ranked: list[dict[str, Any]], criteria: dict[str, Any]) -> list[dict[str, Any]]:
@@ -512,7 +792,12 @@ def _diversity_report(original: list[dict[str, Any]], ranked: list[dict[str, Any
     }
 
 
-def _ranking_warnings(original: list[dict[str, Any]], ranked: list[dict[str, Any]], criteria: dict[str, Any]) -> list[str]:
+def _ranking_warnings(
+    original: list[dict[str, Any]],
+    ranked: list[dict[str, Any]],
+    criteria: dict[str, Any],
+    excluded_candidates: list[dict[str, Any]] | None = None,
+) -> list[str]:
     warnings = []
     formula_counts = Counter(_formula_group(candidate) for candidate in original)
     largest_group = max(formula_counts.values()) if formula_counts else 0
@@ -522,7 +807,16 @@ def _ranking_warnings(original: list[dict[str, Any]], ranked: list[dict[str, Any
         warnings.append("Solid-electrolyte preset is a proxy screen and does not compute ionic conductivity, migration barriers, or electrochemical windows.")
     if len(ranked) < len(original) and (criteria.get("maxPerFormula") or criteria.get("maxPerFamily")):
         warnings.append("Some high raw-score candidates were excluded by formula/family diversity controls.")
+    if excluded_candidates:
+        warnings.append(f"{len(excluded_candidates)} candidate(s) were excluded by chemistry risk filters.")
+    if _score_saturated(ranked):
+        warnings.append("Several candidates still have nearly saturated primary scores; inspect secondaryScore and riskProfile for ordering.")
     return warnings
+
+
+def _score_saturated(ranked: list[dict[str, Any]]) -> bool:
+    saturated = [candidate for candidate in ranked if float(candidate.get("primaryScore") or candidate.get("score") or 0) >= 0.999]
+    return len(saturated) >= 3
 
 
 def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir: Path, prefix: str = "candidate-ranking") -> list[str]:
@@ -540,9 +834,15 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
         "bandGapEv",
         "densityGcm3",
         "score",
+        "primaryScore",
+        "secondaryScore",
+        "riskPenalty",
         "stabilityComponent",
         "bandGapComponent",
         "densityComponent",
+        "riskFlags",
+        "liAtomicFraction",
+        "hydrogenAtomicFraction",
         "duplicateGroup",
         "duplicateCount",
         "screeningLevel",
@@ -564,9 +864,15 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
                 "bandGapEv": candidate.get("bandGapEv"),
                 "densityGcm3": candidate.get("densityGcm3"),
                 "score": candidate.get("score"),
+                "primaryScore": candidate.get("primaryScore"),
+                "secondaryScore": candidate.get("secondaryScore"),
+                "riskPenalty": candidate.get("riskPenalty"),
                 "stabilityComponent": weighted.get("stability"),
                 "bandGapComponent": weighted.get("bandGap"),
                 "densityComponent": weighted.get("density"),
+                "riskFlags": ",".join(((candidate.get("riskProfile") or {}).get("riskFlags") or [])),
+                "liAtomicFraction": ((candidate.get("compositionDescriptors") or {}).get("liAtomicFraction")),
+                "hydrogenAtomicFraction": ((candidate.get("compositionDescriptors") or {}).get("hydrogenAtomicFraction")),
                 "duplicateGroup": candidate.get("duplicateGroup"),
                 "duplicateCount": candidate.get("duplicateCount"),
                 "screeningLevel": candidate.get("screeningLevel"),

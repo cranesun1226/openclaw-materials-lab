@@ -24,6 +24,8 @@ const CandidateSchema = Type.Object(
     duplicateCount: Type.Optional(Type.Number({ minimum: 1 })),
     warnings: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 50 })),
     screeningLevel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
+    riskProfile: Type.Optional(Type.Record(Type.String(), Type.Any())),
+    compositionDescriptors: Type.Optional(Type.Record(Type.String(), Type.Any())),
   },
   { additionalProperties: false },
 );
@@ -51,6 +53,17 @@ const CompareSchema = Type.Object(
           bandGapTargetEv: Type.Optional(Type.Number({ minimum: 0 })),
           densityScoringMode: Type.Optional(Type.Union([Type.Literal("target"), Type.Literal("advisory"), Type.Literal("none")])),
           densityTargetGcm3: Type.Optional(Type.Number({ minimum: 0 })),
+          secondaryWeight: Type.Optional(Type.Number({ minimum: 0, maximum: 0.5 })),
+          riskPenaltyWeight: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
+          preferredBandGapEv: Type.Optional(Type.Number({ minimum: 0 })),
+          preferredLiFractionMin: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
+          preferredLiFractionMax: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
+          excludeToxicElements: Type.Optional(Type.Boolean()),
+          excludeRiskyChemistry: Type.Optional(Type.Boolean()),
+          filterMolecularSalts: Type.Optional(Type.Boolean()),
+          excludedElements: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
+          flaggedElements: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
+          maxHydrogenAtomicFraction: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
           diversifyBy: Type.Optional(
             Type.Union([
               Type.Literal("none"),

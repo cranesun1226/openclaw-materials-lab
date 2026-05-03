@@ -6,7 +6,7 @@ Review date: 2026-05-03
 
 ## Verdict
 
-The patched E2E succeeded. It used live Materials Project data only, applied the new `solid-electrolyte` preset, generated the new ranking table artifacts, enforced formula diversity, and produced Li proxy metrics for fetched structures.
+The patched E2E succeeded. It used live Materials Project data only, applied the updated `solid-electrolyte` preset, generated the ranking table artifacts, enforced formula diversity, excluded chemistry-risk candidates, broke score saturation with secondary tie-breakers, selected structures in a family-balanced way, and produced Li proxy metrics for fetched structures.
 
 This is a clear improvement over the first solid-electrolyte run, where one formula family dominated the top ranks. The V2 result is still a proxy screen, not a research-grade electrolyte discovery result.
 
@@ -23,6 +23,8 @@ This is a clear improvement over the first solid-electrolyte run, where one form
 | Ranked families | garnet oxide, halide, LGPS-like sulfide, NASICON oxide, thiophosphate sulfide, zirconium phosphate |
 | Structures analyzed | 4 |
 | Structures with Li proxy metrics | 4 |
+| Chemistry-risk exclusions | 18 |
+| Family-balanced structure families | garnet oxide, halide, thiophosphate sulfide, zirconium phosphate |
 | Required artifacts | 17 checked, 0 missing |
 | CSV ranking artifact | Present |
 | JSONL ranking artifact | Present |
@@ -32,6 +34,9 @@ This is a clear improvement over the first solid-electrolyte run, where one form
 
 - Formula diversity worked: each ranked formula appears once.
 - The top list now includes multiple families instead of only `LiZr2(PO4)3`.
+- Score saturation was reduced: the top candidates now span roughly `0.994` to `0.929` instead of having the first seven candidates stuck at `1.0`.
+- Chemistry-risk filtering removed 18 candidates, including toxic/high-risk and molecular-salt-like compositions.
+- Structure fetch is now family-balanced rather than simply taking the first four ranked materials.
 - `Li7La3Zr2O12` is no longer heavily penalized by density because density is advisory in the solid-electrolyte preset.
 - Ranking artifacts are more useful for downstream review: PNG, CSV, and JSONL are all generated.
 - Report output now includes a confidence level, domain warnings, candidate table, Materials Project links, score components, duplicate flags, method notes, and provenance.
@@ -42,26 +47,24 @@ This is a clear improvement over the first solid-electrolyte run, where one form
 
 ### Score Saturation
 
-The first seven ranked candidates have score `1.0`. This happens because the solid-electrolyte preset treats band gap as a minimum screen and density as unweighted. Once a material has eHull `0` and band gap above the minimum, the score saturates.
+The previous V2 run had the first seven ranked candidates at score `1.0`. The new secondary tie-breaker fixed this immediate problem. Scores are now separated by composition-level Li fraction, family prior, band-gap margin, and chemistry risk.
 
-This is scientifically safer than over-penalizing LLZO by density, but it makes top-rank ordering less informative. The next scoring patch should add secondary tie-breakers, such as:
+This is still not a true transport score. The secondary score should eventually be replaced or augmented by structure-aware transport evidence:
 
-- smaller energy above hull after the primary gate,
-- family-balanced interleaving,
-- Li number density or Li topology proxy when structures are available,
-- exclusion/risk penalties for toxic or chemically unsuitable elements,
-- known-family priors or benchmark labels.
+- Li-site network topology from structures,
+- BVSE/BVEL-style pathway descriptors,
+- migration barrier estimates or NEB/AIMD workflow generation,
+- electrochemical stability and interface reactivity.
 
 ### Search Space Still Needs Domain Filters
 
-The V2 search found chemically diverse results, but some are questionable solid-electrolyte candidates. Examples include `LiY(TlCl3)2` because of thallium toxicity and `LiClO4`, which is not a normal inorganic ceramic solid-electrolyte candidate despite matching the element filter.
+The updated V2 search now excludes several questionable candidates, including toxic/high-risk and H-rich or molecular-salt-like compositions. This is a strong improvement.
 
-The plugin needs query-time filters and post-ranking risk flags:
+The remaining need is not just filtering, but better domain typing:
 
-- exclude toxic or high-risk elements by default for battery electrolyte screens,
-- separate salts/oxidizers from ceramic or glassy solid-electrolyte families,
-- flag H-rich or unusual compositions for manual review,
-- support family-specific formula/prototype queries rather than only element-set queries.
+- distinguish crystalline ceramic electrolytes from salts, hydrates, and molecular compounds,
+- apply family-specific element and prototype expectations,
+- keep override knobs for exploratory chemistry.
 
 ### Family Classification Is Still Heuristic
 
@@ -78,12 +81,12 @@ The score component plot is readable and more informative than the first version
 ## Recommended Next Patch
 
 1. Add a `solid-electrolyte-strict` preset.
-2. Keep eHull and band gap as gates, then rank by secondary evidence.
-3. Add query/ranking filters for toxic elements and chemically unsuitable salts.
-4. Add family-balanced structure fetching: at least one structure per top family.
-5. Add prototype/family detection with `SpacegroupAnalyzer` and structure matching.
-6. Add a final report section named `Why This Candidate Might Fail`.
+2. Add prototype/family detection with `SpacegroupAnalyzer` and structure matching.
+3. Use structure-derived Li topology as a second-pass reranker after structure fetch.
+4. Add electrochemical-window and decomposition-product workflows.
+5. Add toxicity/cost/abundance risk tables to the report.
+6. Add family-level benchmark controls for LLZO, LGPS, argyrodites, halides, and NASICONs.
 
 ## Bottom Line
 
-The E2E validates the patch: the plugin now produces a more transparent and diverse proxy shortlist with stronger artifacts. It also reveals the next important research-quality gap: after basic stability and electronic-insulation gates pass, the workflow needs transport-aware and chemistry-aware tie-breakers.
+The E2E validates the patch: the plugin now produces a more transparent, diverse, chemistry-aware proxy shortlist with stronger artifacts. The next research-quality gap is deeper transport and electrochemical evidence, not more generic scalar scoring.

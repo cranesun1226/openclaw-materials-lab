@@ -26,9 +26,10 @@ def write_candidate_score_plot(ranked: list[dict[str, Any]], output_path: str) -
             "stability": "#2f5d62",
             "bandGap": "#5f8d4e",
             "density": "#d9a441",
+            "secondary": "#6c8ebf",
         }
         labels_seen: set[str] = set()
-        for key in ["stability", "bandGap", "density"]:
+        for key in ["stability", "bandGap", "density", "secondary"]:
             values = [components.get(key, 0.0) for components in weighted_components]
             if not any(values):
                 continue
@@ -108,6 +109,7 @@ def _component_label(key: str) -> str:
         "stability": "Stability",
         "bandGap": "Band gap",
         "density": "Density",
+        "secondary": "Secondary",
     }.get(key, key)
 
 

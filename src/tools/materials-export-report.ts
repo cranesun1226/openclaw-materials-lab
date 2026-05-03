@@ -12,6 +12,9 @@ const RankedCandidateSchema = Type.Object(
     formula: Type.String({ minLength: 1, maxLength: 80 }),
     source: Type.Union([Type.Literal("materials-project"), Type.Literal("mock")]),
     score: Type.Number(),
+    primaryScore: Type.Optional(Type.Number()),
+    secondaryScore: Type.Optional(Type.Number()),
+    riskPenalty: Type.Optional(Type.Number()),
     rank: Type.Number({ minimum: 1 }),
     reasons: Type.Array(Type.String({ minLength: 1 }), { maxItems: 20 }),
     energyAboveHullEv: Type.Optional(Type.Number({ minimum: 0 })),
@@ -30,6 +33,8 @@ const RankedCandidateSchema = Type.Object(
     warnings: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 50 })),
     screeningLevel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
     scoreComponents: Type.Optional(Type.Any()),
+    riskProfile: Type.Optional(Type.Record(Type.String(), Type.Any())),
+    compositionDescriptors: Type.Optional(Type.Record(Type.String(), Type.Any())),
   },
   { additionalProperties: false },
 );
