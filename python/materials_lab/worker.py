@@ -312,15 +312,19 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
 def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    candidates = payload.get("candidates")
-    if not isinstance(candidates, list) or not candidates:
-        raise WorkerError("INVALID_PARAMS", "plan_research_loop requires at least one candidate object.")
+    candidates = payload.get("candidates") or []
+    if not isinstance(candidates, list):
+        raise WorkerError("INVALID_PARAMS", "plan_research_loop requires candidates to be an array when provided.")
 
     criteria = _prepare_compare_criteria(ensure_dict(payload.get("criteria") or {}, field="criteria"))
     budget = _normalize_research_budget(ensure_dict(payload.get("budget") or {}, field="budget"))
-    objective = ensure_string(payload.get("objective"), field="objective", required=False) or _default_research_objective(criteria)
+    research_goal = ensure_string(payload.get("researchGoal"), field="researchGoal", required=False)
+    objective = ensure_string(payload.get("objective"), field="objective", required=False) or research_goal or _default_research_objective(criteria)
+    if not candidates and not objective:
+        raise WorkerError("INVALID_PARAMS", "plan_research_loop requires either candidates or a researchGoal/objective.")
     mode = str(payload.get("mode") or "property-backed").strip().lower()
     approval_policy = str(payload.get("approvalPolicy") or "approval-required").strip().lower()
+    protocol_inputs = _normalize_protocol_inputs(payload, objective=objective, criteria=criteria)
 
     plan = _build_research_loop_plan(
         candidates=candidates,
@@ -329,6 +333,7 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
         objective=objective,
         mode=mode,
         approval_policy=approval_policy,
+        protocol_inputs=protocol_inputs,
     )
     manifest_path = artifact_dir / f"{plan['planId']}.json"
     report_path = artifact_dir / f"{plan['planId']}.md"
@@ -343,7 +348,7 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
     return success(
         action="plan_research_loop",
         request_id=request_id,
-        summary=f"Planned {len(plan['calculationQueue'])} approval-gated research calculation(s) for {len(plan['selectedCandidates'])} candidate(s).",
+        summary=f"Compiled dynamic research protocol with {len(plan['calculationQueue'])} approval-gated step(s) for {len(plan['selectedCandidates'])} selected candidate(s).",
         data=data,
         artifacts=[str(manifest_path), str(report_path)],
         warnings=warnings,
@@ -661,6 +666,14 @@ def _execute_external_backend_plan(
         if not isinstance(step, dict):
             continue
         calculation_id = str(step.get("calculationId") or step.get("id") or f"calculation-{len(prepared) + len(skipped) + 1}")
+        if step.get("executionBackend") not in {None, "external-backend", "materials-lab"}:
+            skipped.append({
+                "calculationId": calculation_id,
+                "materialId": step.get("materialId"),
+                "status": "skipped-non-external-step",
+                "reason": f"Step targets {step.get('executionBackend')} rather than the {backend} adapter.",
+            })
+            continue
         material_id = str(step.get("materialId") or "")
         candidate = selected_by_id.get(material_id, {"materialId": material_id, "formula": step.get("formula")})
         step_dir = run_dir / _safe_file_stem(calculation_id)
@@ -1414,6 +1427,28 @@ def _default_research_objective(criteria: dict[str, Any]) -> str:
     }.get(preset, "Promote proxy candidates into a property-backed materials shortlist.")
 
 
+def _normalize_protocol_inputs(payload: dict[str, Any], *, objective: str, criteria: dict[str, Any]) -> dict[str, Any]:
+    candidate_generation = payload.get("candidateGeneration")
+    if not isinstance(candidate_generation, dict):
+        candidate_generation = {}
+    explicit_requirements = payload.get("evidenceRequirements")
+    if not isinstance(explicit_requirements, list):
+        explicit_requirements = []
+    return {
+        "researchGoal": ensure_string(payload.get("researchGoal"), field="researchGoal", required=False) or objective,
+        "targetApplication": ensure_string(payload.get("targetApplication"), field="targetApplication", required=False),
+        "hypothesis": ensure_string(payload.get("hypothesis"), field="hypothesis", required=False),
+        "constraints": _string_list(payload.get("constraints")),
+        "literatureQueries": _string_list(payload.get("literatureQueries")),
+        "databaseQueries": _string_list(payload.get("databaseQueries")),
+        "validationMethods": _string_list(payload.get("validationMethods")),
+        "candidateGeneration": candidate_generation,
+        "evidenceRequirements": [item for item in explicit_requirements if isinstance(item, dict)],
+        "autonomyMode": str(payload.get("autonomyMode") or "bounded").strip().lower(),
+        "legacyPreset": criteria.get("preset"),
+    }
+
+
 def _build_research_loop_plan(
     *,
     candidates: list[dict[str, Any]],
@@ -1422,20 +1457,35 @@ def _build_research_loop_plan(
     objective: str,
     mode: str,
     approval_policy: str,
+    protocol_inputs: dict[str, Any],
 ) -> dict[str, Any]:
-    preset = str(criteria.get("preset") or _infer_plan_preset(candidates) or "generic")
+    protocol = _compile_dynamic_research_protocol(
+        objective=objective,
+        candidates=candidates,
+        criteria=criteria,
+        protocol_inputs=protocol_inputs,
+    )
     selected = _select_research_candidates(candidates, budget)
-    plan_id = f"{preset}-research-loop-{int(time.time() * 1000)}"
-    queue = _calculation_queue(selected, preset, budget)
-    approval_gates = _approval_gates(queue, budget, approval_policy)
-    warnings = _research_plan_warnings(selected, queue, budget, approval_policy)
+    plan_id = f"{protocol['protocolId']}-{int(time.time() * 1000)}"
+    queue = _dynamic_calculation_queue(selected, protocol, budget)
+    approval_gates = _approval_gates(queue, budget, approval_policy, protocol)
+    warnings = _research_plan_warnings(selected, queue, budget, approval_policy, protocol)
     return {
         "planId": plan_id,
+        "protocolVersion": "dynamic-research-protocol-v1",
+        "protocolKind": "research-protocol-compiler",
         "mode": mode if mode in {"property-backed", "closed-loop"} else "property-backed",
-        "preset": preset,
+        "preset": "dynamic",
+        "legacyPreset": protocol_inputs.get("legacyPreset"),
+        "topic": protocol["topic"],
         "objective": objective,
+        "researchGoal": protocol["researchGoal"],
+        "targetApplication": protocol.get("targetApplication"),
+        "hypothesis": protocol.get("hypothesis"),
+        "constraints": protocol.get("constraints", []),
         "executionStatus": "planned-not-started",
         "autonomyBoundary": {
+            "requestedAutonomyMode": protocol["autonomyMode"],
             "approvalPolicy": approval_policy if approval_policy in {"plan-only", "approval-required"} else "approval-required",
             "canExecuteWithoutApproval": False,
             "allowedActionsBeforeApproval": ["write-plan-artifacts", "validate-input-artifacts"],
@@ -1444,13 +1494,21 @@ def _build_research_loop_plan(
                 "submit-hpc-job",
                 "call-paid-compute-service",
                 "overwrite-candidate-ranking",
+                "make-research-grade-claim-without-evidence-ledger",
             ],
         },
         "budget": budget,
+        "candidateGenerationPlan": protocol["candidateGenerationPlan"],
+        "literatureReviewPlan": protocol["literatureReviewPlan"],
+        "databaseSearchPlan": protocol["databaseSearchPlan"],
+        "evidenceSchema": protocol["evidenceSchema"],
+        "capabilityPlan": protocol["capabilityPlan"],
+        "claimPolicy": protocol["claimPolicy"],
+        "validationMatrix": protocol["validationMatrix"],
         "selectedCandidates": selected,
         "calculationQueue": queue,
         "approvalGates": approval_gates,
-        "rerankingPolicy": _reranking_policy(preset),
+        "rerankingPolicy": _dynamic_reranking_policy(protocol),
         "loopPolicy": {
             "maxIterations": budget["maxLoopIterations"],
             "afterEachIteration": [
@@ -1460,22 +1518,591 @@ def _build_research_loop_plan(
                 "stop, continue, or request human review based on stopCriteria",
             ],
         },
-        "stopCriteria": _stop_criteria(preset),
-        "propertySchema": _domain_property_schema(preset),
+        "stopCriteria": _dynamic_stop_criteria(protocol),
+        "propertySchema": _dynamic_property_schema(protocol),
         "warnings": warnings,
     }
 
 
-def _infer_plan_preset(candidates: list[dict[str, Any]]) -> str:
-    for candidate in candidates:
-        evidence = candidate.get("domainEvidence")
-        if isinstance(evidence, dict) and evidence.get("preset"):
-            return str(evidence["preset"])
-    for candidate in candidates:
-        level = candidate.get("screeningLevel")
-        if isinstance(level, str) and "solid" in level:
-            return "solid-electrolyte"
-    return "generic"
+def _string_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item).strip() for item in value if str(item).strip()]
+
+
+def _compile_dynamic_research_protocol(
+    *,
+    objective: str,
+    candidates: list[dict[str, Any]],
+    criteria: dict[str, Any],
+    protocol_inputs: dict[str, Any],
+) -> dict[str, Any]:
+    research_goal = str(protocol_inputs.get("researchGoal") or objective).strip()
+    target_application = protocol_inputs.get("targetApplication")
+    hypothesis = protocol_inputs.get("hypothesis")
+    constraints = list(protocol_inputs.get("constraints") or [])
+    text = " ".join([
+        research_goal,
+        str(target_application or ""),
+        str(hypothesis or ""),
+        " ".join(constraints),
+        str((protocol_inputs.get("candidateGeneration") or {}).get("strategy") or ""),
+    ]).lower()
+    topic = _infer_protocol_topic(text, research_goal)
+    evidence_schema = _compile_evidence_schema(
+        text=text,
+        topic=topic,
+        explicit_requirements=list(protocol_inputs.get("evidenceRequirements") or []),
+        validation_methods=list(protocol_inputs.get("validationMethods") or []),
+    )
+    candidate_generation = _candidate_generation_plan(
+        research_goal=research_goal,
+        target_application=target_application,
+        constraints=constraints,
+        candidates=candidates,
+        protocol_inputs=protocol_inputs,
+        evidence_schema=evidence_schema,
+    )
+    return {
+        "protocolId": _safe_file_stem(f"{topic['id']}-research-protocol").lower(),
+        "researchGoal": research_goal,
+        "targetApplication": target_application,
+        "hypothesis": hypothesis,
+        "constraints": constraints,
+        "autonomyMode": protocol_inputs.get("autonomyMode") if protocol_inputs.get("autonomyMode") in {"bounded", "high-autonomy-plan", "human-gated"} else "bounded",
+        "topic": topic,
+        "candidateGenerationPlan": candidate_generation,
+        "literatureReviewPlan": _literature_review_plan(research_goal, topic, protocol_inputs, evidence_schema),
+        "databaseSearchPlan": _database_search_plan(research_goal, topic, protocol_inputs, evidence_schema),
+        "evidenceSchema": evidence_schema,
+        "capabilityPlan": _capability_plan(evidence_schema),
+        "claimPolicy": _claim_policy(evidence_schema),
+        "validationMatrix": _validation_matrix(evidence_schema),
+    }
+
+
+def _infer_protocol_topic(text: str, research_goal: str) -> dict[str, Any]:
+    topic_rules = [
+        ("solid-electrolyte", "Solid electrolyte / ion conductor", ["solid electrolyte", "ionic conductor", "li-ion", "lithium ion", "sodium ion", "na-ion", "electrolyte"]),
+        ("battery-electrode", "Battery electrode", ["cathode", "anode", "battery electrode", "intercalation", "conversion electrode"]),
+        ("dielectric", "Dielectric / gate insulator", ["dielectric", "high-k", "gate oxide", "insulator", "breakdown"]),
+        ("photovoltaic-absorber", "Photovoltaic absorber", ["photovoltaic", "solar", "absorber", "optoelectronic", "band edge"]),
+        ("thermoelectric", "Thermoelectric material", ["thermoelectric", "seebeck", "power factor", "zt", "thermal conductivity"]),
+        ("catalyst", "Catalyst / surface material", ["catalyst", "catalytic", "orr", "oer", "her", "co2 reduction", "adsorption"]),
+        ("mechanical-material", "Mechanical / structural material", ["mechanical", "elastic", "modulus", "toughness", "hardness", "strength"]),
+        ("thermal-material", "Thermal management material", ["thermal barrier", "heat spreader", "thermal conductivity", "thermal expansion"]),
+        ("magnetic-material", "Magnetic / spintronic material", ["magnetic", "spin", "ferromagnetic", "antiferromagnetic", "magnetocaloric"]),
+        ("corrosion-coating", "Corrosion or coating material", ["corrosion", "coating", "passivation", "oxidation resistance", "adhesion"]),
+    ]
+    matches = [
+        {"id": id_, "label": label, "matchedKeywords": [keyword for keyword in keywords if keyword in text]}
+        for id_, label, keywords in topic_rules
+        if any(keyword in text for keyword in keywords)
+    ]
+    if matches:
+        primary = matches[0]
+        return {
+            "id": primary["id"],
+            "label": primary["label"],
+            "inference": "keyword-derived",
+            "matchedKeywords": primary["matchedKeywords"],
+            "alternateTopics": matches[1:],
+        }
+    return {
+        "id": _safe_file_stem(research_goal[:60] or "general-materials").lower() or "general-materials",
+        "label": "General materials research",
+        "inference": "goal-derived",
+        "matchedKeywords": [],
+        "alternateTopics": [],
+    }
+
+
+def _compile_evidence_schema(
+    *,
+    text: str,
+    topic: dict[str, Any],
+    explicit_requirements: list[dict[str, Any]],
+    validation_methods: list[str],
+) -> list[dict[str, Any]]:
+    requirements = [
+        _evidence_requirement("literature-benchmark", "Literature benchmark", ["literatureBaseline"], ["literature"], "Prior art, known positive/negative controls, and reported property ranges.", "At least two independent relevant references or an explicit no-literature-found note.", True),
+        _evidence_requirement("database-provenance", "Database provenance", ["databaseSummary"], ["database"], "Traceable database source, query payloads, data timestamp, and structure provenance.", "Every candidate must have source, query, structure, and version metadata.", True),
+        _evidence_requirement("phase-stability", "Phase stability", ["energyAboveHullEv", "decompositionProducts"], ["database", "dft"], "Thermodynamic stability or metastability relative to competing phases.", "Low eHull or a justified metastability window with decomposition products.", True),
+        _evidence_requirement("structure-validity", "Structure and chemistry validity", ["structureQuality", "oxidationStates", "chargeBalance"], ["database", "workflow"], "Structure parseability, oxidation-state plausibility, charge balance, and duplicate/prototype grouping.", "Candidate must have a validated structure and no unresolved chemistry sanity failure.", True),
+        _evidence_requirement("synthesis-safety", "Synthesis, toxicity, and handling risk", ["synthesisRoute", "toxicityFlags", "supplyRisk"], ["literature", "safety", "experiment"], "Known synthesis feasibility, hazardous elements, air/moisture risk, and supply constraints.", "Risk must be explicitly accepted or mitigated before research-grade claims.", True),
+    ]
+    for item in explicit_requirements:
+        requirements.append(_normalize_evidence_requirement(item, len(requirements) + 1, default_methods=validation_methods))
+
+    if not explicit_requirements:
+        requirements.extend(_inferred_topic_requirements(text, topic, validation_methods))
+
+    requirements.append(_evidence_requirement("reproducibility", "Reproducibility package", ["workflowManifest", "inputDecks", "parsedOutputs"], ["workflow"], "Machine-readable inputs, outputs, parser versions, and reranking trace.", "All promoted claims must link to artifact paths and parser provenance.", True))
+    return _dedupe_requirements(requirements)
+
+
+def _inferred_topic_requirements(text: str, topic: dict[str, Any], validation_methods: list[str]) -> list[dict[str, Any]]:
+    topic_id = str(topic.get("id") or "general-materials")
+    by_topic = {
+        "solid-electrolyte": [
+            ("ion-transport", "Ion transport", ["ionicConductivityScm", "migrationBarrierEv"], ["md", "dft", "experiment"], "Ionic conductivity, activation energy, and connected mobile-ion pathways.", "Conductivity/barrier evidence at relevant temperature or a clearly weaker proxy label."),
+            ("electrochemical-window", "Electrochemical stability window", ["electrochemicalWindowV", "interfaceReactionEnergyEv"], ["dft", "database"], "Reductive/oxidative stability and electrode interface reaction risk.", "Grand-potential or comparable interface stability evidence is required."),
+        ],
+        "battery-electrode": [
+            ("voltage-capacity", "Voltage and capacity", ["voltageV", "capacityMahG", "energyDensityWhKg"], ["database", "dft"], "Average voltage, capacity, and energy density under realistic cycling chemistry.", "Capacity/voltage must be computed or literature-backed for the relevant ion."),
+            ("cycling-stability", "Cycling stability", ["volumeChangePct", "migrationBarrierEv", "phaseTransformationRisk"], ["dft", "md", "experiment"], "Diffusion, structural change, and phase transformation during cycling.", "Volume change and migration evidence must be bounded before promotion."),
+        ],
+        "dielectric": [
+            ("dielectric-response", "Dielectric response", ["dielectricTotal", "dielectricElectronic"], ["dfpt", "experiment"], "Static/electronic dielectric tensor and anisotropy.", "DFPT or experimental dielectric evidence, not density/chemistry proxy alone."),
+            ("leakage-interface", "Leakage and interface risk", ["bandOffsetElectronEv", "bandOffsetHoleEv", "interfaceReactionEnergyEv", "defectFormationEnergyEv"], ["dft", "dfpt"], "Band offsets, interface reactions, and defect/leakage risks.", "Leakage guards and interface stability must be explicitly checked."),
+        ],
+        "photovoltaic-absorber": [
+            ("optical-absorption", "Optical absorption", ["absorptionCoefficientCm1", "directBandGapEv"], ["dft", "experiment"], "Direct/indirect gap and absorption strength.", "Absorption must be property-backed for target spectrum."),
+            ("defect-transport", "Defect and transport risk", ["defectToleranceScore", "effectiveMassElectron", "effectiveMassHole"], ["dft"], "Carrier masses, defect tolerance, and recombination risk.", "Transport and defect evidence must be present before device claims."),
+        ],
+        "thermoelectric": [
+            ("transport-coefficients", "Transport coefficients", ["seebeckUvK", "powerFactorUwCmK2", "carrierConcentrationCm3"], ["dft", "workflow", "experiment"], "Seebeck, conductivity/power factor, and carrier concentration dependence.", "Transport sweep required across relevant carrier concentration and temperature."),
+            ("lattice-thermal", "Lattice thermal conductivity", ["latticeThermalConductivityWmK"], ["dfpt", "md", "experiment"], "Lattice thermal conductivity or phonon scattering evidence.", "Thermal conductivity evidence must be parsed or literature-backed."),
+        ],
+        "catalyst": [
+            ("surface-activity", "Surface activity and selectivity", ["adsorptionEnergyEv", "overpotentialV", "selectivityScore"], ["dft", "experiment"], "Adsorption descriptors, overpotential, and selectivity for target reaction.", "Surface model and reaction conditions must be specified."),
+            ("operando-stability", "Operando stability", ["surfaceStability", "dissolutionRisk"], ["dft", "experiment"], "Stability under reaction environment and electrolyte/temperature.", "Stability must be evaluated under target conditions."),
+        ],
+        "mechanical-material": [
+            ("elastic-mechanical", "Mechanical response", ["elasticTensor", "bulkModulusGpa", "shearModulusGpa", "hardnessGpa"], ["dft", "experiment"], "Elastic tensor, modulus, hardness, and failure proxies.", "Mechanical claims require tensor or experimental evidence."),
+        ],
+        "thermal-material": [
+            ("thermal-response", "Thermal response", ["thermalConductivityWmK", "thermalExpansion", "thermalStability"], ["dfpt", "md", "experiment"], "Thermal conductivity, expansion, and high-temperature stability.", "Temperature-dependent thermal evidence required."),
+        ],
+        "magnetic-material": [
+            ("magnetic-ordering", "Magnetic ordering", ["magneticMoment", "orderingTemperatureK", "anisotropyEnergyEv"], ["dft", "experiment"], "Magnetic order, moment, anisotropy, and transition temperature.", "Magnetic state and temperature evidence required."),
+        ],
+        "corrosion-coating": [
+            ("environmental-durability", "Environmental durability", ["corrosionPotentialV", "oxidationResistance", "adhesionEnergy"], ["dft", "experiment", "literature"], "Corrosion/passivation resistance, adhesion, and environment-specific durability.", "Target environment and failure mode must be explicit."),
+        ],
+    }
+    requirements = [
+        _evidence_requirement(*entry)
+        for entry in by_topic.get(topic_id, [])
+    ]
+    if not requirements:
+        requirements.append(
+            _evidence_requirement(
+                "target-functional-property",
+                "Target functional property",
+                ["domainSpecificProperty"],
+                validation_methods or ["database", "literature", "dft"],
+                "The property that makes a candidate useful for the stated research goal.",
+                "Define a measurable property, accepted range, and evidence source before ranking.",
+                True,
+            )
+        )
+    if any(word in text for word in ["toxic", "lead-free", "bio", "implant", "water", "air", "moisture", "hazard", "radioactive"]):
+        requirements.append(_evidence_requirement("environmental-health-safety", "Environmental health and safety", ["ehsRisk", "regulatoryFlags"], ["safety", "literature"], "Toxicity, environmental release, handling, and regulatory constraints.", "EHS risk must be reviewed before promotion or experimental recommendation.", True))
+    return requirements
+
+
+def _evidence_requirement(
+    id_: str,
+    label: str,
+    property_keys: list[str],
+    evidence_types: list[str],
+    description: str,
+    acceptance_criteria: str,
+    required_for_claim: bool = True,
+) -> dict[str, Any]:
+    return {
+        "id": id_,
+        "label": label,
+        "propertyKeys": property_keys,
+        "evidenceTypes": evidence_types,
+        "description": description,
+        "acceptanceCriteria": acceptance_criteria,
+        "requiredForClaim": required_for_claim,
+        "confidenceRules": [
+            "database/literature-only evidence cannot support research-grade discovery claims",
+            "parsed calculation or experimental artifacts must be linked before property-backed promotion",
+            "conflicting evidence must be recorded in the evidence ledger rather than silently discarded",
+        ],
+    }
+
+
+def _normalize_evidence_requirement(item: dict[str, Any], index: int, *, default_methods: list[str]) -> dict[str, Any]:
+    label = str(item.get("label") or item.get("id") or f"Evidence requirement {index}").strip()
+    id_ = _safe_file_stem(str(item.get("id") or label)).lower() or f"evidence-{index}"
+    property_keys = _string_list(item.get("propertyKeys")) or [id_.replace("-", "_")]
+    evidence_types = _string_list(item.get("evidenceTypes")) or default_methods or ["database", "literature", "dft"]
+    return _evidence_requirement(
+        id_,
+        label,
+        property_keys,
+        evidence_types,
+        str(item.get("description") or f"User-defined evidence requirement for {label}."),
+        str(item.get("acceptanceCriteria") or "User-defined acceptance criteria must be satisfied or explicitly marked unresolved."),
+        bool(item.get("requiredForClaim", True)),
+    )
+
+
+def _dedupe_requirements(requirements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = set()
+    result = []
+    for requirement in requirements:
+        id_ = str(requirement.get("id") or "")
+        if id_ in seen:
+            continue
+        seen.add(id_)
+        result.append(requirement)
+    return result
+
+
+def _candidate_generation_plan(
+    *,
+    research_goal: str,
+    target_application: Any,
+    constraints: list[str],
+    candidates: list[dict[str, Any]],
+    protocol_inputs: dict[str, Any],
+    evidence_schema: list[dict[str, Any]],
+) -> dict[str, Any]:
+    candidate_generation = protocol_inputs.get("candidateGeneration") or {}
+    seed_materials = _string_list(candidate_generation.get("seedMaterials"))
+    formulas = _string_list(candidate_generation.get("formulas"))
+    elements_include = _string_list(candidate_generation.get("elementsInclude"))
+    elements_exclude = _string_list(candidate_generation.get("elementsExclude"))
+    inferred_queries = [
+        f"{research_goal} candidate materials",
+        f"{research_goal} computed screening",
+        f"{research_goal} materials discovery",
+    ]
+    if target_application:
+        inferred_queries.append(f"{target_application} materials candidates")
+    return {
+        "strategy": str(candidate_generation.get("strategy") or "Start broad, gather literature/database candidates, then narrow by evidence schema and diversity controls."),
+        "seedMaterials": seed_materials,
+        "formulas": formulas,
+        "elementsInclude": elements_include,
+        "elementsExclude": elements_exclude,
+        "constraints": constraints,
+        "initialCandidateCount": len(candidates),
+        "databaseQueries": _string_list(candidate_generation.get("databaseQueries")) or list(protocol_inputs.get("databaseQueries") or []) or inferred_queries,
+        "literatureQueries": _string_list(candidate_generation.get("literatureQueries")) or list(protocol_inputs.get("literatureQueries") or []) or [f"{query} review" for query in inferred_queries[:2]],
+        "diversityControls": ["deduplicate by reduced formula", "deduplicate by prototype/space group when structures are available", "cap repeated families before final reranking"],
+        "requiredEvidenceBeforeShortlist": [requirement["id"] for requirement in evidence_schema if requirement.get("requiredForClaim")],
+    }
+
+
+def _literature_review_plan(research_goal: str, topic: dict[str, Any], protocol_inputs: dict[str, Any], evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
+    queries = list(protocol_inputs.get("literatureQueries") or [])
+    if not queries:
+        queries = [
+            f"{research_goal} review",
+            f"{research_goal} benchmark materials",
+            f"{topic.get('label')} experimental validation",
+        ]
+    return {
+        "queries": queries,
+        "extract": ["reported property values", "known positive controls", "known failure modes", "synthesis conditions", "contradictory evidence"],
+        "mapsToEvidence": [requirement["id"] for requirement in evidence_schema if "literature" in requirement.get("evidenceTypes", [])],
+        "requiredOutput": "literature-evidence-ledger with citation, claim, property, candidate, and confidence fields",
+    }
+
+
+def _database_search_plan(research_goal: str, topic: dict[str, Any], protocol_inputs: dict[str, Any], evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
+    queries = list(protocol_inputs.get("databaseQueries") or [])
+    if not queries:
+        queries = [
+            f"Materials Project search for {research_goal}",
+            f"structure and stability query for {topic.get('label')}",
+        ]
+    return {
+        "queries": queries,
+        "primaryTool": "materials_search_mp",
+        "additionalSourcesToIntegrate": ["Materials Project task/property endpoints", "OQMD/AFLOW/NOMAD when available", "user-provided experimental tables"],
+        "mapsToEvidence": [requirement["id"] for requirement in evidence_schema if "database" in requirement.get("evidenceTypes", [])],
+        "requiredOutput": "candidate table with query payload, source database, version/timestamp, raw fields, and missing-field markers",
+    }
+
+
+def _capability_plan(evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
+    required_types = sorted({evidence_type for requirement in evidence_schema for evidence_type in requirement.get("evidenceTypes", [])})
+    return {
+        "requiredEvidenceTypes": required_types,
+        "availableNow": {
+            "database": ["materials_search_mp", "materials_fetch_structure", "materials_analyze_structure"],
+            "workflowPreparation": ["materials_execute_research_plan with quantum-espresso, vasp, atomate2, aiida in prepare mode"],
+            "reporting": ["materials_save_note", "materials_export_report"],
+        },
+        "requiresExternalIntegration": {
+            "literature": "connector or search tool with citation capture",
+            "dft/dfpt/md/workflow": "external code execution plus parser ingestion for completed outputs",
+            "experiment": "human lab system or imported experimental dataset",
+            "safety": "EHS/regulatory data source and human review for hazardous actions",
+        },
+        "currentLimitations": [
+            "prepared external jobs do not become property evidence until parsed outputs are ingested",
+            "research-grade claims require an evidence ledger, not only generated plans",
+            "costly or hazardous execution remains approval-gated",
+        ],
+    }
+
+
+def _claim_policy(evidence_schema: list[dict[str, Any]]) -> dict[str, Any]:
+    required = [requirement["id"] for requirement in evidence_schema if requirement.get("requiredForClaim")]
+    return {
+        "allowedClaimLevels": ["technical-smoke", "candidate-hypothesis", "proxy-shortlist", "property-backed-shortlist", "research-grade-candidate"],
+        "researchGradeRequires": [
+            "all required evidence requirements pass or have documented waivers",
+            "live database provenance and literature ledger are attached",
+            "property values come from parsed calculation/experimental/literature artifacts with confidence labels",
+            "negative and contradictory evidence are included",
+            "reproducibility package contains inputs, outputs, parser versions, and reranking trace",
+        ],
+        "requiredEvidenceRequirementIds": required,
+        "forbiddenWithoutEvidence": ["discovered", "validated", "best material", "experimentally proven", "DFT-confirmed"],
+    }
+
+
+def _validation_matrix(evidence_schema: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    matrix = []
+    for requirement in evidence_schema:
+        matrix.append({
+            "evidenceRequirementId": requirement["id"],
+            "propertyKeys": requirement.get("propertyKeys") or [],
+            "evidenceTypes": requirement.get("evidenceTypes") or [],
+            "acceptanceCriteria": requirement.get("acceptanceCriteria"),
+            "status": "planned",
+            "blockingForResearchGradeClaim": bool(requirement.get("requiredForClaim")),
+        })
+    return matrix
+
+
+def _dynamic_calculation_queue(selected: list[dict[str, Any]], protocol: dict[str, Any], budget: dict[str, Any]) -> list[dict[str, Any]]:
+    queue: list[dict[str, Any]] = []
+    remaining = int(budget["maxCalculations"])
+    for step in _global_protocol_steps(protocol):
+        if remaining <= 0:
+            break
+        queue.append(_finalize_protocol_step(step, budget))
+        remaining -= 1
+    for candidate in selected:
+        if remaining <= 0:
+            break
+        candidate_steps: list[dict[str, Any]] = []
+        preflight = _finalize_protocol_step({
+            "id": "structure-preflight",
+            "label": "Structure fetch and normalization preflight",
+            "priority": "required-preflight",
+            "method": "fetch_structure + structural sanity checks",
+            "costClass": "metadata",
+            "estimatedWallTimeHours": 0.05,
+            "writesProperties": ["structurePath", "cifPath", "structureQuality"],
+            "evidenceTypes": ["database", "workflow"],
+            "evidenceRequirementId": "structure-validity",
+            "executionBackend": "materials-lab",
+            "rationale": "Property calculations need a traceable, normalized input structure.",
+            "materialId": candidate.get("materialId"),
+            "formula": candidate.get("formula"),
+        }, budget)
+        preflight["calculationId"] = f"{candidate.get('materialId', 'candidate')}-structure-preflight"
+        queue.append(preflight)
+        candidate_steps.append(preflight)
+        remaining -= 1
+        for requirement in protocol.get("evidenceSchema") or []:
+            if remaining <= 0:
+                break
+            property_keys = list(requirement.get("propertyKeys") or [])
+            if property_keys and _candidate_has_properties(candidate, property_keys):
+                continue
+            step = _requirement_step(requirement, candidate)
+            step = _finalize_protocol_step(step, budget)
+            queue.append(step)
+            candidate_steps.append(step)
+            remaining -= 1
+        candidate["plannedCalculations"] = [step["calculationId"] for step in candidate_steps]
+    return queue
+
+
+def _global_protocol_steps(protocol: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "id": "research-protocol-review",
+            "calculationId": "global-research-protocol-review",
+            "label": "Research protocol and evidence schema review",
+            "priority": "required-preflight",
+            "method": "review compiled goal, candidate-generation strategy, evidence schema, claim policy, and stop criteria",
+            "costClass": "metadata",
+            "estimatedWallTimeHours": 0.25,
+            "writesProperties": ["protocolReview"],
+            "evidenceTypes": ["workflow"],
+            "executionBackend": "agent-review",
+            "rationale": "General-purpose research automation needs an explicit evidence contract before execution.",
+        },
+        {
+            "id": "literature-evidence-ledger",
+            "calculationId": "global-literature-evidence-ledger",
+            "label": "Literature evidence ledger",
+            "priority": "evidence-discovery",
+            "method": "search, cite, and extract claims from literature queries",
+            "costClass": "metadata",
+            "estimatedWallTimeHours": 1.0,
+            "writesProperties": ["literatureBaseline", "knownControls", "failureModes"],
+            "evidenceTypes": ["literature"],
+            "executionBackend": "literature-connector",
+            "rationale": "Research-grade claims require literature context and contradictory evidence capture.",
+        },
+        {
+            "id": "database-candidate-search",
+            "calculationId": "global-database-candidate-search",
+            "label": "Database candidate generation",
+            "priority": "evidence-discovery",
+            "method": "run database queries and build source-tagged candidate pool",
+            "costClass": "metadata",
+            "estimatedWallTimeHours": 0.5,
+            "writesProperties": ["candidatePool", "databaseSummary"],
+            "evidenceTypes": ["database"],
+            "executionBackend": "materials_search_mp",
+            "rationale": "The agent should discover candidates from database evidence before narrowing.",
+        },
+    ]
+
+
+def _candidate_has_properties(candidate: dict[str, Any], property_keys: list[str]) -> bool:
+    return all(candidate.get(key) is not None for key in property_keys)
+
+
+def _requirement_step(requirement: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
+    evidence_types = list(requirement.get("evidenceTypes") or ["workflow"])
+    cost_class = _cost_class_for_evidence(evidence_types)
+    material_id = candidate.get("materialId") or "candidate"
+    return {
+        "id": str(requirement.get("id") or "evidence-step"),
+        "calculationId": f"{material_id}-{requirement.get('id', 'evidence-step')}",
+        "label": requirement.get("label"),
+        "priority": "property-evidence",
+        "method": _method_for_requirement(requirement),
+        "costClass": cost_class,
+        "estimatedWallTimeHours": _hours_for_evidence(evidence_types),
+        "writesProperties": list(requirement.get("propertyKeys") or []),
+        "evidenceTypes": evidence_types,
+        "evidenceRequirementId": requirement.get("id"),
+        "executionBackend": _execution_backend_for_evidence(evidence_types),
+        "rationale": requirement.get("description"),
+        "acceptanceCriteria": requirement.get("acceptanceCriteria"),
+        "materialId": candidate.get("materialId"),
+        "formula": candidate.get("formula"),
+    }
+
+
+def _method_for_requirement(requirement: dict[str, Any]) -> str:
+    evidence_types = set(requirement.get("evidenceTypes") or [])
+    if "experiment" in evidence_types:
+        return "experimental protocol or imported measurement with calibration metadata"
+    if "md" in evidence_types:
+        return "molecular dynamics / finite-temperature workflow with parsed outputs"
+    if "dfpt" in evidence_types:
+        return "DFPT or perturbative electronic-structure workflow with parsed tensors"
+    if "dft" in evidence_types:
+        return "DFT workflow with convergence checks and parsed properties"
+    if "literature" in evidence_types and len(evidence_types) == 1:
+        return "citation-backed literature extraction"
+    if "database" in evidence_types and len(evidence_types) == 1:
+        return "database query and provenance capture"
+    return "multi-source evidence collection and parser-backed validation"
+
+
+def _cost_class_for_evidence(evidence_types: list[str]) -> str:
+    evidence = set(evidence_types)
+    if evidence.intersection({"experiment", "md", "dfpt"}):
+        return "expensive"
+    if evidence.intersection({"dft", "workflow"}):
+        return "medium"
+    return "metadata"
+
+
+def _hours_for_evidence(evidence_types: list[str]) -> float:
+    evidence = set(evidence_types)
+    if "experiment" in evidence:
+        return 72.0
+    if "md" in evidence:
+        return 24.0
+    if "dfpt" in evidence:
+        return 12.0
+    if "dft" in evidence:
+        return 8.0
+    if "workflow" in evidence:
+        return 2.0
+    if "literature" in evidence:
+        return 1.0
+    return 0.5
+
+
+def _execution_backend_for_evidence(evidence_types: list[str]) -> str:
+    evidence = set(evidence_types)
+    if evidence.intersection({"dft", "dfpt", "md", "workflow"}):
+        return "external-backend"
+    if "experiment" in evidence:
+        return "experimental-system"
+    if "literature" in evidence:
+        return "literature-connector"
+    if "database" in evidence:
+        return "database-tool"
+    return "agent-review"
+
+
+def _finalize_protocol_step(step: dict[str, Any], budget: dict[str, Any]) -> dict[str, Any]:
+    step = dict(step)
+    step.setdefault("calculationId", f"global-{step.get('id', 'step')}")
+    step["approvalRequired"] = True
+    step["consumesBudget"] = step.get("costClass") != "metadata"
+    evidence_types = set(step.get("evidenceTypes") or [])
+    expensive_blocked = step.get("costClass") == "expensive" and not budget.get("allowExpensiveCalculations")
+    risk_blocked = bool(evidence_types.intersection({"experiment", "safety"}))
+    if expensive_blocked:
+        step["status"] = "blocked-pending-expensive-approval"
+        step["blockedReason"] = "budget.allowExpensiveCalculations is false; explicit approval is required before execution."
+    elif risk_blocked:
+        step["status"] = "blocked-pending-safety-review"
+        step["blockedReason"] = "safety/experiment evidence requires external review and explicit approval before execution."
+    else:
+        step["status"] = "planned"
+    return step
+
+
+def _dynamic_reranking_policy(protocol: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "tool": "materials_compare_candidates",
+        "criteriaPatch": {
+            "screeningLevel": "property-backed-screen",
+            "evidenceWeight": 0.25,
+        },
+        "evidenceSchemaIds": [requirement["id"] for requirement in protocol.get("evidenceSchema") or []],
+        "promoteWhen": [
+            "required evidenceSchema entries have parsed evidence or documented waivers",
+            "literature, database, and property evidence ledgers agree or conflicts are explicitly recorded",
+            "no blocking safety, stability, or reproducibility gate remains unresolved",
+        ],
+    }
+
+
+def _dynamic_stop_criteria(protocol: dict[str, Any]) -> list[str]:
+    required = [requirement["id"] for requirement in protocol.get("evidenceSchema") or [] if requirement.get("requiredForClaim")]
+    return [
+        "candidateGenerationPlan produces no new candidates after query expansion",
+        "budget.maxCalculations or budget.maxWallTimeHours is exhausted",
+        "all selected candidates fail at least one required evidence gate",
+        "at least one candidate satisfies required evidenceSchema ids: " + ", ".join(required),
+        "claimPolicy.researchGradeRequires is satisfied for a promoted candidate",
+        "human reviewer or configured governance policy stops the dynamic loop",
+    ]
+
+
+def _dynamic_property_schema(protocol: dict[str, Any]) -> list[str]:
+    keys: list[str] = []
+    for requirement in protocol.get("evidenceSchema") or []:
+        for key in requirement.get("propertyKeys") or []:
+            if key not in keys:
+                keys.append(key)
+    return keys
 
 
 def _select_research_candidates(candidates: list[dict[str, Any]], budget: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1506,109 +2133,21 @@ def _select_research_candidates(candidates: list[dict[str, Any]], budget: dict[s
     return selected
 
 
-def _calculation_queue(selected: list[dict[str, Any]], preset: str, budget: dict[str, Any]) -> list[dict[str, Any]]:
-    recipes = _calculation_recipes(preset)
-    queue: list[dict[str, Any]] = []
-    remaining = int(budget["maxCalculations"])
-    for candidate in selected:
-        if remaining <= 0:
-            break
-        missing = set(str(item) for item in candidate.get("missingProperties") or [])
-        candidate_steps = []
-        for recipe in recipes:
-            if remaining <= 0:
-                break
-            writes = set(recipe.get("writesProperties") or [])
-            priority = str(recipe.get("priority") or "normal")
-            if missing and not writes.intersection(missing) and priority != "required-preflight":
-                continue
-            step = dict(recipe)
-            step["calculationId"] = f"{candidate.get('materialId', 'unknown')}-{recipe['id']}"
-            step["materialId"] = candidate.get("materialId")
-            step["formula"] = candidate.get("formula")
-            expensive_blocked = recipe.get("costClass") == "expensive" and not budget.get("allowExpensiveCalculations")
-            step["status"] = "blocked-pending-expensive-approval" if expensive_blocked else "planned"
-            if expensive_blocked:
-                step["blockedReason"] = "budget.allowExpensiveCalculations is false; explicit approval is required before execution."
-            step["approvalRequired"] = True
-            step["consumesBudget"] = recipe.get("costClass") != "metadata"
-            candidate_steps.append(step)
-            queue.append(step)
-            remaining -= 1
-        candidate["plannedCalculations"] = [step["calculationId"] for step in candidate_steps]
-    return queue
-
-
-def _calculation_recipes(preset: str) -> list[dict[str, Any]]:
-    universal_preflight = {
-        "id": "structure-preflight",
-        "label": "Structure fetch and normalization preflight",
-        "priority": "required-preflight",
-        "method": "fetch_structure + structural sanity checks",
-        "costClass": "metadata",
-        "estimatedWallTimeHours": 0.05,
-        "writesProperties": ["structurePath", "cifPath", "structureQuality"],
-        "rationale": "Property calculations need a traceable, normalized input structure.",
-    }
-    by_preset = {
-        "solid-electrolyte": [
-            universal_preflight,
-            _recipe("li-migration-barrier", "Li migration barrier", "NEB or bond-valence pathway screen", "medium", 8.0, ["migrationBarrierEv"]),
-            _recipe("aimd-ionic-conductivity", "Finite-temperature ionic conductivity", "AIMD or conductivity workflow", "expensive", 24.0, ["ionicConductivityScm"]),
-            _recipe("electrochemical-window", "Electrochemical stability window", "grand-potential phase stability", "medium", 4.0, ["electrochemicalWindowV"]),
-            _recipe("interface-stability", "Electrode interface reaction", "interfacial reaction energy screen", "medium", 5.0, ["interfaceReactionEnergyEv"]),
-        ],
-        "high-k-dielectric": [
-            universal_preflight,
-            _recipe("dfpt-dielectric-tensor", "DFPT dielectric tensor", "DFPT electronic + ionic dielectric calculation", "expensive", 12.0, ["dielectricTotal", "dielectricElectronic"]),
-            _recipe("band-alignment", "Band offsets", "absolute band alignment against target channel", "medium", 6.0, ["bandOffsetElectronEv", "bandOffsetHoleEv"]),
-            _recipe("interface-reaction", "Interface reaction energy", "interface thermodynamics against target channel", "medium", 6.0, ["interfaceReactionEnergyEv"]),
-            _recipe("phonon-stability", "Phonon stability", "phonon or imaginary-mode screen", "expensive", 18.0, ["phononStability"]),
-        ],
-        "photovoltaic-absorber": [
-            universal_preflight,
-            _recipe("optical-absorption", "Optical absorption", "direct/indirect gap and absorption spectrum", "medium", 8.0, ["absorptionCoefficientCm1", "directBandGapEv"]),
-            _recipe("band-edge-alignment", "Band-edge alignment", "absolute CBM/VBM alignment", "medium", 5.0, ["cbmEv", "vbmEv"]),
-            _recipe("defect-tolerance", "Defect tolerance", "dominant intrinsic defect formation-energy screen", "expensive", 24.0, ["defectToleranceScore"]),
-            _recipe("carrier-masses", "Carrier effective masses", "band curvature effective-mass calculation", "medium", 4.0, ["effectiveMassElectron", "effectiveMassHole"]),
-        ],
-        "thermoelectric": [
-            universal_preflight,
-            _recipe("boltzmann-transport", "Boltzmann transport", "Seebeck and power-factor sweep", "medium", 8.0, ["seebeckUvK", "powerFactorUwCmK2"]),
-            _recipe("lattice-thermal-conductivity", "Lattice thermal conductivity", "phonon/BTE kappa lattice workflow", "expensive", 30.0, ["latticeThermalConductivityWmK"]),
-            _recipe("carrier-concentration-sweep", "Carrier concentration sweep", "doping-dependent transport sweep", "medium", 8.0, ["carrierConcentrationCm3"]),
-            _recipe("phonon-stability", "High-temperature stability", "phonon/dynamic stability screen", "expensive", 18.0, ["phononStability"]),
-        ],
-    }
-    return by_preset.get(preset, [
-        universal_preflight,
-        _recipe("domain-property-model", "Domain property model", "domain-specific property calculation", "medium", 6.0, ["domainSpecificProperty"]),
-    ])
-
-
-def _recipe(id_: str, label: str, method: str, cost_class: str, hours: float, writes: list[str]) -> dict[str, Any]:
-    return {
-        "id": id_,
-        "label": label,
-        "priority": "property",
-        "method": method,
-        "costClass": cost_class,
-        "estimatedWallTimeHours": hours,
-        "writesProperties": writes,
-        "rationale": f"Promotes proxy evidence into property-backed evidence for {', '.join(writes)}.",
-    }
-
-
-def _approval_gates(queue: list[dict[str, Any]], budget: dict[str, Any], approval_policy: str) -> list[dict[str, Any]]:
+def _approval_gates(queue: list[dict[str, Any]], budget: dict[str, Any], approval_policy: str, protocol: dict[str, Any] | None = None) -> list[dict[str, Any]]:
     total_hours = round(sum(float(step.get("estimatedWallTimeHours") or 0.0) for step in queue), 3)
     expensive = [step["calculationId"] for step in queue if step.get("costClass") == "expensive"]
-    return [
+    safety_or_experiment = [
+        step["calculationId"]
+        for step in queue
+        if set(step.get("evidenceTypes") or []).intersection({"safety", "experiment"})
+    ]
+    gates = [
         {
             "gateId": "gate-0-human-plan-review",
             "status": "pending",
             "required": approval_policy != "plan-only",
             "blocks": [step["calculationId"] for step in queue],
-            "prompt": "Review objective, selected candidates, budget, and stop criteria before any calculation is executed.",
+            "prompt": "Review research goal, evidence schema, candidate-generation strategy, budget, and stop criteria before execution.",
         },
         {
             "gateId": "gate-1-budget-confirmation",
@@ -1627,51 +2166,33 @@ def _approval_gates(queue: list[dict[str, Any]], budget: dict[str, Any], approva
             "status": "pending",
             "required": bool(expensive),
             "blocks": expensive,
-            "prompt": "Approve expensive DFPT/AIMD/phonon/defect calculations explicitly.",
+            "prompt": "Approve expensive DFT/DFPT/MD/workflow/experimental calculations explicitly.",
         },
         {
-            "gateId": "gate-3-rerank-acceptance",
+            "gateId": "gate-3-safety-and-experiment-review",
+            "status": "pending",
+            "required": bool(safety_or_experiment),
+            "blocks": safety_or_experiment,
+            "prompt": "Review safety, EHS, wet-lab, or experimental actions before execution or recommendation.",
+        },
+        {
+            "gateId": "gate-4-evidence-ledger-acceptance",
             "status": "pending",
             "required": True,
             "blocks": ["update-shortlist", "export-final-report"],
-            "prompt": "Accept parsed property results before they replace the proxy shortlist.",
+            "prompt": "Accept parsed evidence ledgers before they replace proxy rankings or support research-grade claims.",
         },
     ]
-
-
-def _reranking_policy(preset: str) -> dict[str, Any]:
-    return {
-        "tool": "materials_compare_candidates",
-        "criteriaPatch": {
-            "preset": preset,
-            "screeningLevel": "property-backed-screen",
-            "evidenceWeight": 0.20,
-        },
-        "promoteWhen": [
-            "domainEvidence.sourceLevel is mixed-property-proxy or property-backed",
-            "domainEvidence.missingCount decreases versus previous iteration",
-            "no fail gate appears in a required safety/stability criterion",
-        ],
-    }
-
-
-def _stop_criteria(preset: str) -> list[str]:
-    return [
-        "at least one candidate reaches domainEvidence.tier == research-shortlist",
-        "domainCoverage.sourceLevelCounts.property-backed is nonzero",
-        "budget.maxCalculations or budget.maxWallTimeHours is exhausted",
-        "all candidates retain fail gates after required property calculations",
-        f"human reviewer stops the {preset} loop",
-    ]
-
-
-def _domain_property_schema(preset: str) -> list[str]:
-    return {
-        "solid-electrolyte": ["ionicConductivityScm", "migrationBarrierEv", "electrochemicalWindowV", "interfaceReactionEnergyEv"],
-        "high-k-dielectric": ["dielectricTotal", "dielectricElectronic", "bandOffsetElectronEv", "bandOffsetHoleEv", "interfaceReactionEnergyEv", "phononStability"],
-        "photovoltaic-absorber": ["absorptionCoefficientCm1", "directBandGapEv", "cbmEv", "vbmEv", "defectToleranceScore", "effectiveMassElectron", "effectiveMassHole"],
-        "thermoelectric": ["seebeckUvK", "powerFactorUwCmK2", "latticeThermalConductivityWmK", "carrierConcentrationCm3", "phononStability"],
-    }.get(preset, ["domainSpecificProperty"])
+    if protocol:
+        gates.append({
+            "gateId": "gate-5-claim-policy-review",
+            "status": "pending",
+            "required": True,
+            "blocks": ["research-grade-claim"],
+            "prompt": "Verify claimPolicy.researchGradeRequires and required evidenceSchema entries before any discovery claim.",
+            "requiredEvidenceRequirementIds": (protocol.get("claimPolicy") or {}).get("requiredEvidenceRequirementIds", []),
+        })
+    return gates
 
 
 def _research_plan_warnings(
@@ -1679,6 +2200,7 @@ def _research_plan_warnings(
     queue: list[dict[str, Any]],
     budget: dict[str, Any],
     approval_policy: str,
+    protocol: dict[str, Any] | None = None,
 ) -> list[str]:
     warnings = []
     if approval_policy != "approval-required":
@@ -1689,49 +2211,86 @@ def _research_plan_warnings(
     if estimated_hours > float(budget["maxWallTimeHours"]):
         warnings.append("Planned calculation wall-time estimate exceeds maxWallTimeHours; trim queue before execution.")
     if any(step.get("status") == "blocked-pending-expensive-approval" for step in queue):
-        warnings.append("Expensive calculations are present but blocked until allowExpensiveCalculations and human approval are explicit.")
+        warnings.append("Expensive calculations are present but blocked until allowExpensiveCalculations and explicit approval are set.")
+    if any(step.get("status") == "blocked-pending-safety-review" for step in queue):
+        warnings.append("Safety or experimental evidence steps are present and require external review before execution.")
     missing_total = sum(len(candidate.get("missingProperties") or []) for candidate in selected)
     if missing_total:
         warnings.append(f"Selected candidates still have {missing_total} missing research-grade property field(s).")
+    if not selected:
+        warnings.append("No candidates were supplied; this protocol starts with candidate generation and evidence-schema compilation.")
+    if protocol:
+        warnings.append("Dynamic protocol compiler output is a research plan, not independent scientific validation.")
     return warnings
 
 
 def _research_plan_markdown(plan: dict[str, Any]) -> str:
+    topic = plan.get("topic") or {}
     lines = [
-        f"# Research Loop Plan: {plan['preset']}",
+        f"# Dynamic Research Protocol: {topic.get('label') or plan.get('preset')}",
         "",
         "## Objective",
         "",
         str(plan["objective"]),
         "",
+        "## Protocol Compiler",
+        "",
+        f"- Protocol version: `{plan.get('protocolVersion', 'unknown')}`",
+        f"- Topic inference: `{topic.get('inference', 'unknown')}`",
+        f"- Matched keywords: {', '.join(topic.get('matchedKeywords') or []) or '-'}",
+        "",
         "## Autonomy Boundary",
         "",
         f"- Execution status: `{plan['executionStatus']}`",
+        f"- Requested autonomy mode: `{plan['autonomyBoundary'].get('requestedAutonomyMode')}`",
         f"- Approval policy: `{plan['autonomyBoundary']['approvalPolicy']}`",
         f"- Can execute without approval: `{plan['autonomyBoundary']['canExecuteWithoutApproval']}`",
+        "",
+        "## Candidate Generation",
+        "",
+        f"- Strategy: {(plan.get('candidateGenerationPlan') or {}).get('strategy', '-')}",
+        f"- Initial candidate count: {(plan.get('candidateGenerationPlan') or {}).get('initialCandidateCount', 0)}",
+        f"- Database queries: {' | '.join((plan.get('databaseSearchPlan') or {}).get('queries') or []) or '-'}",
+        f"- Literature queries: {' | '.join((plan.get('literatureReviewPlan') or {}).get('queries') or []) or '-'}",
+        "",
+        "## Evidence Schema",
+        "",
+        "| ID | Label | Evidence Types | Property Keys | Required |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for requirement in plan.get("evidenceSchema") or []:
+        lines.append(
+            f"| {requirement.get('id')} | {requirement.get('label')} | "
+            f"{', '.join(requirement.get('evidenceTypes') or [])} | "
+            f"{', '.join(requirement.get('propertyKeys') or [])} | {requirement.get('requiredForClaim')} |"
+        )
+    lines.extend([
         "",
         "## Selected Candidates",
         "",
         "| Rank | Material | Formula | Evidence Tier | Source Level | Missing Properties | Planned Calculations |",
         "| ---: | --- | --- | --- | --- | --- | --- |",
-    ]
-    for candidate in plan["selectedCandidates"]:
+    ])
+    for candidate in plan.get("selectedCandidates") or []:
         missing = ", ".join(candidate.get("missingProperties") or []) or "-"
         planned = ", ".join(candidate.get("plannedCalculations") or []) or "-"
         lines.append(
             f"| {candidate.get('rank', '')} | {candidate.get('materialId', '')} | {candidate.get('formula', '')} | "
             f"{candidate.get('evidenceTier', '')} | {candidate.get('sourceLevel', '')} | {missing} | {planned} |"
         )
+    if not plan.get("selectedCandidates"):
+        lines.append("| - | - | - | - | - | Candidate generation pending | - |")
     lines.extend([
         "",
-        "## Calculation Queue",
+        "## Protocol Queue",
         "",
-        "| ID | Material | Label | Method | Cost | Est. Hours | Writes |",
-        "| --- | --- | --- | --- | --- | ---: | --- |",
+        "| ID | Material | Label | Backend | Method | Cost | Est. Hours | Writes |",
+        "| --- | --- | --- | --- | --- | --- | ---: | --- |",
     ])
     for step in plan["calculationQueue"]:
         lines.append(
-            f"| {step['calculationId']} | {step.get('materialId', '')} | {step['label']} | {step['method']} | "
+            f"| {step['calculationId']} | {step.get('materialId', '') or '-'} | {step['label']} | "
+            f"{step.get('executionBackend', '-')} | {step['method']} | "
             f"{step['costClass']} | {step['estimatedWallTimeHours']} | {', '.join(step.get('writesProperties') or [])} |"
         )
     lines.extend([
@@ -1746,6 +2305,10 @@ def _research_plan_markdown(plan: dict[str, Any]) -> str:
             f"| {gate['gateId']} | {gate['required']} | {gate['status']} | {', '.join(gate.get('blocks') or [])} |"
         )
     lines.extend([
+        "",
+        "## Claim Policy",
+        "",
+        *[f"- {item}" for item in (plan.get("claimPolicy") or {}).get("researchGradeRequires", [])],
         "",
         "## Stop Criteria",
         "",

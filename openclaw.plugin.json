@@ -1,7 +1,7 @@
 {
   "id": "materials-lab",
   "name": "Materials Lab",
-  "description": "Autonomous materials-science research tools and local Python workflows for OpenClaw.",
+  "description": "Evidence-tracked materials research protocol tools and local Python workflows for OpenClaw.",
   "version": "0.1.0",
   "skills": [
     "skills/material-science-research"

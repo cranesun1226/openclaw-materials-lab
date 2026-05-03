@@ -14,7 +14,7 @@ This plugin is for OpenClaw users who already have the gateway running and want 
 
 The plugin provides:
 
-- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, approval-gated research-loop planning/execution, note saving, and report export.
+- Native OpenClaw tools for materials search, structure fetch, structure analysis, candidate comparison, dynamic research-protocol compilation, approval-gated execution, note saving, and report export.
 - Optional approval-gated tools for ASE relaxation and batch screening.
 - A bundled research skill under `skills/material-science-research`.
 - A local Python worker under `python/` using stdin/stdout JSON requests.
@@ -152,7 +152,8 @@ Live Materials Project search and structure fetch require a valid key and the `m
 - "Search lithium phosphate cathode materials, fetch the top structures, and summarize the most promising candidates."
 - "Analyze the structure of `mp-149`, explain the coordination environment at a high level, and save a note."
 - "Export a markdown report comparing these three materials for thermal stability and insulating behavior."
-- "Use the ranked candidates to plan a property-backed high-k dielectric research loop with a 12-calculation budget."
+- "Compile a research protocol for a lead-free moisture-stable photovoltaic absorber campaign before candidates are known."
+- "Use the ranked candidates to compile an evidence schema and validation queue with a 12-calculation budget."
 - "Execute that research-loop plan with the dev-smoke backend to validate plumbing without generating research property evidence."
 - "Prepare Quantum ESPRESSO inputs for the top two calculations in that research-loop plan."
 - "Prepare VASP, atomate2/jobflow, or AiiDA backend inputs for this approved plan without submitting jobs."
@@ -230,6 +231,8 @@ Key development notes:
 Likely follow-up work after v1:
 
 - richer Materials Project query support and better search ranking,
+- ingestion/parsing of completed backend outputs into the evidence ledger,
+- literature connector integration with citation-level claim extraction,
 - execution adapters for DFPT, NEB, AIMD, optical absorption, defect, and transport workflows,
 - more robust pymatgen structural descriptors and plotting,
 - resumable batch workflows,

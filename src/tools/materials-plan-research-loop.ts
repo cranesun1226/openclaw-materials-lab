@@ -71,9 +71,79 @@ const BudgetSchema = Type.Object(
   { additionalProperties: false },
 );
 
+const EvidenceRequirementSchema = Type.Object(
+  {
+    id: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
+    label: Type.String({ minLength: 1, maxLength: 160 }),
+    description: Type.Optional(Type.String({ minLength: 1, maxLength: 800 })),
+    propertyKeys: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 80 }), { maxItems: 20 })),
+    evidenceTypes: Type.Optional(
+      Type.Array(
+        Type.Union([
+          Type.Literal("database"),
+          Type.Literal("literature"),
+          Type.Literal("dft"),
+          Type.Literal("dfpt"),
+          Type.Literal("md"),
+          Type.Literal("workflow"),
+          Type.Literal("experiment"),
+          Type.Literal("safety"),
+        ]),
+        { maxItems: 12 },
+      ),
+    ),
+    acceptanceCriteria: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
+    requiredForClaim: Type.Optional(Type.Boolean()),
+  },
+  { additionalProperties: true },
+);
+
+const CandidateGenerationSchema = Type.Object(
+  {
+    strategy: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
+    seedMaterials: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 80 }), { maxItems: 100 })),
+    elementsInclude: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
+    elementsExclude: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
+    formulas: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 80 }), { maxItems: 100 })),
+    databaseQueries: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 30 })),
+    literatureQueries: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 30 })),
+  },
+  { additionalProperties: true },
+);
+
 const PlanResearchLoopSchema = Type.Object(
   {
-    candidates: Type.Array(PlanCandidateSchema, { minItems: 1, maxItems: 50 }),
+    candidates: Type.Optional(Type.Array(PlanCandidateSchema, { minItems: 0, maxItems: 50 })),
+    researchGoal: Type.Optional(Type.String({ minLength: 1, maxLength: 1000 })),
+    targetApplication: Type.Optional(Type.String({ minLength: 1, maxLength: 300 })),
+    hypothesis: Type.Optional(Type.String({ minLength: 1, maxLength: 1000 })),
+    constraints: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 50 })),
+    literatureQueries: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 30 })),
+    databaseQueries: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 300 }), { maxItems: 30 })),
+    evidenceRequirements: Type.Optional(Type.Array(EvidenceRequirementSchema, { maxItems: 50 })),
+    validationMethods: Type.Optional(
+      Type.Array(
+        Type.Union([
+          Type.Literal("database"),
+          Type.Literal("literature"),
+          Type.Literal("dft"),
+          Type.Literal("dfpt"),
+          Type.Literal("md"),
+          Type.Literal("workflow"),
+          Type.Literal("experiment"),
+          Type.Literal("safety"),
+        ]),
+        { maxItems: 20 },
+      ),
+    ),
+    candidateGeneration: Type.Optional(CandidateGenerationSchema),
+    autonomyMode: Type.Optional(
+      Type.Union([
+        Type.Literal("bounded"),
+        Type.Literal("high-autonomy-plan"),
+        Type.Literal("human-gated"),
+      ]),
+    ),
     criteria: Type.Optional(CriteriaSchema),
     objective: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
     mode: Type.Optional(Type.Union([Type.Literal("property-backed"), Type.Literal("closed-loop")])),
@@ -90,8 +160,8 @@ export function createMaterialsPlanResearchLoopTool(
 ): AnyAgentTool {
   return {
     name: "materials_plan_research_loop",
-    label: "Plan Research Loop",
-    description: "Create an approval-gated property-backed research plan from ranked candidates.",
+    label: "Compile Research Protocol",
+    description: "Compile an approval-gated dynamic materials research protocol from a goal, constraints, evidence requirements, and optional candidates.",
     parameters: PlanResearchLoopSchema,
     async execute(_callId, rawParams) {
       const params = rawParams as MaterialsPlanResearchLoopParams;
@@ -105,8 +175,18 @@ export function createMaterialsPlanResearchLoopTool(
         "research loop artifact dir",
       );
       const bridgeResult = await context.getBridge().planResearchLoop({
-        candidates: params.candidates as ComparedCandidate[],
+        candidates: (params.candidates ?? []) as ComparedCandidate[],
         artifactDir,
+        ...(params.researchGoal ? { researchGoal: params.researchGoal } : {}),
+        ...(params.targetApplication ? { targetApplication: params.targetApplication } : {}),
+        ...(params.hypothesis ? { hypothesis: params.hypothesis } : {}),
+        ...(params.constraints ? { constraints: params.constraints } : {}),
+        ...(params.literatureQueries ? { literatureQueries: params.literatureQueries } : {}),
+        ...(params.databaseQueries ? { databaseQueries: params.databaseQueries } : {}),
+        ...(params.evidenceRequirements ? { evidenceRequirements: params.evidenceRequirements } : {}),
+        ...(params.validationMethods ? { validationMethods: params.validationMethods } : {}),
+        ...(params.candidateGeneration ? { candidateGeneration: params.candidateGeneration } : {}),
+        ...(params.autonomyMode ? { autonomyMode: params.autonomyMode } : {}),
         ...(params.criteria ? { criteria: params.criteria } : {}),
         ...(params.objective ? { objective: params.objective } : {}),
         ...(params.mode ? { mode: params.mode } : {}),

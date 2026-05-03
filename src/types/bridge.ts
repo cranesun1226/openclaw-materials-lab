@@ -216,8 +216,42 @@ export interface ResearchBudget {
   allowExpensiveCalculations?: boolean;
 }
 
+export type EvidenceType = "database" | "literature" | "dft" | "dfpt" | "md" | "workflow" | "experiment" | "safety";
+
+export interface EvidenceRequirementInput {
+  id?: string;
+  label: string;
+  description?: string;
+  propertyKeys?: string[];
+  evidenceTypes?: EvidenceType[];
+  acceptanceCriteria?: string;
+  requiredForClaim?: boolean;
+  [key: string]: unknown;
+}
+
+export interface CandidateGenerationInput {
+  strategy?: string;
+  seedMaterials?: string[];
+  elementsInclude?: string[];
+  elementsExclude?: string[];
+  formulas?: string[];
+  databaseQueries?: string[];
+  literatureQueries?: string[];
+  [key: string]: unknown;
+}
+
 export interface PlanResearchLoopPayload {
-  candidates: ComparedCandidate[];
+  candidates?: ComparedCandidate[];
+  researchGoal?: string;
+  targetApplication?: string;
+  hypothesis?: string;
+  constraints?: string[];
+  literatureQueries?: string[];
+  databaseQueries?: string[];
+  evidenceRequirements?: EvidenceRequirementInput[];
+  validationMethods?: EvidenceType[];
+  candidateGeneration?: CandidateGenerationInput;
+  autonomyMode?: "bounded" | "high-autonomy-plan" | "human-gated";
   criteria?: CompareCriteria;
   objective?: string;
   mode?: "property-backed" | "closed-loop";

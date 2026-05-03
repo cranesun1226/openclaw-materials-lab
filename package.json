@@ -1,7 +1,7 @@
 {
   "name": "@cranesun/openclaw-materials-lab",
   "version": "0.1.0",
-  "description": "Native OpenClaw plugin for autonomous materials-science research workflows.",
+  "description": "Native OpenClaw plugin for evidence-tracked materials research protocol workflows.",
   "license": "MIT",
   "author": "Crane Sun",
   "homepage": "https://github.com/cranesun1226/openclaw-materials-lab#readme",

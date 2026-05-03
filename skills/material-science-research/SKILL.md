@@ -11,6 +11,7 @@ Use this workflow when the user wants to explore candidate materials, inspect st
 
 - Restate the research goal in concrete terms before acting.
 - Define evaluation criteria before ranking candidates.
+- Compile an evidence schema before presenting any research-grade claim.
 - Use structured tool outputs instead of making unsupported claims.
 - Save intermediate notes so the work is reproducible.
 - Export a final report when the user wants a durable summary.
@@ -26,7 +27,15 @@ Use this workflow when the user wants to explore candidate materials, inspect st
 
 Reference prompt: `prompts/goal_refinement.md`
 
-### 2. Define evaluation criteria
+### 2. Compile the research protocol
+
+Use `materials_plan_research_loop` when the user asks for an open-ended research campaign, when candidates are not known yet, or when a ranked list needs property-backed validation.
+
+- Pass `researchGoal`, `targetApplication`, constraints, candidate-generation hints, literature/database queries, and explicit evidence requirements when available.
+- Treat the output as an evidence contract: candidate generation, literature review, database search, validation matrix, claim policy, and approval gates.
+- Do not present research-grade discovery claims unless the compiled claim policy is satisfied by parsed evidence artifacts.
+
+### 3. Define evaluation criteria
 
 Before searching, write down the criteria you will use to compare candidates. Common criteria:
 
@@ -39,7 +48,7 @@ Before searching, write down the criteria you will use to compare candidates. Co
 
 Do not imply the ranking is objective. Explain that rankings depend on the chosen criteria and available evidence.
 
-### 3. Search candidates
+### 4. Search candidates
 
 Use `materials_search_mp` to find candidate materials.
 
@@ -47,7 +56,7 @@ Use `materials_search_mp` to find candidate materials.
 - Prefer a manageable first pass, then refine.
 - If Materials Project access is unavailable, do not silently continue with fixture data. Use development fixture data only when the user explicitly wants a smoke test.
 
-### 4. Inspect structures
+### 5. Inspect structures
 
 Use `materials_fetch_structure` to retrieve promising structures and save local artifacts.
 
@@ -59,14 +68,14 @@ Use `materials_analyze_structure` to derive structural metrics and a readable su
 - Note the limits of the analysis.
 - Do not overclaim coordination or property interpretation if the evidence is weak.
 
-### 5. Compare and rank
+### 6. Compare and rank
 
 Use `materials_compare_candidates` with explicit criteria and explain the tradeoffs.
 
 - Mention when one candidate is more stable but less aligned with another target metric.
 - Prefer ranked shortlists over single-candidate certainty.
 
-### 6. Save notes as you go
+### 7. Save notes as you go
 
 Use `materials_save_note` for:
 
@@ -79,7 +88,7 @@ Use `materials_save_note` for:
 
 Document weak evidence and dead ends instead of quietly dropping them.
 
-### 7. Export a final report
+### 8. Export a final report
 
 Use `materials_export_report` when the user wants a durable artifact.
 
@@ -95,7 +104,7 @@ The report should include:
 
 Reference prompt: `prompts/report_template.md`
 
-### 8. Approval policy
+### 9. Approval policy
 
 Always request approval before:
 
