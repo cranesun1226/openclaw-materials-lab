@@ -1,0 +1,1592 @@
+{
+  "generatedAt": "2026-05-03T07:10:29.430Z",
+  "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503",
+  "topic": "solid-state lithium battery electrolyte screening v2",
+  "liveMaterialsProject": true,
+  "searches": [
+    {
+      "label": "LLZO garnet oxide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "La",
+          "Zr",
+          "O"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 1 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 1,
+      "candidateIds": [
+        "mp-942733"
+      ]
+    },
+    {
+      "label": "Thiophosphate sulfide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "P",
+          "S"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 1.5,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 20 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 20,
+      "candidateIds": [
+        "mp-2646995",
+        "mp-1211324",
+        "mp-1097036",
+        "mp-985583",
+        "mp-985582",
+        "mp-985591",
+        "mp-985592",
+        "mp-1040450",
+        "mp-11175",
+        "mp-950995",
+        "mp-760046",
+        "mp-1147723",
+        "mp-1147725",
+        "mp-1147726",
+        "mp-1147727",
+        "mp-1147729",
+        "mp-1147732",
+        "mp-1147733",
+        "mp-1147734",
+        "mp-1147735"
+      ]
+    },
+    {
+      "label": "LGPS-like sulfide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "Ge",
+          "P",
+          "S"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 1.5,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 2 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 2,
+      "candidateIds": [
+        "mp-696138",
+        "mp-696128"
+      ]
+    },
+    {
+      "label": "NASICON LATP-like oxide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "Al",
+          "Ti",
+          "P",
+          "O"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 4 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 4,
+      "candidateIds": [
+        "mp-776520",
+        "mp-776523",
+        "mp-769073",
+        "mp-769074"
+      ]
+    },
+    {
+      "label": "Zirconium phosphate oxide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "Zr",
+          "P",
+          "O"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 11 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 11,
+      "candidateIds": [
+        "mp-766132",
+        "mp-753649",
+        "mp-773074",
+        "mp-10499",
+        "mp-541661",
+        "mp-759280",
+        "mp-681439",
+        "mp-773068",
+        "mp-1222872",
+        "mp-1223743",
+        "mp-1223569"
+      ]
+    },
+    {
+      "label": "Argyrodite-like chloride sulfide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "P",
+          "S",
+          "Cl"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 1.5,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 5 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 5,
+      "candidateIds": [
+        "mp-985592",
+        "mp-1040451",
+        "mp-1097034",
+        "mp-1097035",
+        "mp-1040450"
+      ]
+    },
+    {
+      "label": "Chloride halide electrolyte",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "Y",
+          "Cl"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 5 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 5,
+      "candidateIds": [
+        "mp-1139957",
+        "mp-1110679",
+        "mp-1110863",
+        "mp-1139958",
+        "mp-567652"
+      ]
+    },
+    {
+      "label": "Antiperovskite oxyhalide",
+      "payload": {
+        "elementsAll": [
+          "Li",
+          "O",
+          "Cl"
+        ],
+        "maxEnergyAboveHullEv": 0.1,
+        "minBandGapEv": 2,
+        "maxBandGapEv": 8.5,
+        "limit": 20,
+        "allowOffline": false
+      },
+      "summary": "Found 20 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 20,
+      "candidateIds": [
+        "mp-985585",
+        "mp-30301",
+        "mp-643259",
+        "mp-756743",
+        "mp-1195620",
+        "mp-1222565",
+        "mp-23797",
+        "mp-1104386",
+        "mp-1120754",
+        "mp-760502",
+        "mp-1210860",
+        "mp-561410",
+        "mp-643655",
+        "mp-23648",
+        "mp-554203",
+        "mp-556886",
+        "mp-560072",
+        "mp-560894",
+        "mp-1275809",
+        "mp-1320145"
+      ]
+    }
+  ],
+  "totalUniqueCandidates": 66,
+  "comparison": {
+    "ranked": [
+      {
+        "materialId": "mp-985583",
+        "formula": "Li3PS4",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 2.8091,
+        "densityGcm3": 1.854266986621739,
+        "volume": 644.980015636747,
+        "sites": 32,
+        "spacegroup": "Pnma",
+        "elements": [
+          "Li",
+          "P",
+          "S"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-985583",
+        "family": "thiophosphate-sulfide",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.618089
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.618 (not weighted)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 3 times.",
+          "Material family 'thiophosphate-sulfide' appears 23 times in the candidate pool."
+        ],
+        "duplicateGroup": "Li3PS4",
+        "duplicateCount": 3,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 1,
+        "rank": 1
+      },
+      {
+        "materialId": "mp-11175",
+        "formula": "LiZnPS4",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 2.731199999999999,
+        "densityGcm3": 2.497266967183973,
+        "volume": 153.98989737362206,
+        "sites": 7,
+        "spacegroup": "I-4",
+        "elements": [
+          "Li",
+          "P",
+          "S",
+          "Zn"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-11175",
+        "family": "thiophosphate-sulfide",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.832422
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.832 (not weighted)"
+        ],
+        "warnings": [
+          "Material family 'thiophosphate-sulfide' appears 23 times in the candidate pool."
+        ],
+        "duplicateGroup": "LiZnPS4",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 2,
+        "rank": 2
+      },
+      {
+        "materialId": "mp-760046",
+        "formula": "LiPH21S3N7",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 3.2702,
+        "densityGcm3": 1.222030298060392,
+        "volume": 688.4500428061036,
+        "sites": 66,
+        "spacegroup": "P-1",
+        "elements": [
+          "H",
+          "Li",
+          "N",
+          "P",
+          "S"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-760046",
+        "family": "thiophosphate-sulfide",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.407343
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.407 (not weighted)"
+        ],
+        "warnings": [
+          "Material family 'thiophosphate-sulfide' appears 23 times in the candidate pool."
+        ],
+        "duplicateGroup": "LiPH21S3N7",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 3,
+        "rank": 3
+      },
+      {
+        "materialId": "mp-10499",
+        "formula": "LiZr2(PO4)3",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 4.253299999999999,
+        "densityGcm3": 3.219703708075803,
+        "volume": 978.4736424490853,
+        "sites": 72,
+        "spacegroup": "P2_1/c",
+        "elements": [
+          "Li",
+          "O",
+          "P",
+          "Zr"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-10499",
+        "family": "zirconium-phosphate",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.926765
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.927 (not weighted)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 6 times.",
+          "Material family 'zirconium-phosphate' appears 11 times in the candidate pool."
+        ],
+        "duplicateGroup": "LiZr2(PO4)3",
+        "duplicateCount": 6,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 4,
+        "rank": 4
+      },
+      {
+        "materialId": "mp-1139957",
+        "formula": "LiY(TlCl3)2",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 4.4444,
+        "densityGcm3": 4.278398279649152,
+        "volume": 1113.6475087807905,
+        "sites": 40,
+        "spacegroup": "P-1",
+        "elements": [
+          "Cl",
+          "Li",
+          "Tl",
+          "Y"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-1139957",
+        "family": "halide",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.573867
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.574 (not weighted)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 2 times.",
+          "Material family 'halide' appears 25 times in the candidate pool."
+        ],
+        "duplicateGroup": "LiY(TlCl3)2",
+        "duplicateCount": 2,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 5,
+        "rank": 5
+      },
+      {
+        "materialId": "mp-567652",
+        "formula": "Cs2LiYCl6",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 4.8986,
+        "densityGcm3": 3.178280559262178,
+        "volume": 300.09099584151784,
+        "sites": 10,
+        "spacegroup": "Fm-3m",
+        "elements": [
+          "Cl",
+          "Cs",
+          "Li",
+          "Y"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-567652",
+        "family": "halide",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.940573
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.941 (not weighted)"
+        ],
+        "warnings": [
+          "Material family 'halide' appears 25 times in the candidate pool."
+        ],
+        "duplicateGroup": "Cs2LiYCl6",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 6,
+        "rank": 6
+      },
+      {
+        "materialId": "mp-30301",
+        "formula": "LiClO4",
+        "energyAboveHullEv": 0,
+        "bandGapEv": 5.7447,
+        "densityGcm3": 2.5571311802616483,
+        "volume": 276.3525149147863,
+        "sites": 24,
+        "spacegroup": "Pnma",
+        "elements": [
+          "Cl",
+          "Li",
+          "O"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-30301",
+        "family": "halide",
+        "score": 1,
+        "scoreComponents": {
+          "raw": {
+            "stability": 1,
+            "bandGap": 1,
+            "density": 0.852377
+          },
+          "weighted": {
+            "stability": 0.65,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 1.000",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.852 (not weighted)"
+        ],
+        "warnings": [
+          "Material family 'halide' appears 25 times in the candidate pool."
+        ],
+        "duplicateGroup": "LiClO4",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 7,
+        "rank": 7
+      },
+      {
+        "materialId": "mp-766132",
+        "formula": "Li2ZrFe(PO4)3",
+        "energyAboveHullEv": 0.0030173771052620004,
+        "bandGapEv": 2.4566,
+        "densityGcm3": 3.043916434674435,
+        "volume": 972.9260439636954,
+        "sites": 76,
+        "spacegroup": "Pna2_1",
+        "elements": [
+          "Fe",
+          "Li",
+          "O",
+          "P",
+          "Zr"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-766132",
+        "family": "zirconium-phosphate",
+        "score": 0.990194,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.984913,
+            "bandGap": 1,
+            "density": 0.985361
+          },
+          "weighted": {
+            "stability": 0.640194,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 0.985",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.985 (not weighted)"
+        ],
+        "warnings": [
+          "Material family 'zirconium-phosphate' appears 11 times in the candidate pool."
+        ],
+        "duplicateGroup": "Li2ZrFe(PO4)3",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 20,
+        "rank": 8
+      },
+      {
+        "materialId": "mp-1223569",
+        "formula": "Li4Zr8V3(P3O16)3",
+        "energyAboveHullEv": 0.006377033888895001,
+        "bandGapEv": 3.1339,
+        "densityGcm3": 3.057278031198527,
+        "volume": 1062.993554641032,
+        "sites": 72,
+        "spacegroup": "P1",
+        "elements": [
+          "Li",
+          "O",
+          "P",
+          "V",
+          "Zr"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-1223569",
+        "family": "zirconium-phosphate",
+        "score": 0.979275,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.968115,
+            "bandGap": 1,
+            "density": 0.980907
+          },
+          "weighted": {
+            "stability": 0.629275,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 0.968",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.981 (not weighted)"
+        ],
+        "warnings": [
+          "Material family 'zirconium-phosphate' appears 11 times in the candidate pool."
+        ],
+        "duplicateGroup": "Li4Zr8V3(P3O16)3",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 23,
+        "rank": 9
+      },
+      {
+        "materialId": "mp-942733",
+        "formula": "Li7La3Zr2O12",
+        "energyAboveHullEv": 0.006846009531249001,
+        "bandGapEv": 4.168800000000001,
+        "densityGcm3": 5.013095012638695,
+        "volume": 1112.6284765324503,
+        "sites": 96,
+        "spacegroup": "I4_1/acd",
+        "elements": [
+          "La",
+          "Li",
+          "O",
+          "Zr"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-942733",
+        "family": "garnet-oxide",
+        "score": 0.97775,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.96577,
+            "bandGap": 1,
+            "density": 0.328968
+          },
+          "weighted": {
+            "stability": 0.62775,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 0.966",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.329 (not weighted)"
+        ],
+        "warnings": [],
+        "duplicateGroup": "Li7La3Zr2O12",
+        "duplicateCount": 1,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 26,
+        "rank": 10
+      },
+      {
+        "materialId": "mp-769074",
+        "formula": "Na2LiTi3Al(PO4)6",
+        "energyAboveHullEv": 0.012859604505403001,
+        "bandGapEv": 2.5293,
+        "densityGcm3": 2.8373378528380053,
+        "volume": 464.29350338631366,
+        "sites": 37,
+        "spacegroup": "P1",
+        "elements": [
+          "Al",
+          "Li",
+          "Na",
+          "O",
+          "P",
+          "Ti"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-769074",
+        "family": "nasicon-oxide",
+        "score": 0.958206,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.935702,
+            "bandGap": 1,
+            "density": 0.945779
+          },
+          "weighted": {
+            "stability": 0.608206,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 0.936",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.946 (not weighted)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 2 times.",
+          "Material family 'nasicon-oxide' appears 4 times in the candidate pool."
+        ],
+        "duplicateGroup": "Na2LiTi3Al(PO4)6",
+        "duplicateCount": 2,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 41,
+        "rank": 11
+      },
+      {
+        "materialId": "mp-696138",
+        "formula": "Li10Ge(PS6)2",
+        "energyAboveHullEv": 0.0187605339,
+        "bandGapEv": 2.5395,
+        "densityGcm3": 1.977132075098642,
+        "volume": 988.9962258482308,
+        "sites": 50,
+        "spacegroup": "P1",
+        "elements": [
+          "Ge",
+          "Li",
+          "P",
+          "S"
+        ],
+        "source": "materials-project",
+        "notes": [],
+        "materialsProjectUrl": "https://materialsproject.org/materials/mp-696138",
+        "family": "lgps-like-sulfide",
+        "score": 0.939028,
+        "scoreComponents": {
+          "raw": {
+            "stability": 0.906197,
+            "bandGap": 1,
+            "density": 0.659044
+          },
+          "weighted": {
+            "stability": 0.589028,
+            "bandGap": 0.35,
+            "density": 0
+          }
+        },
+        "reasons": [
+          "stability score 0.906",
+          "band-gap minimum screen 1.000 (min 2.0 eV)",
+          "density advisory 0.659 (not weighted)"
+        ],
+        "warnings": [
+          "Duplicate reduced-formula group appears 2 times.",
+          "Material family 'lgps-like-sulfide' appears 2 times in the candidate pool."
+        ],
+        "duplicateGroup": "Li10Ge(PS6)2",
+        "duplicateCount": 2,
+        "screeningLevel": "proxy-screen",
+        "rawRank": 48,
+        "rank": 12
+      }
+    ],
+    "criteria": {
+      "preset": "solid-electrolyte",
+      "screeningLevel": "proxy-screen",
+      "stabilityWeight": 0.65,
+      "bandGapWeight": 0.35,
+      "densityWeight": 0,
+      "bandGapScoringMode": "minimum",
+      "minimumBandGapEv": 2,
+      "bandGapTargetEv": 5,
+      "densityScoringMode": "advisory",
+      "densityTargetGcm3": 3,
+      "diversifyBy": "formula",
+      "maxPerFormula": 1,
+      "maxPerFamily": 3
+    },
+    "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/plots/solid-electrolyte-ranking-v2/candidate-ranking.png",
+    "tablePaths": [
+      "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/plots/solid-electrolyte-ranking-v2/candidate-ranking.csv",
+      "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/plots/solid-electrolyte-ranking-v2/candidate-ranking.jsonl"
+    ],
+    "screeningLevel": "proxy-screen",
+    "diversity": {
+      "diversifyBy": "formula",
+      "maxPerFormula": 1,
+      "maxPerFamily": 3,
+      "originalFormulaGroups": 42,
+      "rankedFormulaGroups": 12,
+      "excludedByDiversity": 54,
+      "largestOriginalFormulaGroup": 9
+    }
+  },
+  "rankedCandidates": [
+    {
+      "materialId": "mp-985583",
+      "formula": "Li3PS4",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.8091,
+      "densityGcm3": 1.854266986621739,
+      "volume": 644.980015636747,
+      "sites": 32,
+      "spacegroup": "Pnma",
+      "elements": [
+        "Li",
+        "P",
+        "S"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-985583",
+      "family": "thiophosphate-sulfide",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.618089
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.618 (not weighted)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 3 times.",
+        "Material family 'thiophosphate-sulfide' appears 23 times in the candidate pool."
+      ],
+      "duplicateGroup": "Li3PS4",
+      "duplicateCount": 3,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 1,
+      "rank": 1
+    },
+    {
+      "materialId": "mp-11175",
+      "formula": "LiZnPS4",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.731199999999999,
+      "densityGcm3": 2.497266967183973,
+      "volume": 153.98989737362206,
+      "sites": 7,
+      "spacegroup": "I-4",
+      "elements": [
+        "Li",
+        "P",
+        "S",
+        "Zn"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-11175",
+      "family": "thiophosphate-sulfide",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.832422
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.832 (not weighted)"
+      ],
+      "warnings": [
+        "Material family 'thiophosphate-sulfide' appears 23 times in the candidate pool."
+      ],
+      "duplicateGroup": "LiZnPS4",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 2,
+      "rank": 2
+    },
+    {
+      "materialId": "mp-760046",
+      "formula": "LiPH21S3N7",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 3.2702,
+      "densityGcm3": 1.222030298060392,
+      "volume": 688.4500428061036,
+      "sites": 66,
+      "spacegroup": "P-1",
+      "elements": [
+        "H",
+        "Li",
+        "N",
+        "P",
+        "S"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-760046",
+      "family": "thiophosphate-sulfide",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.407343
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.407 (not weighted)"
+      ],
+      "warnings": [
+        "Material family 'thiophosphate-sulfide' appears 23 times in the candidate pool."
+      ],
+      "duplicateGroup": "LiPH21S3N7",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 3,
+      "rank": 3
+    },
+    {
+      "materialId": "mp-10499",
+      "formula": "LiZr2(PO4)3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.253299999999999,
+      "densityGcm3": 3.219703708075803,
+      "volume": 978.4736424490853,
+      "sites": 72,
+      "spacegroup": "P2_1/c",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-10499",
+      "family": "zirconium-phosphate",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.926765
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.927 (not weighted)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 6 times.",
+        "Material family 'zirconium-phosphate' appears 11 times in the candidate pool."
+      ],
+      "duplicateGroup": "LiZr2(PO4)3",
+      "duplicateCount": 6,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 4,
+      "rank": 4
+    },
+    {
+      "materialId": "mp-1139957",
+      "formula": "LiY(TlCl3)2",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.4444,
+      "densityGcm3": 4.278398279649152,
+      "volume": 1113.6475087807905,
+      "sites": 40,
+      "spacegroup": "P-1",
+      "elements": [
+        "Cl",
+        "Li",
+        "Tl",
+        "Y"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1139957",
+      "family": "halide",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.573867
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.574 (not weighted)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 2 times.",
+        "Material family 'halide' appears 25 times in the candidate pool."
+      ],
+      "duplicateGroup": "LiY(TlCl3)2",
+      "duplicateCount": 2,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 5,
+      "rank": 5
+    },
+    {
+      "materialId": "mp-567652",
+      "formula": "Cs2LiYCl6",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 4.8986,
+      "densityGcm3": 3.178280559262178,
+      "volume": 300.09099584151784,
+      "sites": 10,
+      "spacegroup": "Fm-3m",
+      "elements": [
+        "Cl",
+        "Cs",
+        "Li",
+        "Y"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-567652",
+      "family": "halide",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.940573
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.941 (not weighted)"
+      ],
+      "warnings": [
+        "Material family 'halide' appears 25 times in the candidate pool."
+      ],
+      "duplicateGroup": "Cs2LiYCl6",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 6,
+      "rank": 6
+    },
+    {
+      "materialId": "mp-30301",
+      "formula": "LiClO4",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 5.7447,
+      "densityGcm3": 2.5571311802616483,
+      "volume": 276.3525149147863,
+      "sites": 24,
+      "spacegroup": "Pnma",
+      "elements": [
+        "Cl",
+        "Li",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-30301",
+      "family": "halide",
+      "score": 1,
+      "scoreComponents": {
+        "raw": {
+          "stability": 1,
+          "bandGap": 1,
+          "density": 0.852377
+        },
+        "weighted": {
+          "stability": 0.65,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 1.000",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.852 (not weighted)"
+      ],
+      "warnings": [
+        "Material family 'halide' appears 25 times in the candidate pool."
+      ],
+      "duplicateGroup": "LiClO4",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 7,
+      "rank": 7
+    },
+    {
+      "materialId": "mp-766132",
+      "formula": "Li2ZrFe(PO4)3",
+      "energyAboveHullEv": 0.0030173771052620004,
+      "bandGapEv": 2.4566,
+      "densityGcm3": 3.043916434674435,
+      "volume": 972.9260439636954,
+      "sites": 76,
+      "spacegroup": "Pna2_1",
+      "elements": [
+        "Fe",
+        "Li",
+        "O",
+        "P",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-766132",
+      "family": "zirconium-phosphate",
+      "score": 0.990194,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.984913,
+          "bandGap": 1,
+          "density": 0.985361
+        },
+        "weighted": {
+          "stability": 0.640194,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 0.985",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.985 (not weighted)"
+      ],
+      "warnings": [
+        "Material family 'zirconium-phosphate' appears 11 times in the candidate pool."
+      ],
+      "duplicateGroup": "Li2ZrFe(PO4)3",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 20,
+      "rank": 8
+    },
+    {
+      "materialId": "mp-1223569",
+      "formula": "Li4Zr8V3(P3O16)3",
+      "energyAboveHullEv": 0.006377033888895001,
+      "bandGapEv": 3.1339,
+      "densityGcm3": 3.057278031198527,
+      "volume": 1062.993554641032,
+      "sites": 72,
+      "spacegroup": "P1",
+      "elements": [
+        "Li",
+        "O",
+        "P",
+        "V",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-1223569",
+      "family": "zirconium-phosphate",
+      "score": 0.979275,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.968115,
+          "bandGap": 1,
+          "density": 0.980907
+        },
+        "weighted": {
+          "stability": 0.629275,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 0.968",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.981 (not weighted)"
+      ],
+      "warnings": [
+        "Material family 'zirconium-phosphate' appears 11 times in the candidate pool."
+      ],
+      "duplicateGroup": "Li4Zr8V3(P3O16)3",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 23,
+      "rank": 9
+    },
+    {
+      "materialId": "mp-942733",
+      "formula": "Li7La3Zr2O12",
+      "energyAboveHullEv": 0.006846009531249001,
+      "bandGapEv": 4.168800000000001,
+      "densityGcm3": 5.013095012638695,
+      "volume": 1112.6284765324503,
+      "sites": 96,
+      "spacegroup": "I4_1/acd",
+      "elements": [
+        "La",
+        "Li",
+        "O",
+        "Zr"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-942733",
+      "family": "garnet-oxide",
+      "score": 0.97775,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.96577,
+          "bandGap": 1,
+          "density": 0.328968
+        },
+        "weighted": {
+          "stability": 0.62775,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 0.966",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.329 (not weighted)"
+      ],
+      "warnings": [],
+      "duplicateGroup": "Li7La3Zr2O12",
+      "duplicateCount": 1,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 26,
+      "rank": 10
+    },
+    {
+      "materialId": "mp-769074",
+      "formula": "Na2LiTi3Al(PO4)6",
+      "energyAboveHullEv": 0.012859604505403001,
+      "bandGapEv": 2.5293,
+      "densityGcm3": 2.8373378528380053,
+      "volume": 464.29350338631366,
+      "sites": 37,
+      "spacegroup": "P1",
+      "elements": [
+        "Al",
+        "Li",
+        "Na",
+        "O",
+        "P",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-769074",
+      "family": "nasicon-oxide",
+      "score": 0.958206,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.935702,
+          "bandGap": 1,
+          "density": 0.945779
+        },
+        "weighted": {
+          "stability": 0.608206,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 0.936",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.946 (not weighted)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 2 times.",
+        "Material family 'nasicon-oxide' appears 4 times in the candidate pool."
+      ],
+      "duplicateGroup": "Na2LiTi3Al(PO4)6",
+      "duplicateCount": 2,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 41,
+      "rank": 11
+    },
+    {
+      "materialId": "mp-696138",
+      "formula": "Li10Ge(PS6)2",
+      "energyAboveHullEv": 0.0187605339,
+      "bandGapEv": 2.5395,
+      "densityGcm3": 1.977132075098642,
+      "volume": 988.9962258482308,
+      "sites": 50,
+      "spacegroup": "P1",
+      "elements": [
+        "Ge",
+        "Li",
+        "P",
+        "S"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-696138",
+      "family": "lgps-like-sulfide",
+      "score": 0.939028,
+      "scoreComponents": {
+        "raw": {
+          "stability": 0.906197,
+          "bandGap": 1,
+          "density": 0.659044
+        },
+        "weighted": {
+          "stability": 0.589028,
+          "bandGap": 0.35,
+          "density": 0
+        }
+      },
+      "reasons": [
+        "stability score 0.906",
+        "band-gap minimum screen 1.000 (min 2.0 eV)",
+        "density advisory 0.659 (not weighted)"
+      ],
+      "warnings": [
+        "Duplicate reduced-formula group appears 2 times.",
+        "Material family 'lgps-like-sulfide' appears 2 times in the candidate pool."
+      ],
+      "duplicateGroup": "Li10Ge(PS6)2",
+      "duplicateCount": 2,
+      "screeningLevel": "proxy-screen",
+      "rawRank": 48,
+      "rank": 12
+    }
+  ],
+  "formulaCounts": {
+    "Li3PS4": 1,
+    "LiZnPS4": 1,
+    "LiPH21S3N7": 1,
+    "LiZr2(PO4)3": 1,
+    "LiY(TlCl3)2": 1,
+    "Cs2LiYCl6": 1,
+    "LiClO4": 1,
+    "Li2ZrFe(PO4)3": 1,
+    "Li4Zr8V3(P3O16)3": 1,
+    "Li7La3Zr2O12": 1,
+    "Na2LiTi3Al(PO4)6": 1,
+    "Li10Ge(PS6)2": 1
+  },
+  "familyCounts": {
+    "thiophosphate-sulfide": 3,
+    "zirconium-phosphate": 3,
+    "halide": 3,
+    "garnet-oxide": 1,
+    "nasicon-oxide": 1,
+    "lgps-like-sulfide": 1
+  },
+  "structuresAnalyzed": [
+    {
+      "materialId": "mp-985583",
+      "formula": "Li3PS4",
+      "family": "thiophosphate-sulfide",
+      "fetchSummary": "Fetched structure for mp-985583 and wrote 2 artifact(s).",
+      "analysisSummary": "Li3PS4 has 32 sites, volume 644.98 A^3, density 1.8543 g/cm^3, and 3 distinct elements. Li proxy metrics: 12 Li sites, minimum Li-Li distance 3.2574 A.",
+      "summaryMetrics": {
+        "formula": "Li3PS4",
+        "numSites": 32,
+        "volume": 644.98,
+        "densityGcm3": 1.8543,
+        "a": 6.1718,
+        "b": 8.0186,
+        "c": 13.0328,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90,
+        "numElements": 3,
+        "liCount": 12,
+        "liFraction": 0.375,
+        "liNumberDensityPerA3": 0.018605,
+        "minLiLiDistanceA": 3.2574,
+        "medianLiLiDistanceA": 4.9529,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "sparse-proxy"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-985583/mp-985583.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-985583/mp-985583.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-985583/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-11175",
+      "formula": "LiZnPS4",
+      "family": "thiophosphate-sulfide",
+      "fetchSummary": "Fetched structure for mp-11175 and wrote 2 artifact(s).",
+      "analysisSummary": "LiZnPS4 has 7 sites, volume 153.9899 A^3, density 2.4973 g/cm^3, and 4 distinct elements. Li proxy metrics: 1 Li sites, minimum Li-Li distance None A.",
+      "summaryMetrics": {
+        "formula": "LiZnPS4",
+        "numSites": 7,
+        "volume": 153.9899,
+        "densityGcm3": 2.4973,
+        "a": 6.132,
+        "b": 6.132,
+        "c": 6.132,
+        "alpha": 123.336,
+        "beta": 123.336,
+        "gamma": 84.313,
+        "numElements": 4,
+        "liCount": 1,
+        "liFraction": 0.1429,
+        "liNumberDensityPerA3": 0.006494,
+        "minLiLiDistanceA": null,
+        "medianLiLiDistanceA": null,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "insufficient-li-sites"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-11175/mp-11175.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-11175/mp-11175.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-11175/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-760046",
+      "formula": "LiPH21S3N7",
+      "family": "thiophosphate-sulfide",
+      "fetchSummary": "Fetched structure for mp-760046 and wrote 2 artifact(s).",
+      "analysisSummary": "LiPH21S3N7 has 66 sites, volume 688.45 A^3, density 1.222 g/cm^3, and 5 distinct elements. Li proxy metrics: 2 Li sites, minimum Li-Li distance 4.0465 A.",
+      "summaryMetrics": {
+        "formula": "LiPH21S3N7",
+        "numSites": 66,
+        "volume": 688.45,
+        "densityGcm3": 1.222,
+        "a": 7.2521,
+        "b": 7.4159,
+        "c": 13.3201,
+        "alpha": 87.73,
+        "beta": 89.128,
+        "gamma": 74.112,
+        "numElements": 5,
+        "liCount": 2,
+        "liFraction": 0.0303,
+        "liNumberDensityPerA3": 0.002905,
+        "minLiLiDistanceA": 4.0465,
+        "medianLiLiDistanceA": 4.0465,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "sparse-proxy"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-760046/mp-760046.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-760046/mp-760046.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-760046/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-10499",
+      "formula": "LiZr2(PO4)3",
+      "family": "zirconium-phosphate",
+      "fetchSummary": "Fetched structure for mp-10499 and wrote 2 artifact(s).",
+      "analysisSummary": "LiZr2(PO4)3 has 72 sites, volume 978.4736 A^3, density 3.2197 g/cm^3, and 4 distinct elements. Li proxy metrics: 4 Li sites, minimum Li-Li distance 4.8596 A.",
+      "summaryMetrics": {
+        "formula": "LiZr2(PO4)3",
+        "numSites": 72,
+        "volume": 978.4736,
+        "densityGcm3": 3.2197,
+        "a": 8.8388,
+        "b": 8.9468,
+        "c": 12.3746,
+        "alpha": 90,
+        "beta": 90.846,
+        "gamma": 90,
+        "numElements": 4,
+        "liCount": 4,
+        "liFraction": 0.0556,
+        "liNumberDensityPerA3": 0.004088,
+        "minLiLiDistanceA": 4.8596,
+        "medianLiLiDistanceA": 6.9986,
+        "liNearestNeighborCountWithin3A": 0,
+        "avgLiNeighborsWithin3A": 0,
+        "liConnectivityProxy": "sparse-proxy"
+      },
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-10499/mp-10499.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-10499/mp-10499.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-10499/structure-metrics.png",
+      "usedOfflineData": false
+    }
+  ],
+  "structureFailures": [],
+  "notePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/notes/2026-05-03T07-10-26-433Z-live-materials-project-solid-state-electrolyte-screening-v2-proc.md",
+  "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/reports/live-solid-electrolyte-e2e-v2-report.md",
+  "artifactPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/plots/solid-electrolyte-ranking-v2/candidate-ranking.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/plots/solid-electrolyte-ranking-v2/candidate-ranking.csv",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/plots/solid-electrolyte-ranking-v2/candidate-ranking.jsonl",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-985583/mp-985583.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-985583/mp-985583.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-985583/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-11175/mp-11175.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-11175/mp-11175.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-11175/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-760046/mp-760046.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-760046/mp-760046.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-760046/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-10499/mp-10499.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-10499/mp-10499.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-live-e2e-v2-20260503/structures/mp-10499/structure-metrics.png"
+  ],
+  "validation": {
+    "usedOfflineDataAnywhere": false,
+    "solidElectrolytePreset": true,
+    "densityUnweighted": true,
+    "diversityControlsEnabled": true,
+    "rankedMaxFormulaMultiplicity": 1,
+    "rankedFamilies": [
+      "garnet-oxide",
+      "halide",
+      "lgps-like-sulfide",
+      "nasicon-oxide",
+      "thiophosphate-sulfide",
+      "zirconium-phosphate"
+    ],
+    "searchFamilies": 8,
+    "totalUniqueCandidates": 66,
+    "rankedCandidates": 12,
+    "structuresAnalyzed": 4,
+    "structuresWithLiProxyMetrics": 4,
+    "requiredArtifactsExist": {
+      "ok": true,
+      "checked": 17,
+      "missing": []
+    }
+  }
+}
