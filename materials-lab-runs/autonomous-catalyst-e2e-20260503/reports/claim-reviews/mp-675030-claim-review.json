@@ -1,0 +1,198 @@
+{
+  "blockingEvidence": [],
+  "candidateId": "mp-675030",
+  "claimStatus": {
+    "blockedBy": [
+      "literature-benchmark",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "surface-activity",
+      "operando-stability",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "currentLevel": "proxy-shortlist",
+    "reason": "Research-grade claim remains blocked until missing/conflicting evidence gates are closed.",
+    "requestedLevel": "research-grade-candidate",
+    "researchGradeClaimAllowed": false
+  },
+  "conflictingEvidence": [],
+  "evaluationVersion": "claim-policy-evaluator-v1",
+  "evidenceRowsReviewed": 3,
+  "generatedAt": 1777812631,
+  "ledgerPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl",
+  "mergedLedgerPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/claim-reviews/mp-675030-claim-evidence-ledger.jsonl",
+  "missingEvidence": [
+    {
+      "evidenceRequirementId": "literature-benchmark",
+      "label": "Literature benchmark",
+      "propertyKeys": [
+        "literatureBaseline"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "literature"
+      ],
+      "rowsSeen": []
+    },
+    {
+      "evidenceRequirementId": "phase-stability",
+      "label": "Phase stability",
+      "propertyKeys": [
+        "energyAboveHullEv",
+        "decompositionProducts"
+      ],
+      "reason": "status 'proxy-only' is not strong enough",
+      "requiredEvidenceTypes": [
+        "database",
+        "dft"
+      ],
+      "rowsSeen": [
+        {
+          "artifactPath": null,
+          "candidateId": "mp-675030",
+          "citation": null,
+          "confidence": "database-summary",
+          "evidenceId": "mp-675030-phase-stability",
+          "evidenceRequirementId": "phase-stability",
+          "propertyKeys": [
+            "energyAboveHullEv"
+          ],
+          "source": "materials-project",
+          "sourcePath": null,
+          "sourceType": "database",
+          "status": "proxy-only"
+        }
+      ]
+    },
+    {
+      "evidenceRequirementId": "structure-validity",
+      "label": "Structure and chemistry validity",
+      "propertyKeys": [
+        "structureQuality",
+        "oxidationStates",
+        "chargeBalance"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "database",
+        "workflow"
+      ],
+      "rowsSeen": []
+    },
+    {
+      "evidenceRequirementId": "synthesis-safety",
+      "label": "Synthesis, toxicity, and handling risk",
+      "propertyKeys": [
+        "synthesisRoute",
+        "toxicityFlags",
+        "supplyRisk"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "literature",
+        "safety",
+        "experiment"
+      ],
+      "rowsSeen": []
+    },
+    {
+      "evidenceRequirementId": "surface-activity",
+      "label": "Surface activity and selectivity",
+      "propertyKeys": [
+        "adsorptionEnergyEv",
+        "overpotentialV",
+        "selectivityScore"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "dft",
+        "experiment"
+      ],
+      "rowsSeen": []
+    },
+    {
+      "evidenceRequirementId": "operando-stability",
+      "label": "Operando stability",
+      "propertyKeys": [
+        "surfaceStability",
+        "dissolutionRisk"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "dft",
+        "experiment"
+      ],
+      "rowsSeen": []
+    },
+    {
+      "evidenceRequirementId": "environmental-health-safety",
+      "label": "Environmental health and safety",
+      "propertyKeys": [
+        "ehsRisk",
+        "regulatoryFlags"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "safety",
+        "literature"
+      ],
+      "rowsSeen": []
+    },
+    {
+      "evidenceRequirementId": "reproducibility",
+      "label": "Reproducibility package",
+      "propertyKeys": [
+        "workflowManifest",
+        "inputDecks",
+        "parsedOutputs"
+      ],
+      "reason": "no evidence row exists for this required evidence gate",
+      "requiredEvidenceTypes": [
+        "workflow"
+      ],
+      "rowsSeen": []
+    }
+  ],
+  "planId": "catalyst-research-protocol-1777812227343",
+  "requestedClaimLevel": "research-grade-candidate",
+  "requiredEvidenceRequirementIds": [
+    "literature-benchmark",
+    "database-provenance",
+    "phase-stability",
+    "structure-validity",
+    "synthesis-safety",
+    "surface-activity",
+    "operando-stability",
+    "environmental-health-safety",
+    "reproducibility"
+  ],
+  "satisfiedEvidence": [
+    {
+      "evidenceRequirementId": "database-provenance",
+      "label": "Database provenance",
+      "rows": [
+        {
+          "artifactPath": null,
+          "candidateId": "mp-675030",
+          "citation": null,
+          "confidence": "database-summary",
+          "evidenceId": "mp-675030-database-provenance",
+          "evidenceRequirementId": "database-provenance",
+          "propertyKeys": [
+            "bandGapEv",
+            "densityGcm3",
+            "energyAboveHullEv",
+            "spacegroup"
+          ],
+          "source": "materials-project",
+          "sourcePath": null,
+          "sourceType": "database",
+          "status": "supports-candidate-hypothesis"
+        }
+      ]
+    }
+  ],
+  "warnings": []
+}

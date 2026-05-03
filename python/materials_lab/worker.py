@@ -132,6 +132,7 @@ def dispatch(*, action: str, request_id: str, payload: dict[str, Any]) -> dict[s
         "analyze_structure": lambda: handle_analyze_structure(request_id=request_id, payload=payload, api_key=api_key),
         "compare_candidates": lambda: handle_compare_candidates(request_id=request_id, payload=payload),
         "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload, api_key=api_key),
+        "evaluate_research_claim": lambda: handle_evaluate_research_claim(request_id=request_id, payload=payload),
         "execute_research_plan": lambda: handle_execute_research_plan(request_id=request_id, payload=payload, api_key=api_key),
         "ase_relax": lambda: handle_ase_relax(request_id=request_id, payload=payload, api_key=api_key),
         "batch_screen": lambda: handle_batch_screen(request_id=request_id, payload=payload, api_key=api_key),
@@ -377,6 +378,80 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any], api_k
     )
 
 
+def handle_evaluate_research_claim(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+    artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
+    artifact_dir.mkdir(parents=True, exist_ok=True)
+    plan = _load_research_plan(payload)
+    candidate_id = (
+        ensure_string(payload.get("candidateId"), field="candidateId", required=False)
+        or _default_claim_candidate_id(plan)
+    )
+    if not candidate_id:
+        raise WorkerError("INVALID_PARAMS", "evaluate_research_claim requires candidateId or a plan with selectedCandidates.")
+
+    ledger_path = (
+        ensure_string(payload.get("evidenceLedgerPath"), field="evidenceLedgerPath", required=False)
+        or _default_evidence_ledger_path(plan)
+    )
+    existing_rows = _read_evidence_ledger(ledger_path) if ledger_path else []
+    provided_rows = [
+        _normalize_evidence_row(item, candidate_id=candidate_id)
+        for item in (payload.get("evidenceRows") or [])
+        if isinstance(item, dict)
+    ]
+    rows = [*existing_rows, *provided_rows]
+    if not rows:
+        raise WorkerError(
+            "NO_EVIDENCE_ROWS",
+            "No evidence rows were available for claim evaluation.",
+            hint="Pass evidenceLedgerPath or evidenceRows with parsed literature/calculation/experiment evidence.",
+        )
+
+    merged_ledger_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-claim-evidence-ledger.jsonl"
+    merged_ledger_path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in rows),
+        encoding="utf-8",
+    )
+    requested = str(payload.get("requestedClaimLevel") or "research-grade-candidate")
+    review = _evaluate_research_claim(
+        plan=plan,
+        candidate_id=candidate_id,
+        rows=rows,
+        requested_claim_level=requested,
+        ledger_path=ledger_path,
+        merged_ledger_path=str(merged_ledger_path),
+    )
+    review_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-claim-review.json"
+    report_path = artifact_dir / f"{_safe_file_stem(candidate_id)}-claim-review.md"
+    review_path.write_text(json.dumps(review, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    report_path.write_text(_claim_evaluation_markdown(review), encoding="utf-8")
+    data = {
+        "candidateId": candidate_id,
+        "claimStatus": review["claimStatus"],
+        "reviewPath": str(review_path),
+        "reportPath": str(report_path),
+        "ledgerPath": ledger_path,
+        "mergedLedgerPath": str(merged_ledger_path),
+        "missingEvidence": review["missingEvidence"],
+        "satisfiedEvidence": review["satisfiedEvidence"],
+        "blockingEvidence": review["blockingEvidence"],
+        "evidenceRowsReviewed": review["evidenceRowsReviewed"],
+    }
+    warnings = list(review.get("warnings") or [])
+    return success(
+        action="evaluate_research_claim",
+        request_id=request_id,
+        summary=(
+            f"Evaluated claim for {candidate_id}: "
+            f"{review['claimStatus']['currentLevel']} "
+            f"(research-grade allowed: {str(review['claimStatus']['researchGradeClaimAllowed']).lower()})."
+        ),
+        data=data,
+        artifacts=[str(review_path), str(report_path), str(merged_ledger_path)],
+        warnings=warnings,
+    )
+
+
 def handle_execute_research_plan(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -543,6 +618,383 @@ def handle_export_report(*, request_id: str, payload: dict[str, Any]) -> dict[st
         data={"outputPath": output_file, "references": references},
         artifacts=[output_file],
     )
+
+
+def _default_claim_candidate_id(plan: dict[str, Any]) -> str | None:
+    candidates = plan.get("selectedCandidates") if isinstance(plan.get("selectedCandidates"), list) else []
+    for candidate in candidates:
+        if isinstance(candidate, dict) and candidate.get("materialId"):
+            return str(candidate["materialId"])
+    return None
+
+
+def _default_evidence_ledger_path(plan: dict[str, Any]) -> str | None:
+    discovery = plan.get("autonomousDiscovery") if isinstance(plan.get("autonomousDiscovery"), dict) else {}
+    if discovery.get("evidenceLedgerPath"):
+        return str(discovery["evidenceLedgerPath"])
+    candidate_generation = plan.get("candidateGenerationPlan") if isinstance(plan.get("candidateGenerationPlan"), dict) else {}
+    auto = candidate_generation.get("autoDiscovery") if isinstance(candidate_generation.get("autoDiscovery"), dict) else {}
+    if auto.get("evidenceLedgerPath"):
+        return str(auto["evidenceLedgerPath"])
+    return None
+
+
+def _read_evidence_ledger(ledger_path: str) -> list[dict[str, Any]]:
+    path = Path(ledger_path)
+    if not path.exists():
+        raise WorkerError("EVIDENCE_LEDGER_NOT_FOUND", f"Evidence ledger was not found: {ledger_path}")
+    rows: list[dict[str, Any]] = []
+    if path.suffix.lower() == ".json":
+        parsed = json.loads(path.read_text("utf-8"))
+        if isinstance(parsed, list):
+            rows.extend(_normalize_evidence_row(item) for item in parsed if isinstance(item, dict))
+        elif isinstance(parsed, dict):
+            rows.append(_normalize_evidence_row(parsed))
+        return rows
+    for line_number, line in enumerate(path.read_text("utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise WorkerError("INVALID_EVIDENCE_LEDGER", f"Invalid JSONL at {ledger_path}:{line_number}: {exc}") from exc
+        if isinstance(parsed, dict):
+            rows.append(_normalize_evidence_row(parsed))
+    return rows
+
+
+def _normalize_evidence_row(row: dict[str, Any], *, candidate_id: str | None = None) -> dict[str, Any]:
+    normalized = dict(row)
+    if candidate_id and not normalized.get("candidateId"):
+        normalized["candidateId"] = candidate_id
+    normalized["evidenceRequirementId"] = str(
+        normalized.get("evidenceRequirementId")
+        or normalized.get("requirementId")
+        or normalized.get("id")
+        or ""
+    )
+    normalized["status"] = str(normalized.get("status") or "unknown").strip().lower()
+    normalized["sourceType"] = str(normalized.get("sourceType") or normalized.get("evidenceType") or "unknown").strip().lower()
+    normalized["confidence"] = str(normalized.get("confidence") or "unspecified").strip().lower()
+    property_values = normalized.get("propertyValues")
+    normalized["propertyValues"] = property_values if isinstance(property_values, dict) else {}
+    return normalized
+
+
+def _evaluate_research_claim(
+    *,
+    plan: dict[str, Any],
+    candidate_id: str,
+    rows: list[dict[str, Any]],
+    requested_claim_level: str,
+    ledger_path: str | None,
+    merged_ledger_path: str,
+) -> dict[str, Any]:
+    evidence_schema = [
+        item for item in (plan.get("evidenceSchema") or [])
+        if isinstance(item, dict)
+    ]
+    required_ids = list((plan.get("claimPolicy") or {}).get("requiredEvidenceRequirementIds") or [])
+    if not required_ids:
+        required_ids = [str(item.get("id")) for item in evidence_schema if item.get("requiredForClaim")]
+    required = [
+        requirement for requirement in evidence_schema
+        if str(requirement.get("id")) in set(required_ids)
+    ]
+    candidate_rows = [
+        row for row in rows
+        if _row_candidate_matches(row, candidate_id)
+    ]
+    satisfied: list[dict[str, Any]] = []
+    missing: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    for requirement in required:
+        support = _supporting_rows_for_requirement(requirement, candidate_rows)
+        if support:
+            satisfied.append({
+                "evidenceRequirementId": requirement.get("id"),
+                "label": requirement.get("label"),
+                "rows": [_row_ref(row) for row in support],
+            })
+        else:
+            candidate_requirement_rows = [
+                row for row in candidate_rows
+                if str(row.get("evidenceRequirementId")) == str(requirement.get("id"))
+            ]
+            missing.append({
+                "evidenceRequirementId": requirement.get("id"),
+                "label": requirement.get("label"),
+                "requiredEvidenceTypes": requirement.get("evidenceTypes") or [],
+                "propertyKeys": requirement.get("propertyKeys") or [],
+                "reason": _missing_requirement_reason(requirement, candidate_requirement_rows),
+                "rowsSeen": [_row_ref(row) for row in candidate_requirement_rows],
+            })
+    blocking = [_row_ref(row) for row in candidate_rows if _row_blocks_claim(row)]
+    conflicts = [_row_ref(row) for row in candidate_rows if _row_conflicts(row)]
+    artifact_warnings = _artifact_trace_warnings(candidate_rows)
+    warnings.extend(artifact_warnings)
+    current_level = _claim_level_from_evaluation(
+        satisfied=satisfied,
+        missing=missing,
+        blocking=blocking,
+        candidate_rows=candidate_rows,
+    )
+    research_grade_allowed = (
+        requested_claim_level == "research-grade-candidate"
+        and current_level == "research-grade-candidate"
+        and not missing
+        and not blocking
+        and not conflicts
+    )
+    claim_status = {
+        "requestedLevel": requested_claim_level,
+        "currentLevel": current_level,
+        "researchGradeClaimAllowed": research_grade_allowed,
+        "blockedBy": [item["evidenceRequirementId"] for item in missing] + [item["evidenceId"] for item in blocking],
+        "reason": (
+            "All required evidence gates are satisfied by traceable evidence rows."
+            if research_grade_allowed
+            else "Research-grade claim remains blocked until missing/conflicting evidence gates are closed."
+        ),
+    }
+    return {
+        "evaluationVersion": "claim-policy-evaluator-v1",
+        "generatedAt": int(time.time()),
+        "planId": plan.get("planId"),
+        "candidateId": candidate_id,
+        "ledgerPath": ledger_path,
+        "mergedLedgerPath": merged_ledger_path,
+        "requestedClaimLevel": requested_claim_level,
+        "claimStatus": claim_status,
+        "requiredEvidenceRequirementIds": required_ids,
+        "satisfiedEvidence": satisfied,
+        "missingEvidence": missing,
+        "blockingEvidence": blocking,
+        "conflictingEvidence": conflicts,
+        "evidenceRowsReviewed": len(candidate_rows),
+        "warnings": warnings,
+    }
+
+
+def _row_candidate_matches(row: dict[str, Any], candidate_id: str) -> bool:
+    row_candidate = row.get("candidateId") or row.get("materialId")
+    return not row_candidate or str(row_candidate) == candidate_id
+
+
+def _supporting_rows_for_requirement(requirement: dict[str, Any], rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    result = []
+    for row in rows:
+        if str(row.get("evidenceRequirementId")) != str(requirement.get("id")):
+            continue
+        ok, _reason = _row_supports_requirement(row, requirement)
+        if ok:
+            result.append(row)
+    return result
+
+
+def _row_supports_requirement(row: dict[str, Any], requirement: dict[str, Any]) -> tuple[bool, str]:
+    status = str(row.get("status") or "").lower()
+    if _row_blocks_claim(row) or _row_conflicts(row):
+        return False, "row blocks or conflicts with the claim"
+    requirement_id = str(requirement.get("id") or "")
+    evidence_types = set(str(item).lower() for item in requirement.get("evidenceTypes") or [])
+    if requirement_id == "database-provenance":
+        if row.get("sourceType") in {"database", "materials-project"} and "dev-fixture" not in str(row.get("source") or "").lower():
+            return True, "live database provenance is attached"
+        return False, "database provenance must come from a live database source"
+    if status not in _strong_evidence_statuses(requirement_id):
+        return False, f"status '{status}' is not strong enough"
+    source_type = str(row.get("sourceType") or "").lower()
+    if not _source_type_satisfies(source_type, evidence_types):
+        return False, f"sourceType '{source_type}' does not satisfy {sorted(evidence_types)}"
+    if not _row_has_trace(row):
+        return False, "row lacks source/citation/artifact trace"
+    property_keys = [str(item) for item in requirement.get("propertyKeys") or []]
+    if property_keys and not _row_has_property_values(row, property_keys):
+        return False, "row lacks required property values"
+    return True, "row satisfies requirement"
+
+
+def _strong_evidence_statuses(requirement_id: str) -> set[str]:
+    base = {
+        "pass",
+        "passed",
+        "validated",
+        "supports-research-grade-claim",
+        "supports-property-claim",
+        "property-backed",
+        "parsed-property",
+        "experimentally-supported",
+        "dft-confirmed",
+        "literature-supported",
+        "safety-reviewed",
+        "workflow-reproduced",
+    }
+    if requirement_id in {"literature-benchmark", "synthesis-safety", "environmental-health-safety"}:
+        base.add("supports-candidate-hypothesis")
+    return base
+
+
+def _source_type_satisfies(source_type: str, evidence_types: set[str]) -> bool:
+    if "database" in evidence_types and source_type in {"database", "materials-project"}:
+        return True
+    if "literature" in evidence_types and source_type in {"literature", "citation"}:
+        return True
+    if "safety" in evidence_types and source_type in {"safety", "literature", "experiment", "regulatory"}:
+        return True
+    if "experiment" in evidence_types and source_type in {"experiment", "experimental-measurement"}:
+        return True
+    if evidence_types.intersection({"dft", "dfpt", "md", "workflow"}) and source_type in {
+        "parsed-calculation",
+        "parsed-output",
+        "dft",
+        "dfpt",
+        "md",
+        "workflow",
+        "experiment",
+    }:
+        return True
+    return False
+
+
+def _row_has_trace(row: dict[str, Any]) -> bool:
+    return any(row.get(key) for key in ["source", "artifactPath", "sourcePath", "citation", "queryIds"])
+
+
+def _row_has_property_values(row: dict[str, Any], property_keys: list[str]) -> bool:
+    values = row.get("propertyValues") if isinstance(row.get("propertyValues"), dict) else {}
+    if not values:
+        return False
+    return any(key in values and values.get(key) is not None for key in property_keys)
+
+
+def _row_blocks_claim(row: dict[str, Any]) -> bool:
+    status = str(row.get("status") or "").lower()
+    requirement_id = str(row.get("evidenceRequirementId") or "")
+    if requirement_id == "claim-policy":
+        return False
+    return "block" in status or status in {"fail", "failed", "rejected"}
+
+
+def _row_conflicts(row: dict[str, Any]) -> bool:
+    status = str(row.get("status") or "").lower()
+    return "contradict" in status or "conflict" in status
+
+
+def _missing_requirement_reason(requirement: dict[str, Any], rows: list[dict[str, Any]]) -> str:
+    if not rows:
+        return "no evidence row exists for this required evidence gate"
+    reasons = []
+    for row in rows:
+        ok, reason = _row_supports_requirement(row, requirement)
+        if not ok:
+            reasons.append(reason)
+    return "; ".join(sorted(set(reasons))) or "evidence rows exist but did not satisfy the gate"
+
+
+def _artifact_trace_warnings(rows: list[dict[str, Any]]) -> list[str]:
+    warnings = []
+    for row in rows:
+        for key in ["artifactPath", "sourcePath"]:
+            value = row.get(key)
+            if not value or not isinstance(value, str):
+                continue
+            path = Path(value)
+            if path.is_absolute() and not path.exists():
+                warnings.append(f"Evidence artifact does not exist: {value}")
+    return warnings
+
+
+def _claim_level_from_evaluation(
+    *,
+    satisfied: list[dict[str, Any]],
+    missing: list[dict[str, Any]],
+    blocking: list[dict[str, Any]],
+    candidate_rows: list[dict[str, Any]],
+) -> str:
+    if blocking:
+        return "candidate-hypothesis"
+    if not missing:
+        return "research-grade-candidate"
+    if any(str(row.get("sourceType") or "").lower() in {"parsed-calculation", "parsed-output", "dft", "dfpt", "md", "experiment"} for row in candidate_rows):
+        return "property-backed-shortlist"
+    if satisfied:
+        return "proxy-shortlist"
+    return "candidate-hypothesis"
+
+
+def _row_ref(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "evidenceId": row.get("evidenceId") or _safe_file_stem(f"{row.get('candidateId', 'candidate')}-{row.get('evidenceRequirementId', 'evidence')}").lower(),
+        "candidateId": row.get("candidateId"),
+        "evidenceRequirementId": row.get("evidenceRequirementId"),
+        "status": row.get("status"),
+        "sourceType": row.get("sourceType"),
+        "source": row.get("source"),
+        "confidence": row.get("confidence"),
+        "artifactPath": row.get("artifactPath"),
+        "sourcePath": row.get("sourcePath"),
+        "citation": row.get("citation"),
+        "propertyKeys": sorted((row.get("propertyValues") or {}).keys()) if isinstance(row.get("propertyValues"), dict) else [],
+    }
+
+
+def _claim_evaluation_markdown(review: dict[str, Any]) -> str:
+    status = review.get("claimStatus") or {}
+    lines = [
+        f"# Research Claim Evaluation: {review.get('candidateId')}",
+        "",
+        "## Status",
+        "",
+        f"- Requested level: `{status.get('requestedLevel')}`",
+        f"- Current level: `{status.get('currentLevel')}`",
+        f"- Research-grade claim allowed: `{str(status.get('researchGradeClaimAllowed')).lower()}`",
+        f"- Reason: {status.get('reason')}",
+        "",
+        "## Satisfied Evidence",
+        "",
+        "| Requirement | Rows |",
+        "| --- | ---: |",
+    ]
+    for item in review.get("satisfiedEvidence") or []:
+        lines.append(f"| {item.get('evidenceRequirementId')} | {len(item.get('rows') or [])} |")
+    if not review.get("satisfiedEvidence"):
+        lines.append("| - | 0 |")
+    lines.extend([
+        "",
+        "## Missing Evidence",
+        "",
+        "| Requirement | Reason |",
+        "| --- | --- |",
+    ])
+    for item in review.get("missingEvidence") or []:
+        lines.append(f"| {item.get('evidenceRequirementId')} | {item.get('reason')} |")
+    if not review.get("missingEvidence"):
+        lines.append("| - | - |")
+    lines.extend([
+        "",
+        "## Blocking Evidence",
+        "",
+        "| Evidence | Requirement | Status |",
+        "| --- | --- | --- |",
+    ])
+    for item in review.get("blockingEvidence") or []:
+        lines.append(f"| {item.get('evidenceId')} | {item.get('evidenceRequirementId')} | {item.get('status')} |")
+    if not review.get("blockingEvidence"):
+        lines.append("| - | - | - |")
+    lines.extend([
+        "",
+        "## Artifacts",
+        "",
+        f"- Ledger reviewed: {review.get('ledgerPath') or '-'}",
+        f"- Merged claim ledger: {review.get('mergedLedgerPath') or '-'}",
+        "",
+        "## Warnings",
+        "",
+        *([f"- {warning}" for warning in review.get("warnings") or []] or ["- No warnings."]),
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def _normalize_research_budget(budget: dict[str, Any]) -> dict[str, Any]:

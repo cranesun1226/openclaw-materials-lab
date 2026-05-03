@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
@@ -198,5 +198,96 @@ describe("Python bridge", () => {
     expect(candidatePoolText).toContain("dev-fixture");
     expect(ledgerText).toContain("blocks-research-grade-claim");
     expect(await readFile(result.data.reportPath, "utf8")).toContain("Autonomous Discovery");
+  });
+
+  it("evaluates claim gates from traceable evidence rows", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-claim-eval-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    await mkdir(path.join(tempDir, "reports"), { recursive: true });
+    const artifactPath = path.join(tempDir, "reports", "parsed-output.json");
+    const workflowPath = path.join(tempDir, "reports", "workflow-manifest.json");
+    await writeFile(artifactPath, JSON.stringify({ targetProperty: 42 }), "utf8");
+    await writeFile(workflowPath, JSON.stringify({ parser: "unit-test" }), "utf8");
+
+    const result = await bridge.evaluateResearchClaim({
+      artifactDir: path.join(tempDir, "reports", "claim-reviews"),
+      candidateId: "fixture-hfo2",
+      plan: {
+        planId: "unit-claim-plan",
+        selectedCandidates: [{ materialId: "fixture-hfo2", formula: "HfO2" }],
+        claimPolicy: {
+          requiredEvidenceRequirementIds: ["database-provenance", "target-property", "reproducibility"],
+        },
+        evidenceSchema: [
+          {
+            id: "database-provenance",
+            label: "Database provenance",
+            propertyKeys: ["databaseSummary"],
+            evidenceTypes: ["database"],
+            requiredForClaim: true,
+          },
+          {
+            id: "target-property",
+            label: "Target property",
+            propertyKeys: ["targetProperty"],
+            evidenceTypes: ["dft"],
+            requiredForClaim: true,
+          },
+          {
+            id: "reproducibility",
+            label: "Reproducibility package",
+            propertyKeys: ["workflowManifest"],
+            evidenceTypes: ["workflow"],
+            requiredForClaim: true,
+          },
+        ],
+      },
+      evidenceRows: [
+        {
+          candidateId: "fixture-hfo2",
+          evidenceRequirementId: "database-provenance",
+          status: "validated",
+          sourceType: "database",
+          source: "materials-project",
+          confidence: "database-summary",
+          propertyValues: { databaseSummary: "live database provenance attached" },
+          queryIds: ["dbq-001"],
+        },
+        {
+          candidateId: "fixture-hfo2",
+          evidenceRequirementId: "target-property",
+          status: "parsed-property",
+          sourceType: "parsed-calculation",
+          source: "unit-test-parser",
+          confidence: "parsed-output",
+          propertyValues: { targetProperty: 42 },
+          artifactPath,
+        },
+        {
+          candidateId: "fixture-hfo2",
+          evidenceRequirementId: "reproducibility",
+          status: "workflow-reproduced",
+          sourceType: "workflow",
+          source: "unit-test-workflow",
+          confidence: "workflow-manifest",
+          propertyValues: { workflowManifest: "present" },
+          artifactPath: workflowPath,
+        },
+      ],
+    });
+
+    expect(result.data.claimStatus.currentLevel).toBe("research-grade-candidate");
+    expect(result.data.claimStatus.researchGradeClaimAllowed).toBe(true);
+    expect(result.data.missingEvidence).toEqual([]);
+    expect(await readFile(result.data.reportPath, "utf8")).toContain("Research-grade claim allowed: `true`");
   });
 });

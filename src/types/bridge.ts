@@ -5,6 +5,7 @@ export type BridgeAction =
   | "analyze_structure"
   | "compare_candidates"
   | "plan_research_loop"
+  | "evaluate_research_claim"
   | "execute_research_plan"
   | "ase_relax"
   | "batch_screen"
@@ -273,6 +274,46 @@ export interface PlanResearchLoopResult {
   candidatePoolPath?: string;
   evidenceLedgerPath?: string;
   summaryPath?: string;
+}
+
+export interface EvidenceLedgerInput {
+  candidateId?: string;
+  formula?: string;
+  evidenceRequirementId: string;
+  claim?: string;
+  status: string;
+  sourceType: string;
+  source?: string;
+  confidence?: string;
+  propertyValues?: Record<string, unknown>;
+  artifactPath?: string;
+  sourcePath?: string;
+  citation?: string;
+  queryIds?: string[];
+  [key: string]: unknown;
+}
+
+export interface EvaluateResearchClaimPayload {
+  planPath?: string;
+  plan?: Record<string, unknown>;
+  evidenceLedgerPath?: string;
+  evidenceRows?: EvidenceLedgerInput[];
+  candidateId?: string;
+  requestedClaimLevel?: "candidate-hypothesis" | "proxy-shortlist" | "property-backed-shortlist" | "research-grade-candidate";
+  artifactDir: string;
+}
+
+export interface EvaluateResearchClaimResult {
+  candidateId?: string;
+  claimStatus: Record<string, unknown>;
+  reviewPath: string;
+  reportPath: string;
+  ledgerPath?: string;
+  mergedLedgerPath?: string;
+  missingEvidence: Array<Record<string, unknown>>;
+  satisfiedEvidence: Array<Record<string, unknown>>;
+  blockingEvidence: Array<Record<string, unknown>>;
+  evidenceRowsReviewed: number;
 }
 
 export interface ExecuteResearchPlanPayload {

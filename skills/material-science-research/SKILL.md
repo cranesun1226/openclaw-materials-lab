@@ -37,6 +37,15 @@ Use `materials_plan_research_loop` when the user asks for an open-ended research
 - Treat the output as an evidence contract: candidate generation, literature review, database search, validation matrix, claim policy, and approval gates.
 - Do not present research-grade discovery claims unless the compiled claim policy is satisfied by parsed evidence artifacts.
 
+### 2.1 Evaluate the claim gate
+
+Use `materials_evaluate_research_claim` after evidence has been imported or parsed into an evidence ledger.
+
+- Pass the `planPath`, `evidenceLedgerPath`, and target `candidateId`.
+- If the user provides verified external evidence, pass it as `evidenceRows` with `sourceType`, `status`, `propertyValues`, and an artifact/citation trace.
+- Present the generated claim-review result instead of making your own unsupported claim.
+- If the review says `researchGradeClaimAllowed: false`, report the missing gates and next evidence needed.
+
 ### 3. Define evaluation criteria
 
 Before searching, write down the criteria you will use to compare candidates. Common criteria:
