@@ -370,7 +370,7 @@ def _candidate_summary(item: dict[str, Any]) -> dict[str, Any]:
 
 def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any]) -> list[dict[str, Any]]:
     formula_counts = Counter(_formula_group(candidate) for candidate in candidates)
-    family_counts = Counter(_infer_material_family(candidate) for candidate in candidates)
+    family_counts = Counter(_infer_material_family(candidate, criteria) for candidate in candidates)
     ranked = []
     stability_weight = float(criteria["stabilityWeight"])
     band_gap_weight = float(criteria["bandGapWeight"])
@@ -392,7 +392,7 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
         }
         primary_score = stability * stability_weight + band_gap * band_gap_weight + density * density_weight
         score = _final_score(primary_score, secondary["score"], risk_profile["penalty"], criteria)
-        family = _infer_material_family(candidate)
+        family = _infer_material_family(candidate, criteria)
         formula_group = _formula_group(candidate)
         reasons = _score_reasons(stability, band_gap, density, secondary, risk_profile, criteria)
         warnings = list(candidate.get("warnings") or [])
@@ -447,8 +447,8 @@ def _rank_candidates(candidates: list[dict[str, Any]], criteria: dict[str, Any])
 
 
 def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
-    preset = str(criteria.get("preset") or "generic").strip().lower()
-    if preset in {"solid-electrolyte", "solid_electrolyte", "solid electrolyte"}:
+    preset = _normalize_preset(criteria.get("preset"))
+    if preset == "solid-electrolyte":
         defaults: dict[str, Any] = {
             "preset": "solid-electrolyte",
             "screeningLevel": "proxy-screen",
@@ -475,6 +475,90 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
             "diversifyBy": "formula",
             "maxPerFormula": 1,
             "maxPerFamily": 3,
+        }
+    elif preset == "high-k-dielectric":
+        defaults = {
+            "preset": "high-k-dielectric",
+            "screeningLevel": "proxy-screen",
+            "stabilityWeight": 0.45,
+            "bandGapWeight": 0.40,
+            "densityWeight": 0.15,
+            "bandGapScoringMode": "target",
+            "minimumBandGapEv": 2.0,
+            "bandGapTargetEv": 5.5,
+            "densityScoringMode": "target",
+            "densityTargetGcm3": 6.0,
+            "secondaryWeight": 0.06,
+            "riskPenaltyWeight": 0.20,
+            "preferredBandGapEv": 5.5,
+            "preferredLiFractionMin": 0.0,
+            "preferredLiFractionMax": 1.0,
+            "excludeToxicElements": True,
+            "excludeRiskyChemistry": True,
+            "filterMolecularSalts": False,
+            "requiresLithium": False,
+            "excludedElements": ["Cd", "Hg", "Pb", "Tl", "Th", "U"],
+            "flaggedElements": ["As", "Be", "Cr", "Sb", "Se"],
+            "maxHydrogenAtomicFraction": 0.05,
+            "diversifyBy": "formula",
+            "maxPerFormula": 1,
+            "maxPerFamily": 8,
+        }
+    elif preset == "photovoltaic-absorber":
+        defaults = {
+            "preset": "photovoltaic-absorber",
+            "screeningLevel": "proxy-screen",
+            "stabilityWeight": 0.45,
+            "bandGapWeight": 0.45,
+            "densityWeight": 0.10,
+            "bandGapScoringMode": "target",
+            "minimumBandGapEv": 0.7,
+            "bandGapTargetEv": 1.45,
+            "densityScoringMode": "advisory",
+            "densityTargetGcm3": 5.0,
+            "secondaryWeight": 0.08,
+            "riskPenaltyWeight": 0.20,
+            "preferredBandGapEv": 1.45,
+            "preferredLiFractionMin": 0.0,
+            "preferredLiFractionMax": 1.0,
+            "excludeToxicElements": False,
+            "excludeRiskyChemistry": True,
+            "filterMolecularSalts": True,
+            "requiresLithium": False,
+            "excludedElements": ["Hg", "Tl", "Th", "U"],
+            "flaggedElements": ["As", "Cd", "Cr", "Pb", "Sb", "Se"],
+            "maxHydrogenAtomicFraction": 0.10,
+            "diversifyBy": "formula",
+            "maxPerFormula": 1,
+            "maxPerFamily": 4,
+        }
+    elif preset == "thermoelectric":
+        defaults = {
+            "preset": "thermoelectric",
+            "screeningLevel": "proxy-screen",
+            "stabilityWeight": 0.50,
+            "bandGapWeight": 0.30,
+            "densityWeight": 0.20,
+            "bandGapScoringMode": "target",
+            "minimumBandGapEv": 0.0,
+            "bandGapTargetEv": 0.35,
+            "densityScoringMode": "target",
+            "densityTargetGcm3": 7.0,
+            "secondaryWeight": 0.10,
+            "riskPenaltyWeight": 0.15,
+            "preferredBandGapEv": 0.35,
+            "preferredLiFractionMin": 0.0,
+            "preferredLiFractionMax": 1.0,
+            "excludeToxicElements": False,
+            "excludeRiskyChemistry": False,
+            "filterMolecularSalts": False,
+            "requiresLithium": False,
+            "excludedElements": ["Hg", "Tl", "Th", "U"],
+            "flaggedElements": ["As", "Cd", "Pb", "Sb", "Se"],
+            "maxHydrogenAtomicFraction": 0.05,
+            "diversifyBy": "formula",
+            "maxPerFormula": 1,
+            "maxPerFamily": 4,
         }
     else:
         defaults = {
@@ -529,6 +613,27 @@ def _prepare_compare_criteria(criteria: dict[str, Any]) -> dict[str, Any]:
     return merged
 
 
+def _normalize_preset(value: Any) -> str:
+    preset = str(value or "generic").strip().lower().replace("_", "-").replace(" ", "-")
+    aliases = {
+        "solid-electrolyte": "solid-electrolyte",
+        "battery-electrolyte": "solid-electrolyte",
+        "li-solid-electrolyte": "solid-electrolyte",
+        "high-k": "high-k-dielectric",
+        "high-k-dielectric": "high-k-dielectric",
+        "gate-dielectric": "high-k-dielectric",
+        "dielectric": "high-k-dielectric",
+        "photovoltaic": "photovoltaic-absorber",
+        "photovoltaic-absorber": "photovoltaic-absorber",
+        "solar-absorber": "photovoltaic-absorber",
+        "pv-absorber": "photovoltaic-absorber",
+        "thermoelectric": "thermoelectric",
+        "thermoelectric-material": "thermoelectric",
+        "generic": "generic",
+    }
+    return aliases.get(preset, "generic")
+
+
 def _band_gap_score(value: Any, criteria: dict[str, Any]) -> float:
     mode = str(criteria.get("bandGapScoringMode") or "target").lower()
     if mode == "minimum":
@@ -552,7 +657,7 @@ def _filter_candidates_for_ranking(candidates: list[dict[str, Any]], criteria: d
             excluded.append({
                 "materialId": candidate.get("materialId"),
                 "formula": candidate.get("formula"),
-                "family": _infer_material_family(candidate),
+                "family": _infer_material_family(candidate, criteria),
                 "riskFlags": risk_profile["riskFlags"],
                 "exclusionReasons": risk_profile["exclusionReasons"],
             })
@@ -570,26 +675,99 @@ def _final_score(primary_score: float, secondary_score: float, risk_penalty: flo
 
 
 def _secondary_score(candidate: dict[str, Any], criteria: dict[str, Any], risk_profile: dict[str, Any]) -> dict[str, Any]:
-    family = _infer_material_family(candidate)
+    family = _infer_material_family(candidate, criteria)
     descriptors = risk_profile["compositionDescriptors"]
     band_gap_margin = _target_score(candidate.get("bandGapEv"), float(criteria.get("preferredBandGapEv") or 4.0))
-    li_fraction = descriptors.get("liAtomicFraction")
-    li_fraction_score = _range_score(
-        li_fraction,
-        float(criteria.get("preferredLiFractionMin") or 0.0),
-        float(criteria.get("preferredLiFractionMax") or 1.0),
-    )
-    family_prior = _family_prior_score(family)
+    preset = str(criteria.get("preset") or "generic")
+    family_prior = _family_prior_score(family, preset)
     chemistry = 1.0 - min(risk_profile["penalty"], 1.0)
+
+    if preset == "solid-electrolyte":
+        li_fraction_score = _range_score(
+            descriptors.get("liAtomicFraction"),
+            float(criteria.get("preferredLiFractionMin") or 0.0),
+            float(criteria.get("preferredLiFractionMax") or 1.0),
+        )
+        components = {
+            "bandGapMargin": round(band_gap_margin, 6),
+            "liFraction": round(li_fraction_score, 6),
+            "familyPrior": round(family_prior, 6),
+            "chemistryRisk": round(chemistry, 6),
+        }
+        score = (
+            band_gap_margin * 0.25
+            + li_fraction_score * 0.30
+            + family_prior * 0.30
+            + chemistry * 0.15
+        )
+        return {"score": max(0.0, min(score, 1.0)), "components": components}
+
+    if preset == "high-k-dielectric":
+        oxide_score = 1.0 if descriptors.get("oxygenAtomicFraction", 0) > 0.35 else 0.35
+        density_score = _target_score(candidate.get("densityGcm3"), float(criteria.get("densityTargetGcm3") or 6.0))
+        components = {
+            "bandGapMargin": round(band_gap_margin, 6),
+            "oxideFramework": round(oxide_score, 6),
+            "densityAlignment": round(density_score, 6),
+            "familyPrior": round(family_prior, 6),
+            "chemistryRisk": round(chemistry, 6),
+        }
+        score = (
+            band_gap_margin * 0.30
+            + oxide_score * 0.20
+            + density_score * 0.20
+            + family_prior * 0.20
+            + chemistry * 0.10
+        )
+        return {"score": max(0.0, min(score, 1.0)), "components": components}
+
+    if preset == "photovoltaic-absorber":
+        absorber_score = max(
+            descriptors.get("chalcogenideAtomicFraction", 0.0),
+            descriptors.get("halogenAtomicFraction", 0.0) * 0.8,
+            descriptors.get("oxygenAtomicFraction", 0.0) * 0.55,
+        )
+        components = {
+            "bandGapMargin": round(band_gap_margin, 6),
+            "absorberChemistry": round(absorber_score, 6),
+            "familyPrior": round(family_prior, 6),
+            "chemistryRisk": round(chemistry, 6),
+        }
+        score = (
+            band_gap_margin * 0.40
+            + absorber_score * 0.20
+            + family_prior * 0.25
+            + chemistry * 0.15
+        )
+        return {"score": max(0.0, min(score, 1.0)), "components": components}
+
+    if preset == "thermoelectric":
+        heavy_score = descriptors.get("heavyAtomicFraction", 0.0)
+        narrow_gap_score = band_gap_margin
+        components = {
+            "bandGapMargin": round(narrow_gap_score, 6),
+            "heavyElementFraction": round(heavy_score, 6),
+            "familyPrior": round(family_prior, 6),
+            "chemistryRisk": round(chemistry, 6),
+        }
+        score = (
+            narrow_gap_score * 0.35
+            + heavy_score * 0.25
+            + family_prior * 0.25
+            + chemistry * 0.15
+        )
+        return {"score": max(0.0, min(score, 1.0)), "components": components}
+
+    domain_score = _domain_descriptor_score(descriptors, preset)
     components = {
         "bandGapMargin": round(band_gap_margin, 6),
-        "liFraction": round(li_fraction_score, 6),
+        "domainDescriptor": round(domain_score, 6),
         "familyPrior": round(family_prior, 6),
         "chemistryRisk": round(chemistry, 6),
     }
     score = (
         band_gap_margin * 0.25
-        + li_fraction_score * 0.30
+        + domain_score * 0.30
         + family_prior * 0.30
         + chemistry * 0.15
     )
@@ -615,16 +793,25 @@ def _score_reasons(
         reasons.append(f"density advisory {density:.3f} (not weighted)")
     if float(criteria.get("secondaryWeight") or 0.0) > 0:
         components = secondary.get("components") or {}
+        descriptor_value = _secondary_descriptor_value(components)
         reasons.append(
             "secondary tie-breaker "
             f"{secondary['score']:.3f} "
-            f"(Li fraction {components.get('liFraction', 0):.3f}, "
+            f"(domain descriptor {descriptor_value:.3f}, "
             f"family prior {components.get('familyPrior', 0):.3f}, "
             f"gap margin {components.get('bandGapMargin', 0):.3f})"
         )
     if risk_profile["penalty"] > 0:
         reasons.append(f"chemistry risk penalty {risk_profile['penalty']:.3f}")
     return reasons
+
+
+def _secondary_descriptor_value(components: dict[str, Any]) -> float:
+    for key in ["liFraction", "domainDescriptor", "oxideFramework", "absorberChemistry", "heavyElementFraction"]:
+        value = components.get(key)
+        if isinstance(value, (int, float)):
+            return float(value)
+    return 0.0
 
 
 def _candidate_risk_profile(candidate: dict[str, Any], criteria: dict[str, Any]) -> dict[str, Any]:
@@ -695,26 +882,76 @@ def _candidate_elements(candidate: dict[str, Any]) -> list[str]:
 def _composition_descriptors(candidate: dict[str, Any]) -> dict[str, Any]:
     formula = str(candidate.get("formula") or "")
     if not formula:
-        return {"elements": [], "liAtomicFraction": 0.0, "hydrogenAtomicFraction": 0.0}
+        return _empty_composition_descriptors()
     if Composition is not None:
         try:
             composition = Composition(formula)
             total = float(composition.num_atoms)
             elements = [str(element.symbol) for element in composition.elements]
+            fractions = {str(element.symbol): float(composition.get_atomic_fraction(element)) for element in composition.elements}
+            heavy_fraction = sum(fraction for symbol, fraction in fractions.items() if _is_heavy_element(symbol))
+            metal_fraction = sum(fraction for symbol, fraction in fractions.items() if _is_metal_symbol(symbol))
             return {
                 "elements": elements,
                 "numAtoms": total,
                 "liAtomicFraction": round(float(composition.get_atomic_fraction("Li")), 6),
                 "hydrogenAtomicFraction": round(float(composition.get_atomic_fraction("H")), 6),
+                "oxygenAtomicFraction": round(float(composition.get_atomic_fraction("O")), 6),
+                "halogenAtomicFraction": round(sum(fractions.get(symbol, 0.0) for symbol in ["F", "Cl", "Br", "I"]), 6),
+                "chalcogenideAtomicFraction": round(sum(fractions.get(symbol, 0.0) for symbol in ["S", "Se", "Te"]), 6),
+                "heavyAtomicFraction": round(heavy_fraction, 6),
+                "metalAtomicFraction": round(metal_fraction, 6),
+                "numElements": len(elements),
             }
         except Exception:
             pass
     elements = [str(item) for item in candidate.get("elements") or []]
+    denominator = max(len(elements), 1)
     return {
         "elements": elements,
-        "liAtomicFraction": 1.0 / max(len(elements), 1) if "Li" in elements else 0.0,
-        "hydrogenAtomicFraction": 1.0 / max(len(elements), 1) if "H" in elements else 0.0,
+        "numAtoms": None,
+        "liAtomicFraction": 1.0 / denominator if "Li" in elements else 0.0,
+        "hydrogenAtomicFraction": 1.0 / denominator if "H" in elements else 0.0,
+        "oxygenAtomicFraction": 1.0 / denominator if "O" in elements else 0.0,
+        "halogenAtomicFraction": sum(1 for element in elements if element in {"F", "Cl", "Br", "I"}) / denominator,
+        "chalcogenideAtomicFraction": sum(1 for element in elements if element in {"S", "Se", "Te"}) / denominator,
+        "heavyAtomicFraction": sum(1 for element in elements if _is_heavy_element(element)) / denominator,
+        "metalAtomicFraction": sum(1 for element in elements if _is_metal_symbol(element)) / denominator,
+        "numElements": len(elements),
     }
+
+
+def _empty_composition_descriptors() -> dict[str, Any]:
+    return {
+        "elements": [],
+        "numAtoms": None,
+        "liAtomicFraction": 0.0,
+        "hydrogenAtomicFraction": 0.0,
+        "oxygenAtomicFraction": 0.0,
+        "halogenAtomicFraction": 0.0,
+        "chalcogenideAtomicFraction": 0.0,
+        "heavyAtomicFraction": 0.0,
+        "metalAtomicFraction": 0.0,
+        "numElements": 0,
+    }
+
+
+def _is_heavy_element(symbol: str) -> bool:
+    atomic_numbers = {
+        "Rb": 37, "Sr": 38, "Y": 39, "Zr": 40, "Nb": 41, "Mo": 42, "Tc": 43, "Ru": 44,
+        "Rh": 45, "Pd": 46, "Ag": 47, "Cd": 48, "In": 49, "Sn": 50, "Sb": 51, "Te": 52,
+        "I": 53, "Xe": 54, "Cs": 55, "Ba": 56, "La": 57, "Ce": 58, "Pr": 59, "Nd": 60,
+        "Sm": 62, "Eu": 63, "Gd": 64, "Tb": 65, "Dy": 66, "Ho": 67, "Er": 68, "Tm": 69,
+        "Yb": 70, "Lu": 71, "Hf": 72, "Ta": 73, "W": 74, "Re": 75, "Os": 76, "Ir": 77,
+        "Pt": 78, "Au": 79, "Hg": 80, "Tl": 81, "Pb": 82, "Bi": 83, "Th": 90, "U": 92,
+    }
+    return atomic_numbers.get(symbol, 0) >= 37
+
+
+def _is_metal_symbol(symbol: str) -> bool:
+    nonmetals = {"H", "B", "C", "N", "O", "F", "Si", "P", "S", "Cl", "As", "Se", "Br", "Te", "I"}
+    noble_gases = {"He", "Ne", "Ar", "Kr", "Xe", "Rn"}
+    return symbol not in nonmetals and symbol not in noble_gases
 
 
 def _looks_like_molecular_salt(candidate: dict[str, Any], elements: set[str]) -> bool:
@@ -728,7 +965,34 @@ def _looks_like_molecular_salt(candidate: dict[str, Any], elements: set[str]) ->
     return False
 
 
-def _family_prior_score(family: str) -> float:
+def _family_prior_score(family: str, preset: str = "generic") -> float:
+    by_preset = {
+        "high-k-dielectric": {
+            "binary-oxide": 0.95,
+            "perovskite-oxide": 0.88,
+            "complex-oxide": 0.82,
+            "oxide": 0.75,
+            "generic": 0.35,
+        },
+        "photovoltaic-absorber": {
+            "halide-perovskite-like": 0.95,
+            "chalcopyrite-chalcogenide": 0.92,
+            "ii-vi-chalcogenide": 0.88,
+            "chalcogenide-absorber": 0.84,
+            "oxide-absorber": 0.62,
+            "generic": 0.35,
+        },
+        "thermoelectric": {
+            "telluride-thermoelectric": 0.98,
+            "rocksalt-chalcogenide": 0.92,
+            "skutterudite-like": 0.88,
+            "chalcogenide-thermoelectric": 0.84,
+            "oxide-thermoelectric": 0.58,
+            "generic": 0.35,
+        },
+    }
+    if preset in by_preset:
+        return by_preset[preset].get(family, 0.45)
     return {
         "lgps-like-sulfide": 1.00,
         "garnet-oxide": 0.95,
@@ -739,6 +1003,28 @@ def _family_prior_score(family: str) -> float:
         "lithium-containing": 0.55,
         "generic": 0.40,
     }.get(family, 0.45)
+
+
+def _domain_descriptor_score(descriptors: dict[str, Any], preset: str) -> float:
+    if preset == "high-k-dielectric":
+        return max(
+            float(descriptors.get("oxygenAtomicFraction") or 0.0),
+            float(descriptors.get("metalAtomicFraction") or 0.0) * 0.7,
+        )
+    if preset == "photovoltaic-absorber":
+        return max(
+            float(descriptors.get("chalcogenideAtomicFraction") or 0.0),
+            float(descriptors.get("halogenAtomicFraction") or 0.0) * 0.8,
+            float(descriptors.get("oxygenAtomicFraction") or 0.0) * 0.5,
+        )
+    if preset == "thermoelectric":
+        return float(descriptors.get("heavyAtomicFraction") or 0.0)
+    return max(
+        float(descriptors.get("oxygenAtomicFraction") or 0.0),
+        float(descriptors.get("chalcogenideAtomicFraction") or 0.0),
+        float(descriptors.get("halogenAtomicFraction") or 0.0),
+        float(descriptors.get("metalAtomicFraction") or 0.0),
+    )
 
 
 def _range_score(value: Any, lower: float, upper: float) -> float:
@@ -886,9 +1172,45 @@ def _write_candidate_table_artifacts(ranked: list[dict[str, Any]], artifact_dir:
     return [str(csv_path), str(jsonl_path)]
 
 
-def _infer_material_family(candidate: dict[str, Any]) -> str:
+def _infer_material_family(candidate: dict[str, Any], criteria: dict[str, Any] | None = None) -> str:
     formula = str(candidate.get("formula") or "").lower()
     elements = {str(item) for item in candidate.get("elements") or []}
+    if not elements:
+        elements = set(_composition_descriptors(candidate).get("elements") or [])
+    preset = str((criteria or {}).get("preset") or "generic")
+
+    if preset == "high-k-dielectric":
+        if {"Ba", "Ti", "O"}.issubset(elements) or {"Sr", "Ti", "O"}.issubset(elements):
+            return "perovskite-oxide"
+        if len(elements) == 2 and "O" in elements:
+            if {"Hf", "Zr", "Ti", "Ta", "Y", "La", "Al", "Si"}.intersection(elements):
+                return "binary-oxide"
+            return "oxide"
+        if "O" in elements:
+            return "complex-oxide"
+    if preset == "photovoltaic-absorber":
+        if {"Pb", "I"}.issubset(elements) or {"Sn", "I"}.issubset(elements):
+            return "halide-perovskite-like"
+        if {"Cu", "In", "Se"}.issubset(elements) or {"Cu", "Ga", "Se"}.issubset(elements):
+            return "chalcopyrite-chalcogenide"
+        if {"Cd", "Te"}.issubset(elements):
+            return "ii-vi-chalcogenide"
+        if {"S", "Se", "Te"}.intersection(elements):
+            return "chalcogenide-absorber"
+        if "O" in elements:
+            return "oxide-absorber"
+    if preset == "thermoelectric":
+        if {"Bi", "Te"}.issubset(elements) or {"Sb", "Te"}.issubset(elements):
+            return "telluride-thermoelectric"
+        if {"Pb", "Te"}.issubset(elements) or {"Sn", "Se"}.issubset(elements):
+            return "rocksalt-chalcogenide"
+        if {"Co", "Sb"}.issubset(elements):
+            return "skutterudite-like"
+        if {"S", "Se", "Te"}.intersection(elements):
+            return "chalcogenide-thermoelectric"
+        if "O" in elements:
+            return "oxide-thermoelectric"
+
     if {"Li", "La", "Zr", "O"}.issubset(elements):
         return "garnet-oxide"
     if {"Li", "Ge", "P", "S"}.issubset(elements):

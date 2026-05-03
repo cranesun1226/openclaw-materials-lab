@@ -100,15 +100,8 @@ const compareDir = path.join(paths.plotsDir, "high-k-dielectric-ranking");
 const comparison = await bridge.compareCandidates({
   candidates,
   criteria: {
-    preset: "generic",
+    preset: "high-k-dielectric",
     screeningLevel: "proxy-screen",
-    stabilityWeight: 0.45,
-    bandGapWeight: 0.40,
-    densityWeight: 0.15,
-    bandGapScoringMode: "target",
-    bandGapTargetEv: 5.5,
-    densityScoringMode: "target",
-    densityTargetGcm3: 6.0,
     diversifyBy: "formula",
     maxPerFormula: 1,
   },

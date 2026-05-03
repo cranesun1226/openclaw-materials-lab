@@ -36,7 +36,15 @@ const CompareSchema = Type.Object(
     criteria: Type.Optional(
       Type.Object(
         {
-          preset: Type.Optional(Type.Union([Type.Literal("generic"), Type.Literal("solid-electrolyte")])),
+          preset: Type.Optional(
+            Type.Union([
+              Type.Literal("generic"),
+              Type.Literal("solid-electrolyte"),
+              Type.Literal("high-k-dielectric"),
+              Type.Literal("photovoltaic-absorber"),
+              Type.Literal("thermoelectric"),
+            ]),
+          ),
           screeningLevel: Type.Optional(
             Type.Union([
               Type.Literal("technical-smoke"),

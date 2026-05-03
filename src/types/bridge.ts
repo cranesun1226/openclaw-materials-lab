@@ -114,7 +114,7 @@ export interface AnalyzeStructureResult {
 }
 
 export interface CompareCriteria {
-  preset?: "generic" | "solid-electrolyte";
+  preset?: "generic" | "solid-electrolyte" | "high-k-dielectric" | "photovoltaic-absorber" | "thermoelectric";
   screeningLevel?: "technical-smoke" | "proxy-screen" | "research-shortlist" | "validated-candidate";
   stabilityWeight?: number;
   bandGapWeight?: number;
