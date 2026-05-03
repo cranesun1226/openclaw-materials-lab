@@ -1,0 +1,30 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "global-literature-evidence-ledger",
+  "calculationType": "literature-evidence-ledger",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": false,
+    "hasMaterialId": false,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "literatureBaseline",
+      "knownControls",
+      "failureModes"
+    ]
+  },
+  "estimatedWallTimeHours": 1.0,
+  "formula": "",
+  "label": "Literature evidence ledger",
+  "materialId": "",
+  "method": "search, cite, and extract claims from literature queries",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777812235,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-literature-evidence-ledger.json",
+  "status": "completed-dev-smoke"
+}

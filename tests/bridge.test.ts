@@ -152,4 +152,51 @@ describe("Python bridge", () => {
     expect(evidenceSchema.some((item) => item.id === "optical-absorption")).toBe(true);
     expect(await readFile(result.data.reportPath, "utf8")).toContain("Evidence Schema");
   });
+
+  it("autonomously discovers a candidate pool when explicitly allowed", async () => {
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "materials-lab-autonomous-discovery-"));
+    tempDirs.push(tempDir);
+    const config: MaterialsLabPluginConfig = {
+      pythonPath: "python3",
+      mpApiKey: "",
+      workspaceRoot: tempDir,
+      cacheDir: path.join(tempDir, "cache"),
+      defaultBatchLimit: 20,
+      enableAseTools: false,
+    };
+    const bridge = new PythonBridgeService(config, resolveWorkspacePaths(config), createLogger());
+    const result = await bridge.planResearchLoop({
+      artifactDir: path.join(tempDir, "reports", "autonomous-discovery-plans"),
+      researchGoal: "Find lead-free high-k oxide gate dielectric candidates with evidence-ledger provenance.",
+      constraints: ["lead-free", "oxide"],
+      candidateGeneration: {
+        autoDiscover: true,
+        allowDevelopmentFixtures: true,
+        formulas: ["HfO2", "Al2O3"],
+        maxQueries: 3,
+        perQueryLimit: 4,
+      },
+      budget: { maxCandidates: 2, maxCalculations: 10, maxWallTimeHours: 24 },
+      autonomyMode: "high-autonomy-plan",
+    });
+
+    const plan = result.data.plan as Record<string, unknown>;
+    const discovery = plan.autonomousDiscovery as Record<string, unknown>;
+    const selectedCandidates = plan.selectedCandidates as Array<Record<string, unknown>>;
+    const claimStatus = plan.claimStatus as Record<string, unknown>;
+
+    expect(discovery.status).toBe("completed");
+    expect(discovery.rankedCandidateCount).toBeGreaterThan(0);
+    expect(selectedCandidates.length).toBeGreaterThan(0);
+    expect(claimStatus.researchGradeClaimAllowed).toBe(false);
+    expect(result.data.candidatePoolPath).toBeDefined();
+    expect(result.data.evidenceLedgerPath).toBeDefined();
+    expect(result.artifacts).toContain(result.data.candidatePoolPath);
+
+    const candidatePoolText = await readFile(result.data.candidatePoolPath ?? "", "utf8");
+    const ledgerText = await readFile(result.data.evidenceLedgerPath ?? "", "utf8");
+    expect(candidatePoolText).toContain("dev-fixture");
+    expect(ledgerText).toContain("blocks-research-grade-claim");
+    expect(await readFile(result.data.reportPath, "utf8")).toContain("Autonomous Discovery");
+  });
 });

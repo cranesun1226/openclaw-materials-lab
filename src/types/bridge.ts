@@ -231,6 +231,11 @@ export interface EvidenceRequirementInput {
 
 export interface CandidateGenerationInput {
   strategy?: string;
+  autoDiscover?: boolean;
+  discoverAdditionalCandidates?: boolean;
+  allowDevelopmentFixtures?: boolean;
+  maxQueries?: number;
+  perQueryLimit?: number;
   seedMaterials?: string[];
   elementsInclude?: string[];
   elementsExclude?: string[];
@@ -264,6 +269,10 @@ export interface PlanResearchLoopResult {
   plan: Record<string, unknown>;
   manifestPath: string;
   reportPath: string;
+  queryLogPath?: string;
+  candidatePoolPath?: string;
+  evidenceLedgerPath?: string;
+  summaryPath?: string;
 }
 
 export interface ExecuteResearchPlanPayload {

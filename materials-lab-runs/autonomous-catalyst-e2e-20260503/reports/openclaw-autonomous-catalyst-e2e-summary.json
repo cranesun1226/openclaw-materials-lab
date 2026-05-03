@@ -1,0 +1,734 @@
+{
+  "status": "passed",
+  "startedAt": "2026-05-03T12:43:33.404Z",
+  "completedAt": "2026-05-03T12:44:10.229Z",
+  "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503",
+  "topic": "Discover lead-free noble-metal-free oxygen evolution catalyst candidates for alkaline water splitting.",
+  "targetApplication": "alkaline oxygen evolution electrocatalyst",
+  "constraints": [
+    "lead-free",
+    "noble-metal-free",
+    "alkaline-stable",
+    "low-cost transition-metal chemistry preferred",
+    "no research-grade claim without parsed evidence"
+  ],
+  "openclaw": {
+    "materialsLabConfigured": true,
+    "materialsProjectApiKeyConfigured": true,
+    "pythonPath": "/Users/haksunlee/.openclaw/materials-lab/.venv/bin/python"
+  },
+  "plan": {
+    "summary": "Compiled dynamic research protocol with 16 approval-gated step(s) for 3 selected candidate(s).",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/catalyst-research-protocol-1777812227343.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/catalyst-research-protocol-1777812227343.md",
+    "queryLogPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json",
+    "candidatePoolPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl",
+    "evidenceLedgerPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl",
+    "topic": {
+      "id": "catalyst",
+      "label": "Catalyst / surface material",
+      "inference": "keyword-derived",
+      "matchedKeywords": [
+        "catalyst"
+      ],
+      "alternateTopics": []
+    },
+    "selectedCandidateIds": [
+      "mp-675030",
+      "mp-690546",
+      "mp-19009"
+    ],
+    "evidenceSchemaIds": [
+      "literature-benchmark",
+      "database-provenance",
+      "phase-stability",
+      "structure-validity",
+      "synthesis-safety",
+      "surface-activity",
+      "operando-stability",
+      "environmental-health-safety",
+      "reproducibility"
+    ],
+    "calculationQueueCount": 16,
+    "approvalGateCount": 6,
+    "claimStatus": {
+      "currentLevel": "candidate-hypothesis",
+      "researchGradeClaimAllowed": false,
+      "blockedBy": [
+        "evidence-ledger-review",
+        "parsed-property-evidence",
+        "claim-policy-review"
+      ],
+      "reason": "The autonomous design engine can propose and rank candidates, but research-grade claims require closed evidenceSchema entries."
+    }
+  },
+  "discovery": {
+    "enabled": true,
+    "status": "completed",
+    "sourceMode": "materials-project-live",
+    "queryCount": 6,
+    "successfulQueryCount": 6,
+    "candidateCount": 50,
+    "rankedCandidateCount": 3,
+    "queryLogPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json",
+    "candidatePoolPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl",
+    "evidenceLedgerPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl",
+    "summaryPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/summary.json"
+  },
+  "selectedCandidates": [
+    {
+      "rank": 1,
+      "materialId": "mp-675030",
+      "formula": "TiNiO3",
+      "source": "materials-project",
+      "family": "generic",
+      "score": 0.875032,
+      "energyAboveHullEv": 0.020319030499999002,
+      "bandGapEv": 2.3354,
+      "densityGcm3": 4.957154613212025,
+      "spacegroup": "P1",
+      "elements": [
+        "Ni",
+        "O",
+        "Ti"
+      ],
+      "volume": 414.1901770745118,
+      "sites": 40,
+      "domainEvidenceScore": 0.907345,
+      "evidenceTier": "proxy-shortlist",
+      "sourceLevel": "summary-only",
+      "missingProperties": [
+        "domain-specific-property-model"
+      ],
+      "nextCalculations": [
+        "select a domain preset and add domain-specific property calculations"
+      ],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-675030",
+      "plannedCalculations": [
+        "mp-675030-structure-preflight",
+        "mp-675030-literature-benchmark",
+        "mp-675030-database-provenance",
+        "mp-675030-phase-stability",
+        "mp-675030-structure-validity",
+        "mp-675030-synthesis-safety",
+        "mp-675030-surface-activity",
+        "mp-675030-operando-stability",
+        "mp-675030-environmental-health-safety",
+        "mp-675030-reproducibility"
+      ]
+    },
+    {
+      "rank": 2,
+      "materialId": "mp-690546",
+      "formula": "TiNiO3",
+      "source": "materials-project",
+      "family": "generic",
+      "score": 0.868638,
+      "energyAboveHullEv": 0.018407698333332,
+      "bandGapEv": 2.2715,
+      "densityGcm3": 5.123835266835122,
+      "spacegroup": "P1",
+      "elements": [
+        "Ni",
+        "O",
+        "Ti"
+      ],
+      "volume": 300.53728897985826,
+      "sites": 30,
+      "domainEvidenceScore": 0.902125,
+      "evidenceTier": "proxy-shortlist",
+      "sourceLevel": "summary-only",
+      "missingProperties": [
+        "domain-specific-property-model"
+      ],
+      "nextCalculations": [
+        "select a domain preset and add domain-specific property calculations"
+      ],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-690546",
+      "plannedCalculations": [
+        "mp-690546-structure-preflight",
+        "mp-690546-literature-benchmark",
+        "mp-690546-database-provenance"
+      ]
+    },
+    {
+      "rank": 3,
+      "materialId": "mp-19009",
+      "formula": "NiO",
+      "source": "materials-project",
+      "family": "generic",
+      "score": 0.847952,
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.300899999999999,
+      "densityGcm3": 6.762154477618838,
+      "spacegroup": "Fm-3m",
+      "elements": [
+        "Ni",
+        "O"
+      ],
+      "volume": 18.34183362776642,
+      "sites": 2,
+      "domainEvidenceScore": 0.871256,
+      "evidenceTier": "proxy-shortlist",
+      "sourceLevel": "summary-only",
+      "missingProperties": [
+        "domain-specific-property-model"
+      ],
+      "nextCalculations": [
+        "select a domain preset and add domain-specific property calculations"
+      ],
+      "materialsProjectUrl": "https://materialsproject.org/materials/mp-19009"
+    }
+  ],
+  "structure": {
+    "materialId": "mp-675030",
+    "summary": "Fetched structure for mp-675030 and wrote 2 artifact(s).",
+    "usedOfflineData": false,
+    "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/structures/mp-675030/mp-675030.json",
+    "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/structures/mp-675030/mp-675030.cif"
+  },
+  "devSmoke": {
+    "summary": "Executed dev-smoke backend: 10 completed, 0 prepared, 0 submitted, 0 skipped.",
+    "backend": "dev-smoke",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/execution-manifest.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/execution-report.md",
+    "completedCalculations": 10,
+    "preparedCalculations": 0,
+    "submittedCalculations": 0,
+    "skippedCalculations": 0,
+    "propertyUpdates": [],
+    "inputPathCount": 0,
+    "resultPathCount": 10,
+    "warnings": [
+      "dev-smoke backend validates execution plumbing only; it does not generate property evidence or reranking updates."
+    ]
+  },
+  "quantumEspressoPrepare": {
+    "summary": "Prepared quantum-espresso backend: 0 completed, 7 prepared, 0 submitted, 9 skipped.",
+    "backend": "quantum-espresso",
+    "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/execution-manifest.json",
+    "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/execution-report.md",
+    "completedCalculations": 0,
+    "preparedCalculations": 7,
+    "submittedCalculations": 0,
+    "skippedCalculations": 9,
+    "propertyUpdates": [],
+    "inputPathCount": 38,
+    "resultPathCount": 7,
+    "warnings": []
+  },
+  "checks": [
+    {
+      "name": "bridge-ping",
+      "ok": true,
+      "detail": "Materials Lab worker 0.1.0 is ready."
+    },
+    {
+      "name": "protocol-version",
+      "ok": true,
+      "detail": "dynamic-research-protocol-v1"
+    },
+    {
+      "name": "topic-inference",
+      "ok": true,
+      "detail": "{\"id\":\"catalyst\",\"label\":\"Catalyst / surface material\",\"inference\":\"keyword-derived\",\"matchedKeywords\":[\"catalyst\"],\"alternateTopics\":[]}"
+    },
+    {
+      "name": "autonomous-discovery-enabled",
+      "ok": true,
+      "detail": "{\"enabled\":true,\"status\":\"completed\",\"sourceMode\":\"materials-project-live\",\"queryCount\":6,\"successfulQueryCount\":6,\"candidateCount\":50,\"rankedCandidateCount\":3,\"queryLogPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json\",\"candidatePoolPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl\",\"evidenceLedgerPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl\",\"summaryPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/summary.json\"}"
+    },
+    {
+      "name": "autonomous-discovery-completed",
+      "ok": true,
+      "detail": "{\"enabled\":true,\"status\":\"completed\",\"sourceMode\":\"materials-project-live\",\"queryCount\":6,\"successfulQueryCount\":6,\"candidateCount\":50,\"rankedCandidateCount\":3,\"queryLogPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json\",\"candidatePoolPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl\",\"evidenceLedgerPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl\",\"summaryPath\":\"/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/summary.json\"}"
+    },
+    {
+      "name": "live-source-mode",
+      "ok": true,
+      "detail": "materials-project-live"
+    },
+    {
+      "name": "candidate-pool-nonempty",
+      "ok": true,
+      "detail": "selected=3"
+    },
+    {
+      "name": "surface-activity-schema",
+      "ok": true,
+      "detail": "literature-benchmark, database-provenance, phase-stability, structure-validity, synthesis-safety, surface-activity, operando-stability, environmental-health-safety, reproducibility"
+    },
+    {
+      "name": "operando-stability-schema",
+      "ok": true,
+      "detail": "literature-benchmark, database-provenance, phase-stability, structure-validity, synthesis-safety, surface-activity, operando-stability, environmental-health-safety, reproducibility"
+    },
+    {
+      "name": "claim-locked",
+      "ok": true,
+      "detail": "{\"currentLevel\":\"candidate-hypothesis\",\"researchGradeClaimAllowed\":false,\"blockedBy\":[\"evidence-ledger-review\",\"parsed-property-evidence\",\"claim-policy-review\"],\"reason\":\"The autonomous design engine can propose and rank candidates, but research-grade claims require closed evidenceSchema entries.\"}"
+    },
+    {
+      "name": "candidate-pool-artifact",
+      "ok": true,
+      "detail": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl"
+    },
+    {
+      "name": "evidence-ledger-artifact",
+      "ok": true,
+      "detail": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl"
+    },
+    {
+      "name": "excluded-elements-filtered",
+      "ok": true,
+      "detail": "mp-675030, mp-690546, mp-19009"
+    },
+    {
+      "name": "live-structure-fetch",
+      "ok": true,
+      "detail": "Fetched structure for mp-675030 and wrote 2 artifact(s)."
+    },
+    {
+      "name": "dev-smoke-completed",
+      "ok": true,
+      "detail": "Executed dev-smoke backend: 10 completed, 0 prepared, 0 submitted, 0 skipped."
+    },
+    {
+      "name": "dev-smoke-no-property-updates",
+      "ok": true,
+      "detail": "propertyUpdates=0"
+    },
+    {
+      "name": "qe-prepared",
+      "ok": true,
+      "detail": "Prepared quantum-espresso backend: 0 completed, 7 prepared, 0 submitted, 9 skipped."
+    },
+    {
+      "name": "qe-not-submitted",
+      "ok": true,
+      "detail": "submittedCalculations=0"
+    },
+    {
+      "name": "qe-scf-input",
+      "ok": true,
+      "detail": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/pw.scf.in"
+    },
+    {
+      "name": "candidate-pool-live",
+      "ok": true,
+      "detail": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl"
+    },
+    {
+      "name": "ledger-blocks-research-grade",
+      "ok": true,
+      "detail": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl"
+    }
+  ],
+  "artifactPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/execution-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/execution-report.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-database-candidate-search.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-literature-evidence-ledger.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-research-protocol-review.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-database-provenance.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-literature-benchmark.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-phase-stability.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-preflight.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-validity.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-surface-activity.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-synthesis-safety.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/summary.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/catalyst-research-protocol-1777812227343.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/catalyst-research-protocol-1777812227343.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/execution-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/execution-report.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/preflight-note.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/run.sh",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/preflight-note.md",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/step-manifest.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/structures/mp-675030/mp-675030.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/structures/mp-675030/mp-675030.json"
+  ],
+  "artifactsExist": [
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/catalyst-research-protocol-1777812227343.json",
+      "exists": true,
+      "bytes": 44909
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/catalyst-research-protocol-1777812227343.md",
+      "exists": true,
+      "bytes": 10039
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json",
+      "exists": true,
+      "bytes": 4018
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl",
+      "exists": true,
+      "bytes": 10990
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl",
+      "exists": true,
+      "bytes": 5854
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/summary.json",
+      "exists": true,
+      "bytes": 1122
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/structures/mp-675030/mp-675030.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/structures/mp-675030/mp-675030.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/execution-manifest.json",
+      "exists": true,
+      "bytes": 13010
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/execution-report.md",
+      "exists": true,
+      "bytes": 1481
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-research-protocol-review.json",
+      "exists": true,
+      "bytes": 1158
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-literature-evidence-ledger.json",
+      "exists": true,
+      "bytes": 1149
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-database-candidate-search.json",
+      "exists": true,
+      "bytes": 1127
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-preflight.json",
+      "exists": true,
+      "bytes": 1144
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-literature-benchmark.json",
+      "exists": true,
+      "bytes": 1080
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-database-provenance.json",
+      "exists": true,
+      "bytes": 1073
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-phase-stability.json",
+      "exists": true,
+      "bytes": 1109
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-validity.json",
+      "exists": true,
+      "bytes": 1154
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-synthesis-safety.json",
+      "exists": true,
+      "bytes": 1161
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-surface-activity.json",
+      "exists": true,
+      "bytes": 1166
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/execution-manifest.json",
+      "exists": true,
+      "bytes": 27088
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/execution-report.md",
+      "exists": true,
+      "bytes": 1166
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/step-manifest.json",
+      "exists": true,
+      "bytes": 2830
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/step-manifest.json",
+      "exists": true,
+      "bytes": 3517
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/step-manifest.json",
+      "exists": true,
+      "bytes": 3587
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/step-manifest.json",
+      "exists": true,
+      "bytes": 3568
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/step-manifest.json",
+      "exists": true,
+      "bytes": 3555
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/step-manifest.json",
+      "exists": true,
+      "bytes": 3534
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/step-manifest.json",
+      "exists": true,
+      "bytes": 2830
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/structure.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/structure.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/POSCAR",
+      "exists": true,
+      "bytes": 2972
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-preflight/preflight-note.md",
+      "exists": true,
+      "bytes": 308
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/structure.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/structure.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/POSCAR",
+      "exists": true,
+      "bytes": 2972
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/pw.scf.in",
+      "exists": true,
+      "bytes": 2242
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 20
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-phase-stability/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/POSCAR",
+      "exists": true,
+      "bytes": 2972
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/pw.scf.in",
+      "exists": true,
+      "bytes": 2242
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 20
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/structure.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/structure.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/POSCAR",
+      "exists": true,
+      "bytes": 2972
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/pw.scf.in",
+      "exists": true,
+      "bytes": 2242
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 20
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-surface-activity/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/structure.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/structure.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/POSCAR",
+      "exists": true,
+      "bytes": 2972
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/pw.scf.in",
+      "exists": true,
+      "bytes": 2242
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 20
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-operando-stability/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/structure.json",
+      "exists": true,
+      "bytes": 15476
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/structure.cif",
+      "exists": true,
+      "bytes": 2723
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/POSCAR",
+      "exists": true,
+      "bytes": 2972
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/pw.scf.in",
+      "exists": true,
+      "bytes": 2242
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/PSEUDOPOTENTIALS.required",
+      "exists": true,
+      "bytes": 20
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-reproducibility/run.sh",
+      "exists": true,
+      "bytes": 70
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/structure.json",
+      "exists": true,
+      "bytes": 11953
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/structure.cif",
+      "exists": true,
+      "bytes": 2207
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/POSCAR",
+      "exists": true,
+      "bytes": 2288
+    },
+    {
+      "path": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-690546-structure-preflight/preflight-note.md",
+      "exists": true,
+      "bytes": 308
+    }
+  ],
+  "verdict": "OpenClaw Materials Lab autonomously compiled a catalyst research protocol from a topic, discovered live Materials Project candidates, wrote evidence artifacts, and prepared backend inputs without making research-grade claims."
+}

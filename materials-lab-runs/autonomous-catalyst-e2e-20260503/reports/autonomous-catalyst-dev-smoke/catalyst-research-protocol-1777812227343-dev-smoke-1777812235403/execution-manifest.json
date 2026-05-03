@@ -1,0 +1,309 @@
+{
+  "allowBlockedDevSmoke": true,
+  "backend": "dev-smoke",
+  "completed": [
+    {
+      "backend": "dev-smoke",
+      "calculationId": "global-research-protocol-review",
+      "calculationType": "research-protocol-review",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": false,
+        "hasMaterialId": false,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "protocolReview"
+        ]
+      },
+      "estimatedWallTimeHours": 0.25,
+      "formula": "",
+      "label": "Research protocol and evidence schema review",
+      "materialId": "",
+      "method": "review compiled goal, candidate-generation strategy, evidence schema, claim policy, and stop criteria",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-research-protocol-review.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "global-literature-evidence-ledger",
+      "calculationType": "literature-evidence-ledger",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": false,
+        "hasMaterialId": false,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "literatureBaseline",
+          "knownControls",
+          "failureModes"
+        ]
+      },
+      "estimatedWallTimeHours": 1.0,
+      "formula": "",
+      "label": "Literature evidence ledger",
+      "materialId": "",
+      "method": "search, cite, and extract claims from literature queries",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-literature-evidence-ledger.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "global-database-candidate-search",
+      "calculationType": "database-candidate-search",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": false,
+        "hasMaterialId": false,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "candidatePool",
+          "databaseSummary"
+        ]
+      },
+      "estimatedWallTimeHours": 0.5,
+      "formula": "",
+      "label": "Database candidate generation",
+      "materialId": "",
+      "method": "run database queries and build source-tagged candidate pool",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-database-candidate-search.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-structure-preflight",
+      "calculationType": "structure-preflight",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "structurePath",
+          "cifPath",
+          "structureQuality"
+        ]
+      },
+      "estimatedWallTimeHours": 0.05,
+      "formula": "TiNiO3",
+      "label": "Structure fetch and normalization preflight",
+      "materialId": "mp-675030",
+      "method": "fetch_structure + structural sanity checks",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-preflight.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-literature-benchmark",
+      "calculationType": "literature-benchmark",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "literatureBaseline"
+        ]
+      },
+      "estimatedWallTimeHours": 1.0,
+      "formula": "TiNiO3",
+      "label": "Literature benchmark",
+      "materialId": "mp-675030",
+      "method": "citation-backed literature extraction",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-literature-benchmark.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-database-provenance",
+      "calculationType": "database-provenance",
+      "costClass": "metadata",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "databaseSummary"
+        ]
+      },
+      "estimatedWallTimeHours": 0.5,
+      "formula": "TiNiO3",
+      "label": "Database provenance",
+      "materialId": "mp-675030",
+      "method": "database query and provenance capture",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-database-provenance.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-phase-stability",
+      "calculationType": "phase-stability",
+      "costClass": "medium",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "energyAboveHullEv",
+          "decompositionProducts"
+        ]
+      },
+      "estimatedWallTimeHours": 8.0,
+      "formula": "TiNiO3",
+      "label": "Phase stability",
+      "materialId": "mp-675030",
+      "method": "DFT workflow with convergence checks and parsed properties",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-phase-stability.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-structure-validity",
+      "calculationType": "structure-validity",
+      "costClass": "medium",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "structureQuality",
+          "oxidationStates",
+          "chargeBalance"
+        ]
+      },
+      "estimatedWallTimeHours": 2.0,
+      "formula": "TiNiO3",
+      "label": "Structure and chemistry validity",
+      "materialId": "mp-675030",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-validity.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-synthesis-safety",
+      "calculationType": "synthesis-safety",
+      "costClass": "expensive",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "synthesisRoute",
+          "toxicityFlags",
+          "supplyRisk"
+        ]
+      },
+      "estimatedWallTimeHours": 72.0,
+      "formula": "TiNiO3",
+      "label": "Synthesis, toxicity, and handling risk",
+      "materialId": "mp-675030",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-synthesis-safety.json",
+      "status": "completed-dev-smoke"
+    },
+    {
+      "backend": "dev-smoke",
+      "calculationId": "mp-675030-surface-activity",
+      "calculationType": "surface-activity",
+      "costClass": "expensive",
+      "diagnostics": {
+        "hasFormula": true,
+        "hasMaterialId": true,
+        "preset": "dynamic",
+        "writesPropertiesSuppressed": [
+          "adsorptionEnergyEv",
+          "overpotentialV",
+          "selectivityScore"
+        ]
+      },
+      "estimatedWallTimeHours": 72.0,
+      "formula": "TiNiO3",
+      "label": "Surface activity and selectivity",
+      "materialId": "mp-675030",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "provenance": {
+        "backend": "dev-smoke",
+        "basis": "execution plumbing smoke test only",
+        "confidence": "none",
+        "generatedAt": 1777812235,
+        "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+      },
+      "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-surface-activity.json",
+      "status": "completed-dev-smoke"
+    }
+  ],
+  "completedCalculations": 10,
+  "generatedAt": 1777812235,
+  "planId": "catalyst-research-protocol-1777812227343",
+  "preset": "dynamic",
+  "propertyUpdates": [],
+  "runId": "catalyst-research-protocol-1777812227343-dev-smoke-1777812235403",
+  "skipped": [],
+  "skippedCalculations": 0,
+  "warnings": [
+    "dev-smoke backend validates execution plumbing only; it does not generate property evidence or reranking updates."
+  ]
+}

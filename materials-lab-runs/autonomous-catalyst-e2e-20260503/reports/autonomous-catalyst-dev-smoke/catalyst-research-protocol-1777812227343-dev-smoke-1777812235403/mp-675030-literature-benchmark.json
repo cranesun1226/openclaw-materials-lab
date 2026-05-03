@@ -1,0 +1,28 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "mp-675030-literature-benchmark",
+  "calculationType": "literature-benchmark",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": true,
+    "hasMaterialId": true,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "literatureBaseline"
+    ]
+  },
+  "estimatedWallTimeHours": 1.0,
+  "formula": "TiNiO3",
+  "label": "Literature benchmark",
+  "materialId": "mp-675030",
+  "method": "citation-backed literature extraction",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777812235,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-literature-benchmark.json",
+  "status": "completed-dev-smoke"
+}

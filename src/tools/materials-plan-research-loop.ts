@@ -101,6 +101,11 @@ const EvidenceRequirementSchema = Type.Object(
 const CandidateGenerationSchema = Type.Object(
   {
     strategy: Type.Optional(Type.String({ minLength: 1, maxLength: 500 })),
+    autoDiscover: Type.Optional(Type.Boolean()),
+    discoverAdditionalCandidates: Type.Optional(Type.Boolean()),
+    allowDevelopmentFixtures: Type.Optional(Type.Boolean()),
+    maxQueries: Type.Optional(Type.Number({ minimum: 1, maximum: 30 })),
+    perQueryLimit: Type.Optional(Type.Number({ minimum: 1, maximum: 100 })),
     seedMaterials: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 80 }), { maxItems: 100 })),
     elementsInclude: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),
     elementsExclude: Type.Optional(Type.Array(Type.String({ minLength: 1, maxLength: 3 }), { maxItems: 40 })),

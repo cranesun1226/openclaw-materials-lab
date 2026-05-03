@@ -131,7 +131,7 @@ def dispatch(*, action: str, request_id: str, payload: dict[str, Any]) -> dict[s
         "fetch_structure": lambda: handle_fetch_structure(request_id=request_id, payload=payload, api_key=api_key),
         "analyze_structure": lambda: handle_analyze_structure(request_id=request_id, payload=payload, api_key=api_key),
         "compare_candidates": lambda: handle_compare_candidates(request_id=request_id, payload=payload),
-        "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload),
+        "plan_research_loop": lambda: handle_plan_research_loop(request_id=request_id, payload=payload, api_key=api_key),
         "execute_research_plan": lambda: handle_execute_research_plan(request_id=request_id, payload=payload, api_key=api_key),
         "ase_relax": lambda: handle_ase_relax(request_id=request_id, payload=payload, api_key=api_key),
         "batch_screen": lambda: handle_batch_screen(request_id=request_id, payload=payload, api_key=api_key),
@@ -309,14 +309,15 @@ def handle_compare_candidates(*, request_id: str, payload: dict[str, Any]) -> di
     )
 
 
-def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any], api_key: str | None) -> dict[str, Any]:
     artifact_dir = Path(ensure_string(payload.get("artifactDir"), field="artifactDir"))
     artifact_dir.mkdir(parents=True, exist_ok=True)
     candidates = payload.get("candidates") or []
     if not isinstance(candidates, list):
         raise WorkerError("INVALID_PARAMS", "plan_research_loop requires candidates to be an array when provided.")
 
-    criteria = _prepare_compare_criteria(ensure_dict(payload.get("criteria") or {}, field="criteria"))
+    raw_criteria = ensure_dict(payload.get("criteria") or {}, field="criteria")
+    criteria = _prepare_compare_criteria(raw_criteria)
     budget = _normalize_research_budget(ensure_dict(payload.get("budget") or {}, field="budget"))
     research_goal = ensure_string(payload.get("researchGoal"), field="researchGoal", required=False)
     objective = ensure_string(payload.get("objective"), field="objective", required=False) or research_goal or _default_research_objective(criteria)
@@ -325,6 +326,24 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
     mode = str(payload.get("mode") or "property-backed").strip().lower()
     approval_policy = str(payload.get("approvalPolicy") or "approval-required").strip().lower()
     protocol_inputs = _normalize_protocol_inputs(payload, objective=objective, criteria=criteria)
+    draft_protocol = _compile_dynamic_research_protocol(
+        objective=objective,
+        candidates=candidates,
+        criteria=criteria,
+        protocol_inputs=protocol_inputs,
+    )
+    criteria = _criteria_for_protocol_topic(raw_criteria, criteria, draft_protocol.get("topic") or {})
+    discovery = _autonomous_candidate_discovery(
+        candidates=candidates,
+        protocol=draft_protocol,
+        criteria=criteria,
+        budget=budget,
+        artifact_dir=artifact_dir,
+        api_key=api_key,
+        protocol_inputs=protocol_inputs,
+    )
+    if not candidates and discovery.get("rankedCandidates"):
+        candidates = list(discovery.get("rankedCandidates") or [])
 
     plan = _build_research_loop_plan(
         candidates=candidates,
@@ -335,6 +354,7 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
         approval_policy=approval_policy,
         protocol_inputs=protocol_inputs,
     )
+    _attach_autonomous_discovery(plan, discovery, candidates)
     manifest_path = artifact_dir / f"{plan['planId']}.json"
     report_path = artifact_dir / f"{plan['planId']}.md"
     manifest_path.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -343,14 +363,16 @@ def handle_plan_research_loop(*, request_id: str, payload: dict[str, Any]) -> di
         "plan": plan,
         "manifestPath": str(manifest_path),
         "reportPath": str(report_path),
+        **_discovery_paths_for_result(discovery),
     }
     warnings = list(plan.get("warnings") or [])
+    warnings.extend(discovery.get("warnings") or [])
     return success(
         action="plan_research_loop",
         request_id=request_id,
         summary=f"Compiled dynamic research protocol with {len(plan['calculationQueue'])} approval-gated step(s) for {len(plan['selectedCandidates'])} selected candidate(s).",
         data=data,
-        artifacts=[str(manifest_path), str(report_path)],
+        artifacts=[str(manifest_path), str(report_path), *list(discovery.get("artifactPaths") or [])],
         warnings=warnings,
     )
 
@@ -1524,6 +1546,538 @@ def _build_research_loop_plan(
     }
 
 
+def _criteria_for_protocol_topic(raw_criteria: dict[str, Any], criteria: dict[str, Any], topic: dict[str, Any]) -> dict[str, Any]:
+    if raw_criteria.get("preset"):
+        return criteria
+    topic_to_preset = {
+        "solid-electrolyte": "solid-electrolyte",
+        "dielectric": "high-k-dielectric",
+        "photovoltaic-absorber": "photovoltaic-absorber",
+        "thermoelectric": "thermoelectric",
+    }
+    inferred = topic_to_preset.get(str(topic.get("id") or ""))
+    if not inferred:
+        return criteria
+    return _prepare_compare_criteria({**raw_criteria, "preset": inferred})
+
+
+def _autonomous_candidate_discovery(
+    *,
+    candidates: list[dict[str, Any]],
+    protocol: dict[str, Any],
+    criteria: dict[str, Any],
+    budget: dict[str, Any],
+    artifact_dir: Path,
+    api_key: str | None,
+    protocol_inputs: dict[str, Any],
+) -> dict[str, Any]:
+    candidate_generation = ensure_dict(protocol_inputs.get("candidateGeneration") or {}, field="candidateGeneration")
+    enabled = _auto_discovery_enabled(candidates, candidate_generation)
+    if not enabled:
+        return {
+            "enabled": False,
+            "status": "skipped-existing-candidates" if candidates else "disabled",
+            "reason": "Candidate discovery was disabled or explicit candidates were provided.",
+            "artifactPaths": [],
+            "warnings": [],
+        }
+
+    discovery_dir = artifact_dir / "autonomous-discovery"
+    discovery_dir.mkdir(parents=True, exist_ok=True)
+    allow_development_fixtures = bool(
+        candidate_generation.get("allowDevelopmentFixtures")
+        or candidate_generation.get("allowOffline")
+        or candidate_generation.get("allowOfflineCandidateDiscovery")
+    )
+    search_payloads = _compile_discovery_search_payloads(
+        protocol=protocol,
+        criteria=criteria,
+        budget=budget,
+        protocol_inputs=protocol_inputs,
+    )
+    query_records: list[dict[str, Any]] = []
+    by_id: dict[str, dict[str, Any]] = {}
+    rejected: list[dict[str, Any]] = []
+    warnings: list[str] = []
+
+    if not api_key and not allow_development_fixtures:
+        warnings.append("Autonomous database discovery was attempted without a Materials Project API key; no development fixture fallback was used.")
+
+    for index, payload in enumerate(search_payloads, start=1):
+        query_id = f"dbq-{index:03d}"
+        query_payload = dict(payload)
+        query_payload["allowOffline"] = allow_development_fixtures
+        record: dict[str, Any] = {
+            "queryId": query_id,
+            "status": "planned",
+            "tool": "materials_search_mp",
+            "payload": query_payload,
+            "source": "Materials Project" if api_key else "Materials Project unavailable",
+            "usedDevelopmentFixtureData": False,
+            "candidateIds": [],
+            "rejected": [],
+        }
+        if not api_key and not allow_development_fixtures:
+            record["status"] = "skipped-no-api-key"
+            record["message"] = "Configure mpApiKey or set candidateGeneration.allowDevelopmentFixtures=true for smoke tests."
+            query_records.append(record)
+            continue
+        try:
+            raw_candidates, used_offline = search_materials(query_payload, api_key=api_key)
+            summaries = [_candidate_summary(item) for item in raw_candidates]
+            accepted, rejected_for_query = _filter_discovered_candidates(
+                summaries,
+                protocol=protocol,
+                criteria=criteria,
+                protocol_inputs=protocol_inputs,
+            )
+            for candidate in accepted:
+                material_id = str(candidate.get("materialId") or "")
+                if not material_id:
+                    continue
+                existing = by_id.setdefault(material_id, dict(candidate))
+                query_ids = set(existing.get("discoveryQueryIds") or [])
+                query_ids.add(query_id)
+                existing["discoveryQueryIds"] = sorted(query_ids)
+                existing["discoverySource"] = "dev-fixture" if used_offline else "materials-project-live"
+            rejected.extend(rejected_for_query)
+            record.update({
+                "status": "ok",
+                "source": "development fixture data" if used_offline else "Materials Project",
+                "usedDevelopmentFixtureData": used_offline,
+                "candidateCount": len(summaries),
+                "acceptedCount": len(accepted),
+                "candidateIds": [candidate.get("materialId") for candidate in accepted],
+                "rejected": rejected_for_query,
+            })
+        except WorkerError as exc:
+            record.update({
+                "status": "failed",
+                "error": exc.code,
+                "message": exc.message,
+                "hint": exc.hint,
+            })
+        except Exception as exc:  # pragma: no cover - network/runtime dependent
+            record.update({
+                "status": "failed",
+                "error": exc.__class__.__name__,
+                "message": str(exc),
+            })
+        query_records.append(record)
+
+    discovered = list(by_id.values())
+    rankable, excluded_by_ranking = _filter_candidates_for_ranking(discovered, criteria)
+    if excluded_by_ranking:
+        rejected.extend(excluded_by_ranking)
+    ranked = _rank_candidates(rankable, criteria) if rankable else []
+    ranked = ranked[: int(budget["maxCandidates"])]
+    for candidate in ranked:
+        candidate["claimLevel"] = "candidate-hypothesis"
+        candidate["researchGradeClaimAllowed"] = False
+
+    evidence_rows = _discovery_evidence_ledger_rows(
+        candidates=ranked,
+        query_records=query_records,
+        protocol=protocol,
+        criteria=criteria,
+    )
+    artifact_paths = _write_discovery_artifacts(
+        discovery_dir=discovery_dir,
+        query_records=query_records,
+        ranked=ranked,
+        evidence_rows=evidence_rows,
+        rejected=rejected,
+        protocol=protocol,
+    )
+    status = "completed" if ranked else "completed-no-candidates"
+    if not ranked:
+        warnings.append("Autonomous candidate discovery produced no rankable candidates; protocol remains candidate-generation-first.")
+    return {
+        "enabled": True,
+        "status": status,
+        "sourceMode": _discovery_source_mode(query_records, api_key=api_key),
+        "queryCount": len(query_records),
+        "successfulQueryCount": sum(1 for record in query_records if record.get("status") == "ok"),
+        "candidateCount": len(discovered),
+        "rankedCandidateCount": len(ranked),
+        "rankedCandidates": ranked,
+        "rejectedCandidates": rejected,
+        "queryRecords": query_records,
+        "artifactPaths": artifact_paths,
+        "warnings": warnings,
+        "candidatePoolPath": str(discovery_dir / "candidate-pool.jsonl"),
+        "evidenceLedgerPath": str(discovery_dir / "evidence-ledger.jsonl"),
+        "queryLogPath": str(discovery_dir / "query-log.json"),
+        "summaryPath": str(discovery_dir / "summary.json"),
+    }
+
+
+def _discovery_source_mode(query_records: list[dict[str, Any]], *, api_key: str | None) -> str:
+    if any(record.get("usedDevelopmentFixtureData") for record in query_records):
+        return "development-fixture-smoke"
+    if any(record.get("status") == "ok" for record in query_records):
+        return "materials-project-live"
+    return "materials-project-unavailable" if not api_key else "materials-project-no-successful-query"
+
+
+def _auto_discovery_enabled(candidates: list[dict[str, Any]], candidate_generation: dict[str, Any]) -> bool:
+    if candidates:
+        return bool(candidate_generation.get("discoverAdditionalCandidates", False))
+    if "autoDiscover" in candidate_generation:
+        return bool(candidate_generation.get("autoDiscover"))
+    return True
+
+
+def _compile_discovery_search_payloads(
+    *,
+    protocol: dict[str, Any],
+    criteria: dict[str, Any],
+    budget: dict[str, Any],
+    protocol_inputs: dict[str, Any],
+) -> list[dict[str, Any]]:
+    candidate_generation = ensure_dict(protocol_inputs.get("candidateGeneration") or {}, field="candidateGeneration")
+    max_queries = max(1, min(int(candidate_generation.get("maxQueries") or 8), 30))
+    per_query_limit = max(1, min(int(candidate_generation.get("perQueryLimit") or max(6, budget["maxCandidates"] * 4)), 100))
+    payloads: list[dict[str, Any]] = []
+    for item in candidate_generation.get("searchPayloads") or []:
+        if isinstance(item, dict):
+            payloads.append(_sanitize_search_payload(item, per_query_limit))
+    for formula in _string_list(candidate_generation.get("formulas")):
+        payloads.append(_search_payload({"formula": formula}, criteria, per_query_limit))
+    for seed in _string_list(candidate_generation.get("seedMaterials")):
+        if _looks_like_formula(seed):
+            payloads.append(_search_payload({"formula": seed}, criteria, per_query_limit))
+    payloads.extend(_topic_seed_search_payloads(protocol, criteria, per_query_limit))
+    elements_include = _string_list(candidate_generation.get("elementsInclude"))
+    if elements_include:
+        payloads.append(_search_payload({"elementsAll": elements_include[:8]}, criteria, per_query_limit))
+    if not payloads:
+        payloads.append(_search_payload({}, criteria, per_query_limit))
+    return _dedupe_search_payloads(payloads)[:max_queries]
+
+
+def _topic_seed_search_payloads(protocol: dict[str, Any], criteria: dict[str, Any], limit: int) -> list[dict[str, Any]]:
+    topic_id = str((protocol.get("topic") or {}).get("id") or "")
+    if topic_id == "photovoltaic-absorber":
+        seeds = [
+            {"formula": "Si"},
+            {"elementsAll": ["Cu", "In", "Se"]},
+            {"elementsAll": ["Cu", "Ga", "Se"]},
+            {"elementsAll": ["Cu", "Zn", "Sn", "S"]},
+            {"elementsAll": ["Ag", "Bi", "S"]},
+        ]
+    elif topic_id == "dielectric":
+        seeds = [
+            {"formula": "HfO2"},
+            {"formula": "ZrO2"},
+            {"formula": "Al2O3"},
+            {"formula": "TiO2"},
+            {"formula": "SrTiO3"},
+            {"elementsAll": ["O"]},
+        ]
+    elif topic_id == "solid-electrolyte":
+        seeds = [
+            {"elementsAll": ["Li", "La", "Zr", "O"]},
+            {"elementsAll": ["Li", "P", "S"]},
+            {"elementsAll": ["Li", "Ge", "P", "S"]},
+            {"elementsAll": ["Li", "Al", "Ti", "P", "O"]},
+            {"elementsAll": ["Li", "Y", "Cl"]},
+        ]
+    elif topic_id == "thermoelectric":
+        seeds = [
+            {"elementsAll": ["Bi", "Te"]},
+            {"elementsAll": ["Sb", "Te"]},
+            {"elementsAll": ["Mg", "Si"]},
+            {"elementsAll": ["Sn", "Se"]},
+        ]
+    elif topic_id == "catalyst":
+        seeds = [
+            {"elementsAll": ["Fe", "O"]},
+            {"elementsAll": ["Co", "O"]},
+            {"elementsAll": ["Ni", "O"]},
+            {"elementsAll": ["Mo", "S"]},
+        ]
+    else:
+        seeds = [{}]
+    return [_search_payload(seed, criteria, limit) for seed in seeds]
+
+
+def _search_payload(seed: dict[str, Any], criteria: dict[str, Any], limit: int) -> dict[str, Any]:
+    payload = dict(seed)
+    payload.setdefault("maxEnergyAboveHullEv", 0.08)
+    min_gap = criteria.get("minimumBandGapEv")
+    if isinstance(min_gap, (int, float)) and float(min_gap) > 0:
+        payload.setdefault("minBandGapEv", float(min_gap))
+    target_gap = criteria.get("bandGapTargetEv")
+    if isinstance(target_gap, (int, float)) and float(target_gap) > 0:
+        payload.setdefault("maxBandGapEv", max(float(target_gap) * 1.7, float(min_gap or 0) + 0.5))
+    payload["limit"] = limit
+    return payload
+
+
+def _sanitize_search_payload(payload: dict[str, Any], limit: int) -> dict[str, Any]:
+    allowed = {
+        "textQuery",
+        "formula",
+        "elementsAll",
+        "elementsAny",
+        "maxEnergyAboveHullEv",
+        "minBandGapEv",
+        "maxBandGapEv",
+        "limit",
+    }
+    sanitized = {key: payload[key] for key in allowed if key in payload}
+    sanitized["limit"] = int(sanitized.get("limit") or limit)
+    return sanitized
+
+
+def _dedupe_search_payloads(payloads: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = set()
+    result = []
+    for payload in payloads:
+        key = json.dumps(payload, sort_keys=True)
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(payload)
+    return result
+
+
+def _filter_discovered_candidates(
+    candidates: list[dict[str, Any]],
+    *,
+    protocol: dict[str, Any],
+    criteria: dict[str, Any],
+    protocol_inputs: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    candidate_generation = ensure_dict(protocol_inputs.get("candidateGeneration") or {}, field="candidateGeneration")
+    excluded_elements = set(_string_list(candidate_generation.get("elementsExclude")))
+    excluded_elements.update(_constraint_excluded_elements(protocol))
+    if criteria.get("excludeToxicElements"):
+        excluded_elements.update(str(item) for item in criteria.get("excludedElements") or [])
+    accepted: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    for candidate in candidates:
+        elements = set(str(item) for item in candidate.get("elements") or [])
+        reasons = []
+        blocked = sorted(elements.intersection(excluded_elements))
+        if blocked:
+            reasons.append(f"excluded elements present: {', '.join(blocked)}")
+        if reasons:
+            rejected.append({
+                "materialId": candidate.get("materialId"),
+                "formula": candidate.get("formula"),
+                "reasons": reasons,
+            })
+        else:
+            accepted.append(candidate)
+    return accepted, rejected
+
+
+def _constraint_excluded_elements(protocol: dict[str, Any]) -> set[str]:
+    text = " ".join([
+        str(protocol.get("researchGoal") or ""),
+        " ".join(protocol.get("constraints") or []),
+    ]).lower()
+    excluded: set[str] = set()
+    if "lead-free" in text or "pb-free" in text:
+        excluded.add("Pb")
+    if "cadmium-free" in text or "cd-free" in text:
+        excluded.add("Cd")
+    if "mercury-free" in text or "hg-free" in text:
+        excluded.add("Hg")
+    if "toxic" in text or "toxicity" in text:
+        excluded.update({"Hg", "Tl", "Th", "U"})
+    return excluded
+
+
+def _discovery_evidence_ledger_rows(
+    *,
+    candidates: list[dict[str, Any]],
+    query_records: list[dict[str, Any]],
+    protocol: dict[str, Any],
+    criteria: dict[str, Any],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    generated_at = int(time.time())
+    query_ids = {str(record.get("queryId")): record for record in query_records}
+    for candidate in candidates:
+        material_id = str(candidate.get("materialId") or "candidate")
+        linked_queries = [query_ids[item] for item in candidate.get("discoveryQueryIds") or [] if item in query_ids]
+        rows.append(_ledger_row(
+            material_id=material_id,
+            formula=str(candidate.get("formula") or ""),
+            evidence_requirement_id="database-provenance",
+            claim="Candidate came from an auditable database discovery query.",
+            status="supports-candidate-hypothesis",
+            source_type="database",
+            source=candidate.get("source"),
+            confidence="database-summary",
+            generated_at=generated_at,
+            property_values={
+                "energyAboveHullEv": candidate.get("energyAboveHullEv"),
+                "bandGapEv": candidate.get("bandGapEv"),
+                "densityGcm3": candidate.get("densityGcm3"),
+                "spacegroup": candidate.get("spacegroup"),
+            },
+            query_ids=[record.get("queryId") for record in linked_queries],
+        ))
+        if candidate.get("energyAboveHullEv") is not None:
+            rows.append(_ledger_row(
+                material_id=material_id,
+                formula=str(candidate.get("formula") or ""),
+                evidence_requirement_id="phase-stability",
+                claim="Database phase-stability proxy is available; DFT decomposition evidence is still required for research-grade promotion.",
+                status="proxy-only",
+                source_type="database",
+                source=candidate.get("source"),
+                confidence="database-summary",
+                generated_at=generated_at,
+                property_values={"energyAboveHullEv": candidate.get("energyAboveHullEv")},
+                query_ids=[record.get("queryId") for record in linked_queries],
+            ))
+        rows.append(_ledger_row(
+            material_id=material_id,
+            formula=str(candidate.get("formula") or ""),
+            evidence_requirement_id="claim-policy",
+            claim="Discovery output is limited to candidate-hypothesis/proxy-shortlist until evidenceSchema requirements are closed.",
+            status="blocks-research-grade-claim",
+            source_type="workflow",
+            source="dynamic-research-protocol-v1",
+            confidence="workflow-policy",
+            generated_at=generated_at,
+            property_values={
+                "claimLevel": "candidate-hypothesis",
+                "researchGradeClaimAllowed": False,
+                "rankingPreset": criteria.get("preset"),
+                "requiredEvidenceRequirementIds": (protocol.get("claimPolicy") or {}).get("requiredEvidenceRequirementIds"),
+            },
+            query_ids=[record.get("queryId") for record in linked_queries],
+        ))
+    return rows
+
+
+def _ledger_row(
+    *,
+    material_id: str,
+    formula: str,
+    evidence_requirement_id: str,
+    claim: str,
+    status: str,
+    source_type: str,
+    source: Any,
+    confidence: str,
+    generated_at: int,
+    property_values: dict[str, Any],
+    query_ids: list[Any],
+) -> dict[str, Any]:
+    return {
+        "ledgerVersion": "evidence-ledger-v1",
+        "evidenceId": _safe_file_stem(f"{material_id}-{evidence_requirement_id}").lower(),
+        "candidateId": material_id,
+        "formula": formula,
+        "evidenceRequirementId": evidence_requirement_id,
+        "claim": claim,
+        "status": status,
+        "sourceType": source_type,
+        "source": source,
+        "confidence": confidence,
+        "propertyValues": {key: value for key, value in property_values.items() if value is not None},
+        "queryIds": [item for item in query_ids if item],
+        "generatedAt": generated_at,
+    }
+
+
+def _write_discovery_artifacts(
+    *,
+    discovery_dir: Path,
+    query_records: list[dict[str, Any]],
+    ranked: list[dict[str, Any]],
+    evidence_rows: list[dict[str, Any]],
+    rejected: list[dict[str, Any]],
+    protocol: dict[str, Any],
+) -> list[str]:
+    query_log_path = discovery_dir / "query-log.json"
+    candidate_pool_path = discovery_dir / "candidate-pool.jsonl"
+    evidence_ledger_path = discovery_dir / "evidence-ledger.jsonl"
+    summary_path = discovery_dir / "summary.json"
+    query_log_path.write_text(json.dumps(query_records, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    candidate_pool_path.write_text(
+        "".join(json.dumps(_public_candidate_record(candidate), sort_keys=True) + "\n" for candidate in ranked),
+        encoding="utf-8",
+    )
+    evidence_ledger_path.write_text(
+        "".join(json.dumps(row, sort_keys=True) + "\n" for row in evidence_rows),
+        encoding="utf-8",
+    )
+    summary = {
+        "discoveryVersion": "autonomous-discovery-v1",
+        "topic": protocol.get("topic"),
+        "queryCount": len(query_records),
+        "successfulQueryCount": sum(1 for record in query_records if record.get("status") == "ok"),
+        "candidateCount": len(ranked),
+        "candidateIds": [candidate.get("materialId") for candidate in ranked],
+        "rejectedCount": len(rejected),
+        "claimLevel": "candidate-hypothesis" if ranked else "no-candidate",
+        "researchGradeClaimAllowed": False,
+        "artifacts": {
+            "queryLogPath": str(query_log_path),
+            "candidatePoolPath": str(candidate_pool_path),
+            "evidenceLedgerPath": str(evidence_ledger_path),
+        },
+    }
+    summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return [str(query_log_path), str(candidate_pool_path), str(evidence_ledger_path), str(summary_path)]
+
+
+def _public_candidate_record(candidate: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: value
+        for key, value in candidate.items()
+        if not key.startswith("_")
+    }
+
+
+def _attach_autonomous_discovery(plan: dict[str, Any], discovery: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
+    summary = {
+        "enabled": discovery.get("enabled", False),
+        "status": discovery.get("status"),
+        "sourceMode": discovery.get("sourceMode"),
+        "queryCount": discovery.get("queryCount", 0),
+        "successfulQueryCount": discovery.get("successfulQueryCount", 0),
+        "candidateCount": discovery.get("candidateCount", len(candidates)),
+        "rankedCandidateCount": discovery.get("rankedCandidateCount", len(candidates)),
+        **_discovery_paths_for_result(discovery),
+    }
+    plan["autonomousDiscovery"] = summary
+    plan["claimStatus"] = {
+        "currentLevel": "candidate-hypothesis" if plan.get("selectedCandidates") else "no-candidate",
+        "researchGradeClaimAllowed": False,
+        "blockedBy": [
+            "evidence-ledger-review",
+            "parsed-property-evidence",
+            "claim-policy-review",
+        ],
+        "reason": "The autonomous design engine can propose and rank candidates, but research-grade claims require closed evidenceSchema entries.",
+    }
+    candidate_generation = plan.get("candidateGenerationPlan") if isinstance(plan.get("candidateGenerationPlan"), dict) else {}
+    candidate_generation["autoDiscovery"] = summary
+    candidate_generation["initialCandidateCount"] = len(candidates)
+    plan["candidateGenerationPlan"] = candidate_generation
+
+
+def _discovery_paths_for_result(discovery: dict[str, Any]) -> dict[str, str]:
+    return {
+        key: str(discovery[key])
+        for key in ["queryLogPath", "candidatePoolPath", "evidenceLedgerPath", "summaryPath"]
+        if discovery.get(key)
+    }
+
+
+def _looks_like_formula(value: str) -> bool:
+    return any(char.isdigit() for char in value) or any(char.isupper() for char in value)
+
+
 def _string_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []
@@ -2252,6 +2806,16 @@ def _research_plan_markdown(plan: dict[str, Any]) -> str:
         f"- Initial candidate count: {(plan.get('candidateGenerationPlan') or {}).get('initialCandidateCount', 0)}",
         f"- Database queries: {' | '.join((plan.get('databaseSearchPlan') or {}).get('queries') or []) or '-'}",
         f"- Literature queries: {' | '.join((plan.get('literatureReviewPlan') or {}).get('queries') or []) or '-'}",
+        "",
+        "## Autonomous Discovery",
+        "",
+        f"- Enabled: `{(plan.get('autonomousDiscovery') or {}).get('enabled', False)}`",
+        f"- Status: `{(plan.get('autonomousDiscovery') or {}).get('status', '-')}`",
+        f"- Source mode: `{(plan.get('autonomousDiscovery') or {}).get('sourceMode', '-')}`",
+        f"- Queries: {(plan.get('autonomousDiscovery') or {}).get('successfulQueryCount', 0)} / {(plan.get('autonomousDiscovery') or {}).get('queryCount', 0)}",
+        f"- Ranked candidates: {(plan.get('autonomousDiscovery') or {}).get('rankedCandidateCount', 0)}",
+        f"- Candidate pool: {(plan.get('autonomousDiscovery') or {}).get('candidatePoolPath', '-')}",
+        f"- Evidence ledger: {(plan.get('autonomousDiscovery') or {}).get('evidenceLedgerPath', '-')}",
         "",
         "## Evidence Schema",
         "",

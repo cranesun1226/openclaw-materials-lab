@@ -1,0 +1,37 @@
+{
+  "backend": "quantum-espresso",
+  "calculationId": "mp-675030-structure-validity",
+  "calculationType": "structure-validity",
+  "costClass": "medium",
+  "executionScript": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/run.sh",
+  "formula": "TiNiO3",
+  "inputPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/POSCAR",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/pw.scf.in",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/PSEUDOPOTENTIALS.required",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/run.sh"
+  ],
+  "label": "Structure and chemistry validity",
+  "materialId": "mp-675030",
+  "provenance": {
+    "backend": "quantum-espresso",
+    "generatedAt": 1777812243,
+    "parsedPropertiesAvailable": false,
+    "requiresExternalCode": true,
+    "stage": "input-preparation"
+  },
+  "status": "prepared",
+  "stepManifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/step-manifest.json",
+  "structurePaths": {
+    "poscar": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/POSCAR",
+    "structureCif": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.cif",
+    "structureJson": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-qe-prepare/catalyst-research-protocol-1777812227343-quantum-espresso-1777812238244/mp-675030-structure-validity/structure.json"
+  },
+  "writesProperties": [
+    "structureQuality",
+    "oxidationStates",
+    "chargeBalance"
+  ]
+}

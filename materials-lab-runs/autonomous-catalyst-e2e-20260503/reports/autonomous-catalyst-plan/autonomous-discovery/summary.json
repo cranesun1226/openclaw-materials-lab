@@ -1,0 +1,28 @@
+{
+  "artifacts": {
+    "candidatePoolPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/candidate-pool.jsonl",
+    "evidenceLedgerPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/evidence-ledger.jsonl",
+    "queryLogPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-plan/autonomous-discovery/query-log.json"
+  },
+  "candidateCount": 3,
+  "candidateIds": [
+    "mp-675030",
+    "mp-690546",
+    "mp-19009"
+  ],
+  "claimLevel": "candidate-hypothesis",
+  "discoveryVersion": "autonomous-discovery-v1",
+  "queryCount": 6,
+  "rejectedCount": 0,
+  "researchGradeClaimAllowed": false,
+  "successfulQueryCount": 6,
+  "topic": {
+    "alternateTopics": [],
+    "id": "catalyst",
+    "inference": "keyword-derived",
+    "label": "Catalyst / surface material",
+    "matchedKeywords": [
+      "catalyst"
+    ]
+  }
+}

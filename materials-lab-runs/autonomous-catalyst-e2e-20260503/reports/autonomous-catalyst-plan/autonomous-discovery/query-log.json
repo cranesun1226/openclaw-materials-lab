@@ -1,0 +1,199 @@
+[
+  {
+    "acceptedCount": 10,
+    "candidateCount": 10,
+    "candidateIds": [
+      "mp-1178232",
+      "mp-1274279",
+      "mp-715262",
+      "mp-1283030",
+      "mp-1225011",
+      "mp-1244517",
+      "mp-1279528",
+      "mp-1279763",
+      "mp-1280477",
+      "mp-2216699"
+    ],
+    "payload": {
+      "allowOffline": false,
+      "elementsAll": [
+        "Fe",
+        "O"
+      ],
+      "limit": 10,
+      "maxBandGapEv": 6,
+      "maxEnergyAboveHullEv": 0.08,
+      "minBandGapEv": 0
+    },
+    "queryId": "dbq-001",
+    "rejected": [],
+    "source": "Materials Project",
+    "status": "ok",
+    "tool": "materials_search_mp",
+    "usedDevelopmentFixtureData": false
+  },
+  {
+    "acceptedCount": 10,
+    "candidateCount": 10,
+    "candidateIds": [
+      "mp-1272680",
+      "mp-1278937",
+      "mp-1281832",
+      "mp-550206",
+      "mp-19128",
+      "mp-755508",
+      "mp-1278455",
+      "mp-22408",
+      "mp-19079",
+      "mp-754748"
+    ],
+    "payload": {
+      "allowOffline": false,
+      "elementsAll": [
+        "Co",
+        "O"
+      ],
+      "limit": 10,
+      "maxBandGapEv": 6,
+      "maxEnergyAboveHullEv": 0.08,
+      "minBandGapEv": 0
+    },
+    "queryId": "dbq-002",
+    "rejected": [],
+    "source": "Materials Project",
+    "status": "ok",
+    "tool": "materials_search_mp",
+    "usedDevelopmentFixtureData": false
+  },
+  {
+    "acceptedCount": 10,
+    "candidateCount": 10,
+    "candidateIds": [
+      "mp-19009",
+      "mp-1100939",
+      "mp-1272234",
+      "mp-2348641",
+      "mp-531689",
+      "mp-675030",
+      "mp-690546",
+      "mp-698587",
+      "mp-766394",
+      "mp-1641670"
+    ],
+    "payload": {
+      "allowOffline": false,
+      "elementsAll": [
+        "Ni",
+        "O"
+      ],
+      "limit": 10,
+      "maxBandGapEv": 6,
+      "maxEnergyAboveHullEv": 0.08,
+      "minBandGapEv": 0
+    },
+    "queryId": "dbq-003",
+    "rejected": [],
+    "source": "Materials Project",
+    "status": "ok",
+    "tool": "materials_search_mp",
+    "usedDevelopmentFixtureData": false
+  },
+  {
+    "acceptedCount": 10,
+    "candidateCount": 10,
+    "candidateIds": [
+      "mp-796336",
+      "mp-644514",
+      "mp-510408",
+      "mp-25223",
+      "mp-1272141",
+      "mp-25424",
+      "mp-755671",
+      "mp-755489",
+      "mp-999539",
+      "mp-1271850"
+    ],
+    "payload": {
+      "allowOffline": false,
+      "elementsAll": [
+        "Mn",
+        "O"
+      ],
+      "limit": 10,
+      "maxBandGapEv": 6,
+      "maxEnergyAboveHullEv": 0.08,
+      "minBandGapEv": 0
+    },
+    "queryId": "dbq-004",
+    "rejected": [],
+    "source": "Materials Project",
+    "status": "ok",
+    "tool": "materials_search_mp",
+    "usedDevelopmentFixtureData": false
+  },
+  {
+    "acceptedCount": 10,
+    "candidateCount": 10,
+    "candidateIds": [
+      "mp-1434",
+      "mp-1023939",
+      "mp-1027525",
+      "mp-1023924",
+      "mp-1025874",
+      "mp-1018809",
+      "mp-2815",
+      "mp-1216784",
+      "mp-1220398",
+      "mp-30285"
+    ],
+    "payload": {
+      "allowOffline": false,
+      "elementsAll": [
+        "Mo",
+        "S"
+      ],
+      "limit": 10,
+      "maxBandGapEv": 6,
+      "maxEnergyAboveHullEv": 0.08,
+      "minBandGapEv": 0
+    },
+    "queryId": "dbq-005",
+    "rejected": [],
+    "source": "Materials Project",
+    "status": "ok",
+    "tool": "materials_search_mp",
+    "usedDevelopmentFixtureData": false
+  },
+  {
+    "acceptedCount": 10,
+    "candidateCount": 10,
+    "candidateIds": [
+      "mp-1178232",
+      "mp-1274279",
+      "mp-715262",
+      "mp-1283030",
+      "mp-1225011",
+      "mp-1244517",
+      "mp-1279528",
+      "mp-1279763",
+      "mp-1280477",
+      "mp-2216699"
+    ],
+    "payload": {
+      "allowOffline": false,
+      "elementsAll": [
+        "Fe",
+        "O"
+      ],
+      "limit": 10,
+      "maxBandGapEv": 5.1,
+      "maxEnergyAboveHullEv": 0.08
+    },
+    "queryId": "dbq-006",
+    "rejected": [],
+    "source": "Materials Project",
+    "status": "ok",
+    "tool": "materials_search_mp",
+    "usedDevelopmentFixtureData": false
+  }
+]

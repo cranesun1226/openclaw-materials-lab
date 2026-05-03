@@ -10,7 +10,7 @@ import type { MaterialsConfigSource, MaterialsLabPluginConfig, MaterialsWorkspac
 
 export const PLUGIN_ID = "materials-lab";
 export const PLUGIN_NAME = "Materials Lab";
-export const PLUGIN_DESCRIPTION = "Evidence-tracked materials research protocol tools and local Python workflows for OpenClaw.";
+export const PLUGIN_DESCRIPTION = "Evidence-tracked autonomous materials research design tools and local Python workflows for OpenClaw.";
 
 export interface MaterialsPluginContext {
   logger: MaterialsLogger;

@@ -32,6 +32,8 @@ Reference prompt: `prompts/goal_refinement.md`
 Use `materials_plan_research_loop` when the user asks for an open-ended research campaign, when candidates are not known yet, or when a ranked list needs property-backed validation.
 
 - Pass `researchGoal`, `targetApplication`, constraints, candidate-generation hints, literature/database queries, and explicit evidence requirements when available.
+- If only the topic is known, pass `researchGoal` and let the bounded autonomous discovery compiler create the database query log, candidate-pool JSONL, evidence-ledger JSONL, and candidate-backed protocol.
+- Use `candidateGeneration.allowDevelopmentFixtures: true` only for smoke tests; live research should use Materials Project or other database evidence.
 - Treat the output as an evidence contract: candidate generation, literature review, database search, validation matrix, claim policy, and approval gates.
 - Do not present research-grade discovery claims unless the compiled claim policy is satisfied by parsed evidence artifacts.
 

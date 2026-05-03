@@ -153,6 +153,7 @@ Live Materials Project search and structure fetch require a valid key and the `m
 - "Analyze the structure of `mp-149`, explain the coordination environment at a high level, and save a note."
 - "Export a markdown report comparing these three materials for thermal stability and insulating behavior."
 - "Compile a research protocol for a lead-free moisture-stable photovoltaic absorber campaign before candidates are known."
+- "Given only this research goal, autonomously compile the protocol, search candidate databases, write a candidate pool, and create an evidence ledger before making any claim."
 - "Use the ranked candidates to compile an evidence schema and validation queue with a 12-calculation budget."
 - "Execute that research-loop plan with the dev-smoke backend to validate plumbing without generating research property evidence."
 - "Prepare Quantum ESPRESSO inputs for the top two calculations in that research-loop plan."
@@ -204,6 +205,8 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - File writes are restricted to `workspaceRoot`.
 - Expensive or write-heavy workflows request approval before execution.
 - `materials_plan_research_loop` writes a plan and manifest only. It marks DFT/HPC/paid-compute work as blocked until a human explicitly approves a later execution workflow.
+- With only `researchGoal`, `materials_plan_research_loop` now runs the bounded autonomous discovery compiler: it writes a query log, candidate-pool JSONL, evidence-ledger JSONL, and candidate-backed protocol when database candidates are found.
+- Autonomous discovery never upgrades a candidate beyond `candidate-hypothesis`/proxy status; research-grade claims remain blocked until the evidence schema is closed with parsed evidence artifacts.
 - `materials_execute_research_plan` supports a non-evidentiary `dev-smoke` backend plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
 - External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided.
 - The `dev-smoke` backend validates execution/provenance plumbing only. It does not emit property updates or reranking payloads.
@@ -230,7 +233,7 @@ Key development notes:
 
 Likely follow-up work after v1:
 
-- richer Materials Project query support and better search ranking,
+- broader database connectors beyond Materials Project and better query synthesis,
 - ingestion/parsing of completed backend outputs into the evidence ledger,
 - literature connector integration with citation-level claim extraction,
 - execution adapters for DFPT, NEB, AIMD, optical absorption, defect, and transport workflows,

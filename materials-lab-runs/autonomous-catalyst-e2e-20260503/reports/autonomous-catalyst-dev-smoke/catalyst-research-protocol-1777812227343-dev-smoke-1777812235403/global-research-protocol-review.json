@@ -1,0 +1,28 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "global-research-protocol-review",
+  "calculationType": "research-protocol-review",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": false,
+    "hasMaterialId": false,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "protocolReview"
+    ]
+  },
+  "estimatedWallTimeHours": 0.25,
+  "formula": "",
+  "label": "Research protocol and evidence schema review",
+  "materialId": "",
+  "method": "review compiled goal, candidate-generation strategy, evidence schema, claim policy, and stop criteria",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777812235,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/global-research-protocol-review.json",
+  "status": "completed-dev-smoke"
+}

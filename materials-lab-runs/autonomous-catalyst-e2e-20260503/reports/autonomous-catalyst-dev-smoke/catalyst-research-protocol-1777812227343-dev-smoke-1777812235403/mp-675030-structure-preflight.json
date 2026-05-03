@@ -1,0 +1,30 @@
+{
+  "backend": "dev-smoke",
+  "calculationId": "mp-675030-structure-preflight",
+  "calculationType": "structure-preflight",
+  "costClass": "metadata",
+  "diagnostics": {
+    "hasFormula": true,
+    "hasMaterialId": true,
+    "preset": "dynamic",
+    "writesPropertiesSuppressed": [
+      "structurePath",
+      "cifPath",
+      "structureQuality"
+    ]
+  },
+  "estimatedWallTimeHours": 0.05,
+  "formula": "TiNiO3",
+  "label": "Structure fetch and normalization preflight",
+  "materialId": "mp-675030",
+  "method": "fetch_structure + structural sanity checks",
+  "provenance": {
+    "backend": "dev-smoke",
+    "basis": "execution plumbing smoke test only",
+    "confidence": "none",
+    "generatedAt": 1777812235,
+    "notAReplacementFor": "Materials Project data, DFT, DFPT, MD, workflow execution, parsed outputs, literature, or experiment"
+  },
+  "resultPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/autonomous-catalyst-e2e-20260503/reports/autonomous-catalyst-dev-smoke/catalyst-research-protocol-1777812227343-dev-smoke-1777812235403/mp-675030-structure-preflight.json",
+  "status": "completed-dev-smoke"
+}
