@@ -1,0 +1,313 @@
+{
+  "generatedAt": "2026-05-03T06:20:18.601Z",
+  "runRoot": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503",
+  "liveMaterialsProject": true,
+  "searches": [
+    {
+      "label": "Sr-Ti-O oxide perovskite family",
+      "summary": "Found 8 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 8,
+      "candidateIds": [
+        "mp-5532",
+        "mp-4651",
+        "mp-551830",
+        "mp-776018",
+        "mp-5229",
+        "mp-1192641",
+        "mp-1208614",
+        "mp-1218603"
+      ]
+    },
+    {
+      "label": "Ba-Ti-O oxide perovskite family",
+      "summary": "Found 8 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 8,
+      "candidateIds": [
+        "mp-3943",
+        "mp-27790",
+        "mp-5020",
+        "mp-5933",
+        "mp-504457",
+        "mp-558125",
+        "mp-2998",
+        "mp-5777"
+      ]
+    },
+    {
+      "label": "Ca-Ti-O oxide perovskite family",
+      "summary": "Found 8 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 8,
+      "candidateIds": [
+        "mp-3442",
+        "mp-754701",
+        "mp-1403610",
+        "mp-4019",
+        "mp-1205364",
+        "mp-556003",
+        "mp-1218872",
+        "mp-1227270"
+      ]
+    },
+    {
+      "label": "Na-Nb-O oxide perovskite family",
+      "summary": "Found 8 candidate materials using Materials Project.",
+      "usedOfflineData": false,
+      "candidateCount": 8,
+      "candidateIds": [
+        "mp-27247",
+        "mp-4419",
+        "mp-1078295",
+        "mp-5477",
+        "mp-4514",
+        "mp-1199037",
+        "mp-3744",
+        "mp-3136"
+      ]
+    }
+  ],
+  "totalUniqueCandidates": 32,
+  "rankedCandidates": [
+    {
+      "materialId": "mp-4514",
+      "formula": "NaNbO3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.5048,
+      "densityGcm3": 4.472888253079711,
+      "volume": 121.69003756668431,
+      "sites": 10,
+      "spacegroup": "R3c",
+      "elements": [
+        "Na",
+        "Nb",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.942015,
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.895",
+        "density alignment 0.895"
+      ],
+      "rank": 1
+    },
+    {
+      "materialId": "mp-27790",
+      "formula": "BaTi5O11",
+      "energyAboveHullEv": 0.0077932558455890005,
+      "bandGapEv": 2.6235,
+      "densityGcm3": 4.415739248770174,
+      "volume": 831.3044139307269,
+      "sites": 68,
+      "spacegroup": "P2_1/c",
+      "elements": [
+        "Ba",
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.939723,
+      "reasons": [
+        "stability score 0.961",
+        "band-gap alignment 0.937",
+        "density alignment 0.883"
+      ],
+      "rank": 2
+    },
+    {
+      "materialId": "mp-504457",
+      "formula": "BaTi6O13",
+      "energyAboveHullEv": 0.013269258593750001,
+      "bandGapEv": 2.6401,
+      "densityGcm3": 4.544975012152147,
+      "volume": 462.19227179220894,
+      "sites": 40,
+      "spacegroup": "P-1",
+      "elements": [
+        "Ba",
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.933651,
+      "reasons": [
+        "stability score 0.934",
+        "band-gap alignment 0.943",
+        "density alignment 0.909"
+      ],
+      "rank": 3
+    },
+    {
+      "materialId": "mp-1403610",
+      "formula": "CaTi2O5",
+      "energyAboveHullEv": 0.003020262656249,
+      "bandGapEv": 2.9078,
+      "densityGcm3": 3.484595944327877,
+      "volume": 205.68196780875334,
+      "sites": 16,
+      "spacegroup": "Pmmn",
+      "elements": [
+        "Ca",
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.932342,
+      "reasons": [
+        "stability score 0.985",
+        "band-gap alignment 0.961",
+        "density alignment 0.697"
+      ],
+      "rank": 4
+    },
+    {
+      "materialId": "mp-5020",
+      "formula": "BaTiO3",
+      "energyAboveHullEv": 0.00004098999996848818,
+      "bandGapEv": 2.5086999999999993,
+      "densityGcm3": 5.89961040436988,
+      "volume": 65.6356490658401,
+      "sites": 5,
+      "spacegroup": "R3m",
+      "elements": [
+        "Ba",
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.931305,
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.896",
+        "density alignment 0.820"
+      ],
+      "rank": 5
+    },
+    {
+      "materialId": "mp-1218603",
+      "formula": "Sr3Ti(GaO2)10",
+      "energyAboveHullEv": 0.020009235183824,
+      "bandGapEv": 2.6054,
+      "densityGcm3": 4.860990325493532,
+      "volume": 453.63277915437016,
+      "sites": 34,
+      "spacegroup": "C2/m",
+      "elements": [
+        "Ga",
+        "O",
+        "Sr",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.923009,
+      "reasons": [
+        "stability score 0.900",
+        "band-gap alignment 0.930",
+        "density alignment 0.972"
+      ],
+      "rank": 6
+    },
+    {
+      "materialId": "mp-5477",
+      "formula": "Na5NbO5",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.6374999999999993,
+      "densityGcm3": 3.121864575118567,
+      "volume": 306.2207573990195,
+      "sites": 22,
+      "spacegroup": "C2/c",
+      "elements": [
+        "Na",
+        "Nb",
+        "O"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.920442,
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.942",
+        "density alignment 0.624"
+      ],
+      "rank": 7
+    },
+    {
+      "materialId": "mp-5777",
+      "formula": "BaTiO3",
+      "energyAboveHullEv": 0,
+      "bandGapEv": 2.2929999999999993,
+      "densityGcm3": 5.905237274567591,
+      "volume": 65.57310741671338,
+      "sites": 5,
+      "spacegroup": "Amm2",
+      "elements": [
+        "Ba",
+        "O",
+        "Ti"
+      ],
+      "source": "materials-project",
+      "notes": [],
+      "score": 0.900414,
+      "reasons": [
+        "stability score 1.000",
+        "band-gap alignment 0.819",
+        "density alignment 0.819"
+      ],
+      "rank": 8
+    }
+  ],
+  "structuresAnalyzed": [
+    {
+      "materialId": "mp-4514",
+      "formula": "NaNbO3",
+      "fetchSummary": "Fetched structure for mp-4514 and wrote 2 artifact(s).",
+      "analysisSummary": "NaNbO3 has 10 sites, volume 121.69 A^3, density 4.4729 g/cm^3, and 3 distinct elements.",
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-4514/mp-4514.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-4514/mp-4514.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-4514/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-27790",
+      "formula": "BaTi5O11",
+      "fetchSummary": "Fetched structure for mp-27790 and wrote 2 artifact(s).",
+      "analysisSummary": "BaTi5O11 has 68 sites, volume 831.3044 A^3, density 4.4157 g/cm^3, and 3 distinct elements.",
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-27790/mp-27790.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-27790/mp-27790.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-27790/structure-metrics.png",
+      "usedOfflineData": false
+    },
+    {
+      "materialId": "mp-504457",
+      "formula": "BaTi6O13",
+      "fetchSummary": "Fetched structure for mp-504457 and wrote 2 artifact(s).",
+      "analysisSummary": "BaTi6O13 has 40 sites, volume 462.1923 A^3, density 4.545 g/cm^3, and 3 distinct elements.",
+      "structurePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-504457/mp-504457.json",
+      "cifPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-504457/mp-504457.cif",
+      "plotPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-504457/structure-metrics.png",
+      "usedOfflineData": false
+    }
+  ],
+  "notePath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/notes/2026-05-03T06-20-15-134Z-live-materials-project-perovskite-solar-screening-process.md",
+  "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/reports/live-perovskite-solar-e2e-report.md",
+  "artifactPaths": [
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/plots/live-candidate-ranking/candidate-ranking.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-4514/mp-4514.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-4514/mp-4514.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-4514/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-27790/mp-27790.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-27790/mp-27790.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-27790/structure-metrics.png",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-504457/mp-504457.json",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-504457/mp-504457.cif",
+    "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/perovskite-solar-live-e2e-20260503/structures/mp-504457/structure-metrics.png"
+  ]
+}

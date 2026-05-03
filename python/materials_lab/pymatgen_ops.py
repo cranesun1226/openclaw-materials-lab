@@ -36,7 +36,7 @@ def load_structure(*, structure_path: str | None = None, structure_data: dict[st
         raise WorkerError("INVALID_PARAMS", "A structure payload or structurePath is required.")
 
     if Structure is not None and isinstance(payload, dict) and "lattice" in payload and "sites" in payload:
-        structure = _structure_from_simple_payload(payload)
+        structure = _structure_from_payload(payload)
         return structure, payload
 
     return None, payload
@@ -96,7 +96,7 @@ def write_cif(structure_data: dict[str, Any], output_path: str) -> str | None:
     structure = None
     if Structure is not None:
         try:
-            structure = _structure_from_simple_payload(structure_data)
+            structure = _structure_from_payload(structure_data)
         except Exception:
             if isinstance(structure_data, dict) and "@module" in structure_data:
                 structure = Structure.from_dict(structure_data)
@@ -121,6 +121,17 @@ def _structure_from_simple_payload(payload: dict[str, Any]) -> Any:
     species = [site["element"] for site in sites]
     coords = [site["coords"] for site in sites]
     return Structure(Lattice(lattice), species, coords)
+
+
+def _structure_from_payload(payload: dict[str, Any]) -> Any:
+    if Structure is None:
+        raise WorkerError("PYMATGEN_UNAVAILABLE", "pymatgen is not installed in this Python environment.")
+
+    lattice = payload.get("lattice")
+    if isinstance(lattice, dict) or "@module" in payload:
+        return Structure.from_dict(payload)
+
+    return _structure_from_simple_payload(payload)
 
 
 def _vector_length(vector: Any) -> float:
