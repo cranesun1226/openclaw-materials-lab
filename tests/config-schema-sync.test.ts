@@ -17,6 +17,9 @@ describe("plugin manifest sync", () => {
         properties: Record<string, Record<string, unknown>>;
       };
       uiHints: Record<string, unknown>;
+      contracts: {
+        tools: string[];
+      };
     };
 
     expect(manifest.id).toBe(PLUGIN_ID);
@@ -28,6 +31,24 @@ describe("plugin manifest sync", () => {
     );
     expect(Object.keys(manifest.uiHints).sort()).toEqual(
       ["cacheDir", "defaultBatchLimit", "enableAseTools", "mpApiKey", "pythonPath", "workspaceRoot"].sort(),
+    );
+    expect(manifest.contracts.tools.sort()).toEqual(
+      [
+        "materials_search_mp",
+        "materials_fetch_structure",
+        "materials_analyze_structure",
+        "materials_compare_candidates",
+        "materials_plan_research_loop",
+        "materials_search_literature",
+        "materials_ingest_evidence",
+        "materials_evaluate_research_claim",
+        "materials_close_evidence_gaps",
+        "materials_save_note",
+        "materials_export_report",
+        "materials_ase_relax",
+        "materials_batch_screen",
+        "materials_execute_research_plan",
+      ].sort(),
     );
     expect(manifest.configSchema.properties.pythonPath?.default).toBe(DEFAULT_PLUGIN_CONFIG.pythonPath);
     expect(manifest.configSchema.properties.mpApiKey?.default).toBe(DEFAULT_PLUGIN_CONFIG.mpApiKey);

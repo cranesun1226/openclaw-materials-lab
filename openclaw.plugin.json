@@ -6,6 +6,24 @@
   "skills": [
     "skills/material-science-research"
   ],
+  "contracts": {
+    "tools": [
+      "materials_search_mp",
+      "materials_fetch_structure",
+      "materials_analyze_structure",
+      "materials_compare_candidates",
+      "materials_plan_research_loop",
+      "materials_search_literature",
+      "materials_ingest_evidence",
+      "materials_evaluate_research_claim",
+      "materials_close_evidence_gaps",
+      "materials_save_note",
+      "materials_export_report",
+      "materials_ase_relax",
+      "materials_batch_screen",
+      "materials_execute_research_plan"
+    ]
+  },
   "uiHints": {
     "pythonPath": {
       "label": "Python executable",
