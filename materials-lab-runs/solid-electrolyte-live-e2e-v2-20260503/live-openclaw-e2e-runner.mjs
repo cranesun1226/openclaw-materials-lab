@@ -8,7 +8,10 @@ import { ArtifactService } from "../../dist/src/services/artifact-service.js";
 import { NoteService } from "../../dist/src/services/note-service.js";
 
 const repoRoot = path.resolve(new URL("../..", import.meta.url).pathname);
-const runRoot = path.join(repoRoot, "materials-lab-runs", "solid-electrolyte-live-e2e-v2-20260503");
+const defaultRunRoot = path.join(repoRoot, "materials-lab-runs", "solid-electrolyte-live-e2e-v2-20260503");
+const runRoot = process.env.MATERIALS_LAB_RUN_ROOT
+  ? path.resolve(process.env.MATERIALS_LAB_RUN_ROOT)
+  : defaultRunRoot;
 const openclawConfigPath = path.join(os.homedir(), ".openclaw", "openclaw.json");
 
 const configText = await fs.readFile(openclawConfigPath, "utf8");
