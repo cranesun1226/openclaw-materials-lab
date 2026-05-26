@@ -13,7 +13,34 @@ const AseRelaxSchema = Type.Object(
     structurePath: Type.Optional(Type.String({ minLength: 1 })),
     steps: Type.Optional(Type.Number({ minimum: 1, maximum: 5000 })),
     fmaxEvA: Type.Optional(Type.Number({ minimum: 0.0001, maximum: 1 })),
-    calculator: Type.Optional(Type.String({ minLength: 1, maxLength: 40 })),
+    calculator: Type.Optional(
+      Type.String({
+        minLength: 1,
+        maxLength: 40,
+        description: "ASE calculator to use. Supported values are EMT and SevenNet.",
+      }),
+    ),
+    sevenNetModel: Type.Optional(
+      Type.String({
+        minLength: 1,
+        maxLength: 300,
+        description: "SevenNet pretrained model keyword or local checkpoint path. Defaults to 7net-omni.",
+      }),
+    ),
+    sevenNetModal: Type.Optional(
+      Type.String({
+        minLength: 1,
+        maxLength: 80,
+        description: "SevenNet modal label for multi-modal pretrained models. Defaults to mpa.",
+      }),
+    ),
+    device: Type.Optional(
+      Type.String({
+        minLength: 1,
+        maxLength: 40,
+        description: "SevenNet execution device, such as auto, cpu, cuda, or cuda:0. Defaults to auto.",
+      }),
+    ),
     allowOffline: Type.Optional(Type.Boolean({ default: false })),
   },
   { additionalProperties: false },
@@ -55,6 +82,9 @@ export function createMaterialsAseRelaxTool(context: MaterialsPluginContext): An
         ...(typeof params.steps === "number" ? { steps: params.steps } : {}),
         ...(typeof params.fmaxEvA === "number" ? { fmaxEvA: params.fmaxEvA } : {}),
         ...(params.calculator ? { calculator: params.calculator } : {}),
+        ...(params.sevenNetModel ? { sevenNetModel: params.sevenNetModel } : {}),
+        ...(params.sevenNetModal ? { sevenNetModal: params.sevenNetModal } : {}),
+        ...(params.device ? { device: params.device } : {}),
         allowOffline: params.allowOffline ?? false,
       });
 

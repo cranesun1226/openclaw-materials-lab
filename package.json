@@ -26,6 +26,7 @@
     "skills",
     "python/materials_lab/*.py",
     "python/requirements.txt",
+    "python/requirements-sevennet.txt",
     "python/pyproject.toml",
     "openclaw.plugin.json",
     "README.md",

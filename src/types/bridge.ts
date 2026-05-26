@@ -468,6 +468,9 @@ export interface AseRelaxPayload {
   steps?: number;
   fmaxEvA?: number;
   calculator?: string;
+  sevenNetModel?: string;
+  sevenNetModal?: string;
+  device?: string;
   allowOffline?: boolean;
 }
 

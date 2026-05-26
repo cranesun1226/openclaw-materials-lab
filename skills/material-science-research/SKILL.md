@@ -115,6 +115,12 @@ Use `materials_analyze_structure` to derive structural metrics and a readable su
 - Note the limits of the analysis.
 - Do not overclaim coordination or property interpretation if the evidence is weak.
 
+Use `materials_ase_relax` only after approval when a local relaxation or energy/force check is appropriate.
+
+- For lightweight smoke checks, use the default EMT calculator and keep its element limits in mind.
+- For SevenNet ML-potential checks, pass `calculator: "SevenNet"` and record `sevenNetModel`, `sevenNetModal`, `device`, and the returned citation hint in notes or reports.
+- Treat SevenNet results as model-derived evidence with provenance, not as DFT-equivalent validation unless the project evidence policy explicitly accepts that model.
+
 ### 6. Compare and rank
 
 Use `materials_compare_candidates` with explicit criteria and explain the tradeoffs.
@@ -157,6 +163,7 @@ Always request approval before:
 
 - `materials_ase_relax`
 - `materials_batch_screen`
+- `materials_execute_research_plan`
 
 These workflows can be slow, write multiple artifacts, or trigger heavier local computation.
 

@@ -857,6 +857,9 @@ def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str |
     steps = int(ensure_number(payload.get("steps"), field="steps", default=100) or 100)
     fmax_ev_a = float(ensure_number(payload.get("fmaxEvA"), field="fmaxEvA", default=0.05) or 0.05)
     calculator = ensure_string(payload.get("calculator"), field="calculator", required=False) or "EMT"
+    seven_net_model = ensure_string(payload.get("sevenNetModel"), field="sevenNetModel", required=False)
+    seven_net_modal = ensure_string(payload.get("sevenNetModal"), field="sevenNetModal", required=False)
+    device = ensure_string(payload.get("device"), field="device", required=False)
 
     structure_data = None
     used_offline = False
@@ -875,6 +878,9 @@ def handle_ase_relax(*, request_id: str, payload: dict[str, Any], api_key: str |
         steps=steps,
         fmax_ev_a=fmax_ev_a,
         calculator=calculator,
+        seven_net_model=seven_net_model,
+        seven_net_modal=seven_net_modal,
+        device=device,
     )
     data = {
         "summaryMetrics": summary_metrics,

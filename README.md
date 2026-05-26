@@ -137,6 +137,32 @@ Then point plugin config at the interpreter:
 }
 ```
 
+### Optional SevenNet ASE Calculator
+
+`materials_ase_relax` can use MDIL-SNU SevenNet through ASE when optional dependencies are installed. SevenNet is not included in the base requirements because PyTorch and GPU builds are hardware-specific.
+
+Install the base environment first, then install a compatible PyTorch build for your machine if needed, followed by:
+
+```bash
+~/.openclaw/materials-lab/.venv/bin/pip install -r python/requirements-sevennet.txt
+```
+
+Example tool parameters:
+
+```json
+{
+  "structurePath": "/absolute/path/under/workspace/structures/mp-id/mp-id.json",
+  "calculator": "SevenNet",
+  "sevenNetModel": "7net-omni",
+  "sevenNetModal": "mpa",
+  "device": "auto",
+  "steps": 100,
+  "fmaxEvA": 0.05
+}
+```
+
+Reports should record the returned SevenNet model, modal, device, and citation hint as ML-potential provenance. A local checkpoint path can be passed as `sevenNetModel` when a project uses a vetted custom model.
+
 ## Materials Project API Key Setup
 
 Set the key in plugin config or with an environment variable:
@@ -200,6 +226,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - Enable `enableAseTools` in plugin config.
 - Add the optional tools to `tools.allow`.
 - Remember that expensive tools also require runtime approval before execution.
+- For SevenNet, install `python/requirements-sevennet.txt` into the configured Python environment after selecting an appropriate PyTorch build.
 
 ### Files are not written where expected
 
@@ -220,6 +247,7 @@ The plugin validates paths before writing and rejects attempts to escape the con
 - `materials_close_evidence_gaps` evaluates a candidate against the claim policy and writes the next action queue needed to close missing, blocking, or conflicting evidence gates. It can optionally run bounded literature search, but fixture literature remains non-claim evidence.
 - `materials_ingest_evidence` parses QE/VASP/MD outputs plus literature PDFs/text/markdown and experiment/literature JSON, JSONL, or CSV evidence tables into standard evidence-ledger rows for claim evaluation.
 - `materials_execute_research_plan` supports a non-evidentiary `dev-smoke` backend plus prepare/submit adapters for `quantum-espresso`, `vasp`, `atomate2`, and `aiida`.
+- `materials_ase_relax` supports EMT by default and optional SevenNet ML-potential relaxations when `sevenn` and its PyTorch runtime are installed. Treat SevenNet outputs as model-derived evidence and keep model/checkpoint/device provenance with the artifacts.
 - External backend adapters default to `executionMode: "prepare"` and write reproducible input decks, structure files, and run/submit scaffolds. Set `backendConfig.scheduler` to `slurm` or `pbs` to generate `submit.slurm`/`submit.pbs` scripts with queue/account/walltime/module/resource directives. They only launch commands when `executionMode: "submit"` and `allowExecution: true` are both provided. `executionMode: "monitor"` reads a prior execution manifest, checks scheduler state with `squeue`/`sacct` or `qstat` when job IDs are available, detects completed outputs, parses evidence rows, and can run claim review when requested.
 - The `dev-smoke` backend validates execution/provenance plumbing only. It does not emit property updates or reranking payloads.
 - External prepared jobs do not produce property-backed candidate updates until completed outputs are parsed back into `propertyUpdates`.
