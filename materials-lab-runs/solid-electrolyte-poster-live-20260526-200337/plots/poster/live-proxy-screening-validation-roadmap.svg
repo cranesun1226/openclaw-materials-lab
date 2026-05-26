@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3600" height="2320" viewBox="0 0 3600 2320">
+<rect x="0" y="0" width="3600" height="2320" rx="0" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<text x="1800" y="82" font-size="48" fill="#0F172A" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Live Solid-State Electrolyte Screening: Proxy Evidence + Validation Roadmap</text>
+<text x="1800" y="125" font-size="25" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Fresh OpenClaw Materials Lab run using live Materials Project data; no offline fallback; validation protocol compiled for research-grade follow-up</text>
+<rect x="70" y="170" width="910" height="850" rx="18" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="2"/>
+<rect x="1030" y="170" width="2490" height="850" rx="18" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="2"/>
+<rect x="70" y="1070" width="3450" height="1060" rx="18" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="2"/>
+<text x="115" y="230" font-size="34" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">A. Reproducible live screening run</text>
+<rect x="135" y="305" width="790" height="94" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="205" y="364" font-size="37" fill="#183A64" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8</text>
+<text x="365" y="344" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">chemistry families</text>
+<text x="365" y="375" font-size="20" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">oxide, sulfide, halide, phosphate</text>
+<line x1="530" y1="405" x2="530" y2="429" stroke="#1F4E8C" stroke-width="3"/><polygon points="530,429 522.498424870294,417.17940904297177 537.501575129706,417.17940904297177" fill="#1F4E8C"/>
+<rect x="135" y="435" width="790" height="94" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="205" y="494" font-size="37" fill="#183A64" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">66</text>
+<text x="365" y="474" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">unique live candidates</text>
+<text x="365" y="505" font-size="20" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Materials Project API only</text>
+<line x1="530" y1="535" x2="530" y2="559" stroke="#1F4E8C" stroke-width="3"/><polygon points="530,559 522.498424870294,547.1794090429718 537.501575129706,547.1794090429718" fill="#1F4E8C"/>
+<rect x="135" y="565" width="790" height="94" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="205" y="624" font-size="37" fill="#183A64" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">12</text>
+<text x="365" y="604" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">diverse shortlist</text>
+<text x="365" y="635" font-size="20" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">max one entry per formula</text>
+<line x1="530" y1="665" x2="530" y2="689" stroke="#1F4E8C" stroke-width="3"/><polygon points="530,689 522.498424870294,677.1794090429718 537.501575129706,677.1794090429718" fill="#1F4E8C"/>
+<rect x="135" y="695" width="790" height="94" rx="18" fill="#EEF7EF" stroke="#2F7D4E" stroke-width="2"/>
+<text x="205" y="754" font-size="37" fill="#1F5E3A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4</text>
+<text x="365" y="734" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">structures analyzed</text>
+<text x="365" y="765" font-size="20" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">family-balanced representatives</text>
+<line x1="530" y1="795" x2="530" y2="819" stroke="#1F4E8C" stroke-width="3"/><polygon points="530,819 522.498424870294,807.1794090429718 537.501575129706,807.1794090429718" fill="#1F4E8C"/>
+<rect x="135" y="825" width="790" height="94" rx="18" fill="#EEF7EF" stroke="#2F7D4E" stroke-width="2"/>
+<text x="205" y="884" font-size="37" fill="#1F5E3A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">18/18</text>
+<text x="365" y="864" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">artifacts verified</text>
+<text x="365" y="895" font-size="20" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Markdown, JSON, CSV, CIF, PNG</text>
+<text x="115" y="965" font-size="19" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Generated: 2026-05-26 | Offline fallback: false</text>
+<text x="1075" y="230" font-size="34" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">B. Scientifically interpretable proxy map</text>
+<text x="1075" y="266" font-size="22" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Database-backed phase stability and electronic-insulation proxies, not a conductivity claim</text>
+<rect x="1220" y="355" width="775" height="500" rx="0" fill="#EAF7EF" stroke="none" stroke-width="0"/>
+<text x="1607.5" y="373.75" font-size="19" fill="#2F7D4E" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">low eHull + insulating proxy region</text>
+<line x1="1220" y1="355" x2="1220" y2="855" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1220" y="889" font-size="18" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.0</text>
+<line x1="1607.5" y1="355" x2="1607.5" y2="855" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1607.5" y="889" font-size="18" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.005</text>
+<line x1="1995" y1="355" x2="1995" y2="855" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1995" y="889" font-size="18" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.010</text>
+<line x1="2382.5" y1="355" x2="2382.5" y2="855" stroke="#E2E8F0" stroke-width="2"/>
+<text x="2382.5" y="889" font-size="18" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.015</text>
+<line x1="2770" y1="355" x2="2770" y2="855" stroke="#E2E8F0" stroke-width="2"/>
+<text x="2770" y="889" font-size="18" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.020</text>
+<line x1="1220" y1="855" x2="2770" y2="855" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1192" y="862" font-size="18" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">2</text>
+<line x1="1220" y1="698.75" x2="2770" y2="698.75" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1192" y="705.75" font-size="18" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">3</text>
+<line x1="1220" y1="542.5" x2="2770" y2="542.5" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1192" y="549.5" font-size="18" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">4</text>
+<line x1="1220" y1="386.25" x2="2770" y2="386.25" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1192" y="393.25" font-size="18" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">5</text>
+<line x1="1220" y1="355" x2="1220" y2="855" stroke="#334155" stroke-width="2"/>
+<line x1="1220" y1="855" x2="2770" y2="855" stroke="#334155" stroke-width="2"/>
+<text x="1995" y="933" font-size="22" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Energy above hull, eHull (eV/atom)</text>
+<text x="1136" y="605" font-size="22" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" transform="rotate(-90 1136 605)">Band gap (eV)</text>
+<line x1="1220" y1="855" x2="2770" y2="855" stroke="#64748B" stroke-width="2" stroke-dasharray="8 8"/>
+<circle cx="1255.0893127715874" cy="524.140625" r="19.304346000000002" fill="#287078" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1273.0893127715874" y="506.140625" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">1. mp-556886</text>
+<circle cx="1220" cy="450.265625" r="19.304346000000002" fill="#287078" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1238" y="432.265625" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">2. mp-554203</text>
+<circle cx="1220" cy="402.09375" r="16.2" fill="#287078" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1238" y="384.09375" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">3. mp-567652</text>
+<circle cx="1220" cy="740.7500000000001" r="17.999994" fill="#A0712A" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1234" y="768.7500000000001" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4. mp-11175</text>
+<circle cx="1220" cy="728.578125" r="27.75" fill="#A0712A" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1234" y="756.578125" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">5. mp-985583</text>
+<circle cx="1384.6817620191175" cy="771.6718750000003" r="30" fill="#A0712A" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<circle cx="1750.5657386717976" cy="516.1249999999998" r="24.250014" fill="#8B4D83" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1764.5657386717976" y="544.1249999999998" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">7. mp-942733</text>
+<circle cx="1453.846725657805" cy="783.65625" r="16.421046" fill="#4F6FA8" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="1467.846725657805" y="811.65625" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8. mp-766132</text>
+<circle cx="1220" cy="502.9218750000001" r="14.333352" fill="#4F6FA8" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<circle cx="1714.2201263893626" cy="677.828125" r="14.333352" fill="#4F6FA8" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<circle cx="2673.94137725" cy="770.703125" r="28.8" fill="#A35C2D" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<circle cx="2216.6193491687327" cy="772.296875" r="13.135134" fill="#5D8B4D" stroke="#FFFFFF" stroke-width="3" opacity="0.94"/>
+<text x="2230.6193491687327" y="800.296875" font-size="18" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">12. mp-769074</text>
+<rect x="2835" y="320" width="610" height="438" rx="14" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+<text x="2870" y="365" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Candidate family</text>
+<rect x="2870" y="387" width="24" height="24" rx="4" fill="#287078" stroke="none" stroke-width="0"/>
+<text x="2910" y="407" font-size="20" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">halide</text>
+<rect x="2870" y="429" width="24" height="24" rx="4" fill="#A0712A" stroke="none" stroke-width="0"/>
+<text x="2910" y="449" font-size="20" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">thiophosphate-sulfide</text>
+<rect x="2870" y="471" width="24" height="24" rx="4" fill="#8B4D83" stroke="none" stroke-width="0"/>
+<text x="2910" y="491" font-size="20" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">garnet-oxide</text>
+<rect x="2870" y="513" width="24" height="24" rx="4" fill="#4F6FA8" stroke="none" stroke-width="0"/>
+<text x="2910" y="533" font-size="20" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">zirconium-phosphate</text>
+<rect x="2870" y="555" width="24" height="24" rx="4" fill="#A35C2D" stroke="none" stroke-width="0"/>
+<text x="2910" y="575" font-size="20" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">lgps-like-sulfide</text>
+<rect x="2870" y="597" width="24" height="24" rx="4" fill="#5D8B4D" stroke="none" stroke-width="0"/>
+<text x="2910" y="617" font-size="20" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">nasicon-oxide</text>
+<line x1="2870" y1="675" x2="3405" y2="675" stroke="#E2E8F0" stroke-width="2"/>
+<circle cx="2895" cy="720" r="15" fill="#64748B" stroke="none" stroke-width="0" opacity="0.42"/>
+<circle cx="2948" cy="720" r="25" fill="#64748B" stroke="none" stroke-width="0" opacity="0.42"/>
+<text x="3000" y="727" font-size="19" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Circle size approx. Li atomic fraction</text>
+<text x="1075" y="960" font-size="20" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Proxy map interpretation: candidates cluster in a low-eHull, wide-gap region, but transport validation is intentionally not inferred from this plot.</text>
+<text x="115" y="1130" font-size="34" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">C. Evidence status and research-grade validation queue</text>
+<text x="115" y="1168" font-size="22" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">The live run completes defensible proxy evidence and compiles, but does not execute, expensive validation tasks.</text>
+<rect x="105" y="1215" width="3300" height="62" rx="10" fill="#EAF1FA" stroke="none" stroke-width="0"/>
+<text x="115" y="1254" font-size="23" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Evidence layer</text>
+<text x="830" y="1254" font-size="23" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Status from fresh run</text>
+<text x="1365" y="1254" font-size="23" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Artifact or generated action</text>
+<text x="2865" y="1254" font-size="23" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role</text>
+<text x="115" y="1317" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Live database provenance</text>
+<rect x="830" y="1287" width="170" height="40" rx="20" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="915" y="1313" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="1365" y="1317" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8 MP queries; offline fallback false; CSV/JSONL tables saved</text>
+<text x="2865" y="1317" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">source traceability</text>
+<rect x="105" y="1375" width="3300" height="84" rx="6" fill="#F8FAFC" stroke="none" stroke-width="0"/>
+<text x="115" y="1421" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Phase stability proxy</text>
+<rect x="830" y="1391" width="170" height="40" rx="20" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="915" y="1417" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="1365" y="1421" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">shortlist satisfies eHull &lt;= 0.1 eV screening criterion</text>
+<text x="2865" y="1421" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">proxy evidence</text>
+<text x="115" y="1525" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Electronic insulation proxy</text>
+<rect x="830" y="1495" width="170" height="40" rx="20" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="915" y="1521" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="1365" y="1525" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">shortlist satisfies band gap &gt;= 2 eV minimum screen</text>
+<text x="2865" y="1525" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">proxy evidence</text>
+<rect x="105" y="1583" width="3300" height="84" rx="6" fill="#F8FAFC" stroke="none" stroke-width="0"/>
+<text x="115" y="1629" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Structure artifacts</text>
+<rect x="830" y="1599" width="170" height="40" rx="20" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="915" y="1625" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="1365" y="1629" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4 JSON/CIF structures plus Li sublattice descriptor plots</text>
+<text x="2865" y="1629" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">triage evidence</text>
+<text x="115" y="1733" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Literature benchmark</text>
+<rect x="830" y="1703" width="170" height="40" rx="20" fill="#3B6EA8" stroke="none" stroke-width="0"/>
+<text x="915" y="1729" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">QUEUED</text>
+<text x="1365" y="1733" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">protocol compiler generated citation-backed extraction task</text>
+<text x="2865" y="1733" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">context evidence</text>
+<rect x="105" y="1791" width="3300" height="84" rx="6" fill="#F8FAFC" stroke="none" stroke-width="0"/>
+<text x="115" y="1837" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Li-ion transport validation</text>
+<rect x="830" y="1807" width="260" height="40" rx="20" fill="#B7791F" stroke="none" stroke-width="0"/>
+<text x="960" y="1833" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">APPROVAL-GATED</text>
+<text x="1365" y="1837" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">NEB/BVSE/AIMD or imported measurement required</text>
+<text x="2865" y="1837" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">research-grade gate</text>
+<text x="115" y="1941" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Electrochemical/interface</text>
+<text x="115" y="1969" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">stability</text>
+<rect x="830" y="1911" width="260" height="40" rx="20" fill="#B7791F" stroke="none" stroke-width="0"/>
+<text x="960" y="1937" font-size="17" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">APPROVAL-GATED</text>
+<text x="1365" y="1941" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">electrochemical window plus electrode interface reaction evidence required</text>
+<text x="2865" y="1941" font-size="21" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">research-grade gate</text>
+<rect x="115" y="2052" width="3290" height="48" rx="10" fill="#FFF8E6" stroke="#D9A441" stroke-width="2"/>
+<text x="140" y="2083" font-size="22" fill="#674D0B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Research protocol compiled for 4 top candidates; 16 planned validation actions; expensive evidence gates remain approval-gated.</text>
+<text x="70" y="2258" font-size="20" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Interpretation: the figure presents a reproducible proxy shortlist and the generated path to research-grade validation, without implying measured ionic conductivity.</text>
+</svg>

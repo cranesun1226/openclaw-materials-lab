@@ -1,0 +1,136 @@
+{
+  "ok": true,
+  "manifestPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-poster-live-20260526-200337/reports/poster-validation-protocol/solid-electrolyte-research-protocol-1779793650706.json",
+  "reportPath": "/Users/haksunlee/gitpublish/openclaw-materials-lab/materials-lab-runs/solid-electrolyte-poster-live-20260526-200337/reports/poster-validation-protocol/solid-electrolyte-research-protocol-1779793650706.md",
+  "selectedCandidates": [
+    {
+      "materialId": "mp-556886",
+      "formula": "Li4Al3Ge3ClO12",
+      "family": "halide",
+      "rank": 1
+    },
+    {
+      "materialId": "mp-554203",
+      "formula": "Li4Ga3Si3ClO12",
+      "family": "halide",
+      "rank": 2
+    },
+    {
+      "materialId": "mp-567652",
+      "formula": "Cs2LiYCl6",
+      "family": "halide",
+      "rank": 3
+    },
+    {
+      "materialId": "mp-11175",
+      "formula": "LiZnPS4",
+      "family": "thiophosphate-sulfide",
+      "rank": 4
+    }
+  ],
+  "calculationQueue": [
+    {
+      "label": "Research protocol and evidence schema review",
+      "method": "review compiled goal, candidate-generation strategy, evidence schema, claim policy, and stop criteria",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Literature evidence ledger",
+      "method": "search, cite, extract PDF/text/table claims, and normalize citation provenance",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Database candidate generation",
+      "method": "run database queries and build source-tagged candidate pool",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Structure fetch and normalization preflight",
+      "method": "fetch_structure + structural sanity checks",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Literature benchmark",
+      "method": "citation-backed literature extraction",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Database provenance",
+      "method": "database query and provenance capture",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Phase stability",
+      "method": "DFT workflow with convergence checks and parsed properties",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Structure and chemistry validity",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Synthesis, toxicity, and handling risk",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "status": "blocked-pending-expensive-approval",
+      "approvalRequired": true
+    },
+    {
+      "label": "Li-ion transport",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "status": "blocked-pending-expensive-approval",
+      "approvalRequired": true
+    },
+    {
+      "label": "Electrochemical window",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "status": "blocked-pending-expensive-approval",
+      "approvalRequired": true
+    },
+    {
+      "label": "Electrode interface stability",
+      "method": "experimental protocol or imported measurement with calibration metadata",
+      "status": "blocked-pending-expensive-approval",
+      "approvalRequired": true
+    },
+    {
+      "label": "Reproducibility package",
+      "method": "multi-source evidence collection and parser-backed validation",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Structure fetch and normalization preflight",
+      "method": "fetch_structure + structural sanity checks",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Literature benchmark",
+      "method": "citation-backed literature extraction",
+      "status": "planned",
+      "approvalRequired": true
+    },
+    {
+      "label": "Database provenance",
+      "method": "database query and provenance capture",
+      "status": "planned",
+      "approvalRequired": true
+    }
+  ],
+  "warnings": [
+    "Approval policy is not approval-required; the generated plan still marks compute execution as blocked until explicit approval.",
+    "Planned calculation wall-time estimate exceeds maxWallTimeHours; trim queue before execution.",
+    "Expensive calculations are present but blocked until allowExpensiveCalculations and explicit approval are set.",
+    "Selected candidates still have 16 missing research-grade property field(s).",
+    "Dynamic protocol compiler output is a research plan, not independent scientific validation."
+  ]
+}

@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="2400" viewBox="0 0 2400 2400">
+<rect x="0" y="0" width="2400" height="2400" rx="0" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<text x="1200" y="88" font-size="54" fill="#0F172A" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Scientifically Interpretable Proxy Map</text>
+<text x="1200" y="135" font-size="28" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Phase-stability and electronic-insulation proxies from live Materials Project data</text>
+<rect x="88" y="190" width="2224" height="2020" rx="24" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="3"/>
+<rect x="285" y="340" width="800" height="1420" rx="0" fill="#EAF7EF" stroke="none" stroke-width="0"/>
+<text x="685" y="393.25" font-size="24" fill="#2F7D4E" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">low eHull + insulating proxy region</text>
+<line x1="285" y1="340" x2="285" y2="1760" stroke="#E2E8F0" stroke-width="3"/>
+<text x="285" y="1804" font-size="24" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.000</text>
+<line x1="685" y1="340" x2="685" y2="1760" stroke="#E2E8F0" stroke-width="3"/>
+<text x="685" y="1804" font-size="24" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.005</text>
+<line x1="1085" y1="340" x2="1085" y2="1760" stroke="#E2E8F0" stroke-width="3"/>
+<text x="1085" y="1804" font-size="24" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.010</text>
+<line x1="1485" y1="340" x2="1485" y2="1760" stroke="#E2E8F0" stroke-width="3"/>
+<text x="1485" y="1804" font-size="24" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.015</text>
+<line x1="1885" y1="340" x2="1885" y2="1760" stroke="#E2E8F0" stroke-width="3"/>
+<text x="1885" y="1804" font-size="24" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.020</text>
+<line x1="285" y1="1760" x2="1885" y2="1760" stroke="#E2E8F0" stroke-width="3"/>
+<text x="251" y="1769" font-size="24" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">2</text>
+<line x1="285" y1="1316.25" x2="1885" y2="1316.25" stroke="#E2E8F0" stroke-width="3"/>
+<text x="251" y="1325.25" font-size="24" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">3</text>
+<line x1="285" y1="872.5" x2="1885" y2="872.5" stroke="#E2E8F0" stroke-width="3"/>
+<text x="251" y="881.5" font-size="24" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">4</text>
+<line x1="285" y1="428.75" x2="1885" y2="428.75" stroke="#E2E8F0" stroke-width="3"/>
+<text x="251" y="437.75" font-size="24" fill="#475569" font-weight="400" text-anchor="end" font-family="Arial, Helvetica, sans-serif">5</text>
+<line x1="285" y1="340" x2="285" y2="1760" stroke="#334155" stroke-width="3"/>
+<line x1="285" y1="1760" x2="1885" y2="1760" stroke="#334155" stroke-width="3"/>
+<line x1="285" y1="1760" x2="1885" y2="1760" stroke="#64748B" stroke-width="3" stroke-dasharray="10 10"/>
+<text x="1085" y="1854" font-size="30" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Energy above hull, eHull (eV/atom)</text>
+<text x="165" y="1050" font-size="30" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" transform="rotate(-90 165 1050)">Band gap (eV)</text>
+<circle cx="321.2212260868" cy="820.3593750000001" r="29.304345" fill="#287078" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="343.2212260868" y="796.3593750000001" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">1. mp-556886</text>
+<circle cx="285" cy="610.5543750000002" r="29.304345" fill="#287078" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="307" y="586.5543750000002" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">2. mp-554203</text>
+<circle cx="285" cy="473.7462499999999" r="24.5" fill="#287078" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="307" y="449.7462499999999" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">3. mp-567652</text>
+<circle cx="285" cy="1435.5300000000004" r="27.285705" fill="#A0712A" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="303" y="1473.5300000000004" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4. mp-11175</text>
+<circle cx="285" cy="1400.961875" r="42.375" fill="#A0712A" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="303" y="1438.961875" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">5. mp-985583</text>
+<circle cx="454.99407692296006" cy="1523.348125000001" r="47.999970000000005" fill="#A0712A" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<circle cx="832.6807624999201" cy="797.5949999999996" r="36.958355" fill="#8B4D83" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="850.6807624999201" y="835.5949999999996" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">7. mp-942733</text>
+<circle cx="526.39016842096" cy="1557.38375" r="24.842095" fill="#4F6FA8" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="544.39016842096" y="1595.38375" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8. mp-766132</text>
+<circle cx="285" cy="760.0981250000002" r="21.61114" fill="#4F6FA8" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<circle cx="795.1627111116001" cy="1256.8318749999999" r="21.61114" fill="#4F6FA8" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<circle cx="1785.8427120000001" cy="1520.5968750000002" r="44" fill="#A35C2D" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<circle cx="1313.7683604322401" cy="1525.123125" r="19.756755" fill="#5D8B4D" stroke="#FFFFFF" stroke-width="5" opacity="0.95"/>
+<text x="1331.7683604322401" y="1563.123125" font-size="24" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">12. mp-769074</text>
+<rect x="250" y="1860" width="1900" height="210" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+<text x="285" y="1908" font-size="26" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Candidate family</text>
+<rect x="285" y="1931" width="30" height="30" rx="5" fill="#287078" stroke="none" stroke-width="0"/>
+<text x="329" y="1956" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">halide</text>
+<rect x="875" y="1931" width="30" height="30" rx="5" fill="#A0712A" stroke="none" stroke-width="0"/>
+<text x="919" y="1956" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">thiophosphate-sulfide</text>
+<rect x="1465" y="1931" width="30" height="30" rx="5" fill="#8B4D83" stroke="none" stroke-width="0"/>
+<text x="1509" y="1956" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">garnet-oxide</text>
+<rect x="285" y="1985" width="30" height="30" rx="5" fill="#4F6FA8" stroke="none" stroke-width="0"/>
+<text x="329" y="2010" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">zirconium-phosphate</text>
+<rect x="875" y="1985" width="30" height="30" rx="5" fill="#A35C2D" stroke="none" stroke-width="0"/>
+<text x="919" y="2010" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">lgps-like-sulfide</text>
+<rect x="1465" y="1985" width="30" height="30" rx="5" fill="#5D8B4D" stroke="none" stroke-width="0"/>
+<text x="1509" y="2010" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">nasicon-oxide</text>
+<circle cx="1780" cy="2040" r="20" fill="#64748B" stroke="none" stroke-width="0" opacity="0.38"/>
+<circle cx="1842" cy="2040" r="36" fill="#64748B" stroke="none" stroke-width="0" opacity="0.38"/>
+<text x="1900" y="2049" font-size="23" fill="#475569" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">size approx. Li atomic fraction</text>
+<text x="250" y="2170" font-size="24" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Interpretation: candidates cluster in a low-eHull, wide-gap region, but transport validation is intentionally not inferred</text>
+<text x="250" y="2202" font-size="24" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">from this plot.</text>
+</svg>

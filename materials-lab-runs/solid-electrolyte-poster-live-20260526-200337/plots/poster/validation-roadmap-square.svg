@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="2400" viewBox="0 0 2400 2400">
+<rect x="0" y="0" width="2400" height="2400" rx="0" fill="#FFFFFF" stroke="none" stroke-width="0"/>
+<text x="1200" y="88" font-size="54" fill="#0F172A" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Evidence Status and Validation Queue</text>
+<text x="1200" y="135" font-size="27" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Completed proxy evidence is separated from approval-gated research-grade validation tasks</text>
+<rect x="80" y="190" width="2240" height="2020" rx="24" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="3"/>
+<rect x="170" y="270" width="2060" height="205" rx="20" fill="#F0FAF3" stroke="#2F7D4E" stroke-width="3"/>
+<text x="210" y="328" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Live database provenance</text>
+<rect x="1980" y="304" width="210" height="46" rx="23" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="2085" y="334" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="210" y="376" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8 MP queries; offline fallback false; CSV/JSONL tables saved</text>
+<text x="210" y="442" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Source traceability</text>
+<rect x="170" y="497" width="2060" height="205" rx="20" fill="#F0FAF3" stroke="#2F7D4E" stroke-width="3"/>
+<text x="210" y="555" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Phase stability proxy</text>
+<rect x="1980" y="531" width="210" height="46" rx="23" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="2085" y="561" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="210" y="603" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Shortlist satisfies eHull &lt;= 0.1 eV screening criterion</text>
+<text x="210" y="669" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Proxy evidence</text>
+<rect x="170" y="724" width="2060" height="205" rx="20" fill="#F0FAF3" stroke="#2F7D4E" stroke-width="3"/>
+<text x="210" y="782" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Electronic insulation proxy</text>
+<rect x="1980" y="758" width="210" height="46" rx="23" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="2085" y="788" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="210" y="830" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Shortlist satisfies band gap &gt;= 2 eV minimum screen</text>
+<text x="210" y="896" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Proxy evidence</text>
+<rect x="170" y="951" width="2060" height="205" rx="20" fill="#F0FAF3" stroke="#2F7D4E" stroke-width="3"/>
+<text x="210" y="1009" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Structure artifacts</text>
+<rect x="1980" y="985" width="210" height="46" rx="23" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="2085" y="1015" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">COMPLETED</text>
+<text x="210" y="1057" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4 JSON/CIF structures plus Li-sublattice descriptor plots</text>
+<text x="210" y="1123" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Triage evidence</text>
+<rect x="170" y="1178" width="2060" height="205" rx="20" fill="#EFF6FF" stroke="#3B6EA8" stroke-width="3"/>
+<text x="210" y="1236" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Literature benchmark</text>
+<rect x="1980" y="1212" width="210" height="46" rx="23" fill="#3B6EA8" stroke="none" stroke-width="0"/>
+<text x="2085" y="1242" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">QUEUED</text>
+<text x="210" y="1284" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Protocol compiler generated citation-backed extraction task</text>
+<text x="210" y="1350" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Context evidence</text>
+<rect x="170" y="1405" width="2060" height="205" rx="20" fill="#FFF8E6" stroke="#B7791F" stroke-width="3"/>
+<text x="210" y="1463" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Li-ion transport validation</text>
+<rect x="1875" y="1439" width="315" height="46" rx="23" fill="#B7791F" stroke="none" stroke-width="0"/>
+<text x="2032.5" y="1469" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">APPROVAL-GATED</text>
+<text x="210" y="1511" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">NEB/BVSE/AIMD or imported measurement required</text>
+<text x="210" y="1577" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Research-grade gate</text>
+<rect x="170" y="1632" width="2060" height="205" rx="20" fill="#FFF8E6" stroke="#B7791F" stroke-width="3"/>
+<text x="210" y="1690" font-size="30" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Electrochemical/interface stability</text>
+<rect x="1875" y="1666" width="315" height="46" rx="23" fill="#B7791F" stroke="none" stroke-width="0"/>
+<text x="2032.5" y="1696" font-size="20" fill="#FFFFFF" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">APPROVAL-GATED</text>
+<text x="210" y="1738" font-size="25" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Electrochemical window plus electrode interface reaction evidence required</text>
+<text x="210" y="1804" font-size="23" fill="#475569" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Claim role: Research-grade gate</text>
+<rect x="170" y="1910" width="2060" height="125" rx="18" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+<text x="210" y="1958" font-size="28" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Compiled validation protocol</text>
+<text x="210" y="1998" font-size="24" fill="#674D0B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Research protocol compiled for 4 top candidates with 16 planned validation actions; expensive evidence gates</text>
+<text x="210" y="2030" font-size="24" fill="#674D0B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">remain approval-gated.</text>
+<text x="170" y="2148" font-size="24" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Interpretation: this panel shows what the live run has actually completed and which tasks are required before making a</text>
+<text x="170" y="2180" font-size="24" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">research-grade electrolyte claim.</text>
+</svg>

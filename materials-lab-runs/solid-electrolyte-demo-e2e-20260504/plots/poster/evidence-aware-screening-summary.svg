@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2000" viewBox="0 0 3200 2000">
+<rect x="0" y="0" width="3200" height="2000" rx="0" fill="#ffffff" stroke="none" stroke-width="0"/>
+<text x="1600" y="82" font-size="48" fill="#0F172A" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Evidence-Aware Solid-State Electrolyte Proxy Screening</text>
+<text x="1600" y="125" font-size="28" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Live Materials Project search -&gt; diversity-controlled shortlist -&gt; explicit evidence-gate audit</text>
+<rect x="80" y="170" width="960" height="720" rx="18" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="2"/>
+<rect x="1090" y="170" width="2030" height="720" rx="18" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="2"/>
+<rect x="80" y="940" width="3040" height="900" rx="18" fill="#FBFCFE" stroke="#CBD5E1" stroke-width="2"/>
+<text x="125" y="225" font-size="34" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">A. Screening funnel</text>
+<rect x="180" y="300" width="760" height="82" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="560" y="338" font-size="36" fill="#183A64" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">8</text>
+<text x="560" y="368" font-size="20" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Chemistry families</text>
+<line x1="560" y1="388" x2="560" y2="398" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="548,398 572,398 560,416" fill="#1F4E8C" stroke="none" stroke-width="0"/>
+<rect x="230" y="410" width="660" height="82" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="560" y="448" font-size="36" fill="#183A64" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">66</text>
+<text x="560" y="478" font-size="20" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Unique live candidates</text>
+<line x1="560" y1="498" x2="560" y2="508" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="548,508 572,508 560,526" fill="#1F4E8C" stroke="none" stroke-width="0"/>
+<rect x="290" y="520" width="540" height="82" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="560" y="558" font-size="36" fill="#183A64" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">12</text>
+<text x="560" y="588" font-size="20" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Ranked proxy shortlist</text>
+<line x1="560" y1="608" x2="560" y2="618" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="548,618 572,618 560,636" fill="#1F4E8C" stroke="none" stroke-width="0"/>
+<rect x="350" y="630" width="420" height="82" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="560" y="668" font-size="36" fill="#183A64" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">4</text>
+<text x="560" y="698" font-size="20" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Representative structures</text>
+<line x1="560" y1="718" x2="560" y2="728" stroke="#1F4E8C" stroke-width="3"/>
+<polygon points="548,728 572,728 560,746" fill="#1F4E8C" stroke="none" stroke-width="0"/>
+<rect x="395" y="740" width="330" height="82" rx="18" fill="#EAF1FA" stroke="#1F4E8C" stroke-width="2"/>
+<text x="560" y="778" font-size="36" fill="#183A64" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">18</text>
+<text x="560" y="808" font-size="20" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Required artifacts verified</text>
+<text x="560" y="850" font-size="22" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Offline fallback used: false</text>
+<text x="1135" y="225" font-size="34" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">B. Diversity-controlled proxy shortlist</text>
+<line x1="1560" y1="811" x2="2840" y2="811" stroke="#94A3B8" stroke-width="2"/>
+<line x1="1756.9230769230771" y1="275" x2="1756.9230769230771" y2="811" stroke="#E2E8F0" stroke-width="2"/>
+<text x="1756.9230769230771" y="846" font-size="19" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.86</text>
+<line x1="2150.7692307692314" y1="275" x2="2150.7692307692314" y2="811" stroke="#E2E8F0" stroke-width="2"/>
+<text x="2150.7692307692314" y="846" font-size="19" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.90</text>
+<line x1="2544.6153846153843" y1="275" x2="2544.6153846153843" y2="811" stroke="#E2E8F0" stroke-width="2"/>
+<text x="2544.6153846153843" y="846" font-size="19" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.94</text>
+<line x1="2840" y1="275" x2="2840" y2="811" stroke="#E2E8F0" stroke-width="2"/>
+<text x="2840" y="846" font-size="19" fill="#475569" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">0.97</text>
+<text x="1135" y="311" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">1. mp-556886  Li4Al3Ge3ClO12</text>
+<rect x="1560" y="291" width="1153.7132307692307" height="28" rx="6" fill="#2F6F73" stroke="none" stroke-width="0"/>
+<text x="2725.713230769231" y="313" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.957</text>
+<text x="1135" y="354" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">2. mp-554203  Li4Ga3Si3ClO12</text>
+<rect x="1560" y="334" width="1136.5612307692304" height="28" rx="6" fill="#2F6F73" stroke="none" stroke-width="0"/>
+<text x="2708.5612307692304" y="356" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.955</text>
+<text x="1135" y="397" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">3. mp-567652  Cs2LiYCl6</text>
+<rect x="1560" y="377" width="1118.3655384615386" height="28" rx="6" fill="#2F6F73" stroke="none" stroke-width="0"/>
+<text x="2690.3655384615386" y="399" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.954</text>
+<text x="1135" y="440" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4. mp-11175  LiZnPS4</text>
+<rect x="1560" y="420" width="1115.8350769230774" height="28" rx="6" fill="#8A6A2D" stroke="none" stroke-width="0"/>
+<text x="2687.8350769230774" y="442" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.953</text>
+<text x="1135" y="483" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">5. mp-985583  Li3PS4</text>
+<rect x="1560" y="463" width="1112.192000000001" height="28" rx="6" fill="#8A6A2D" stroke="none" stroke-width="0"/>
+<text x="2684.192000000001" y="485" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.953</text>
+<text x="1135" y="526" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">6. mp-950995  Li6PS5I</text>
+<rect x="1560" y="506" width="1014.4098461538467" height="28" rx="6" fill="#8A6A2D" stroke="none" stroke-width="0"/>
+<text x="2586.409846153847" y="528" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.943</text>
+<text x="1135" y="569" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">7. mp-942733  Li7La3Zr2O12</text>
+<rect x="1560" y="549" width="1000.3495384615393" height="28" rx="6" fill="#8A4F7D" stroke="none" stroke-width="0"/>
+<text x="2572.3495384615394" y="571" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.942</text>
+<text x="1135" y="612" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8. mp-766132  Li2ZrFe(PO4)3</text>
+<rect x="1560" y="592" width="979.7809230769237" height="28" rx="6" fill="#4F6FA8" stroke="none" stroke-width="0"/>
+<text x="2551.7809230769235" y="614" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.940</text>
+<text x="1135" y="655" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">9. mp-10499  LiZr2(PO4)3</text>
+<rect x="1560" y="635" width="949.7698461538464" height="28" rx="6" fill="#4F6FA8" stroke="none" stroke-width="0"/>
+<text x="2521.7698461538466" y="657" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.936</text>
+<text x="1135" y="698" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">10. mp-1223569  Li4Zr8V3(P3O16)3</text>
+<rect x="1560" y="678" width="743.7883076923084" height="28" rx="6" fill="#4F6FA8" stroke="none" stroke-width="0"/>
+<text x="2315.7883076923085" y="700" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.916</text>
+<text x="1135" y="741" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">11. mp-696138  Li10Ge(PS6)2</text>
+<rect x="1560" y="721" width="627.731692307692" height="28" rx="6" fill="#9A5B2E" stroke="none" stroke-width="0"/>
+<text x="2199.731692307692" y="743" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.904</text>
+<text x="1135" y="784" font-size="20" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">12. mp-769074  Na2LiTi3Al(PO4)6</text>
+<rect x="1560" y="764" width="451.4658461538462" height="28" rx="6" fill="#5D8B4D" stroke="none" stroke-width="0"/>
+<text x="2023.465846153846" y="786" font-size="19" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">0.886</text>
+<text x="2200" y="883" font-size="22" fill="#334155" font-weight="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Proxy ranking score</text>
+<rect x="1135" y="807" width="22" height="22" rx="3" fill="#2F6F73" stroke="none" stroke-width="0"/>
+<text x="1169" y="825" font-size="18" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">halide</text>
+<rect x="1495" y="807" width="22" height="22" rx="3" fill="#8A6A2D" stroke="none" stroke-width="0"/>
+<text x="1529" y="825" font-size="18" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">thiophosphate-sulfide</text>
+<rect x="1855" y="807" width="22" height="22" rx="3" fill="#8A4F7D" stroke="none" stroke-width="0"/>
+<text x="1889" y="825" font-size="18" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">garnet-oxide</text>
+<rect x="1135" y="841" width="22" height="22" rx="3" fill="#4F6FA8" stroke="none" stroke-width="0"/>
+<text x="1169" y="859" font-size="18" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">zirconium-phosphate</text>
+<rect x="1495" y="841" width="22" height="22" rx="3" fill="#9A5B2E" stroke="none" stroke-width="0"/>
+<text x="1529" y="859" font-size="18" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">lgps-like-sulfide</text>
+<rect x="1855" y="841" width="22" height="22" rx="3" fill="#5D8B4D" stroke="none" stroke-width="0"/>
+<text x="1889" y="859" font-size="18" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">nasicon-oxide</text>
+<text x="125" y="1000" font-size="34" fill="#0F172A" font-weight="700" text-anchor="start" font-family="Arial, Helvetica, sans-serif">C. Evidence-gate audit for shortlisted candidates</text>
+<text x="1042.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Phase</text>
+<text x="1042.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">stability</text>
+<text x="1327.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Wide-gap</text>
+<text x="1327.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">proxy</text>
+<text x="1612.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Li</text>
+<text x="1612.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">content</text>
+<text x="1897.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Framework</text>
+<text x="1897.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">chemistry</text>
+<text x="2182.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Ionic</text>
+<text x="2182.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">conductivity</text>
+<text x="2467.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Migration</text>
+<text x="2467.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">barrier</text>
+<text x="2752.5" y="1046" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">Electrochem.</text>
+<text x="2752.5" y="1070" font-size="20" fill="#334155" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">window</text>
+<text x="125" y="1120" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">1. mp-556886 (Li4Al3Ge3ClO12)</text>
+<rect x="900" y="1088" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1088" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1088" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1088" width="281" height="46" rx="6" fill="#B65A4A" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">FAIL</text>
+<rect x="2040" y="1088" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1088" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1088" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1119" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1170" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">2. mp-554203 (Li4Ga3Si3ClO12)</text>
+<rect x="900" y="1138" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1138" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1138" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1138" width="281" height="46" rx="6" fill="#B65A4A" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">FAIL</text>
+<rect x="2040" y="1138" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1138" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1138" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1169" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1220" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">3. mp-567652 (Cs2LiYCl6)</text>
+<rect x="900" y="1188" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1188" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1188" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1188" width="281" height="46" rx="6" fill="#B65A4A" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">FAIL</text>
+<rect x="2040" y="1188" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1188" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1188" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1219" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1270" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">4. mp-11175 (LiZnPS4)</text>
+<rect x="900" y="1238" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1238" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1238" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1238" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1238" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1238" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1238" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1269" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1320" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">5. mp-985583 (Li3PS4)</text>
+<rect x="900" y="1288" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1288" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1288" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1288" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1288" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1288" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1288" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1319" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1370" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">6. mp-950995 (Li6PS5I)</text>
+<rect x="900" y="1338" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1338" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1338" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1338" width="281" height="46" rx="6" fill="#B65A4A" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">FAIL</text>
+<rect x="2040" y="1338" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1338" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1338" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1369" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1420" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">7. mp-942733 (Li7La3Zr2O12)</text>
+<rect x="900" y="1388" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1388" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1388" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1388" width="281" height="46" rx="6" fill="#B65A4A" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">FAIL</text>
+<rect x="2040" y="1388" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1388" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1388" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1419" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1470" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">8. mp-766132 (Li2ZrFe(PO4)3)</text>
+<rect x="900" y="1438" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1438" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1438" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1438" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1438" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1438" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1438" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1469" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1520" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">9. mp-10499 (LiZr2(PO4)3)</text>
+<rect x="900" y="1488" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1488" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1488" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="1755" y="1488" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1488" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1488" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1488" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1519" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1570" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">10. mp-1223569 (Li4Zr8V3(P3O16)3)</text>
+<rect x="900" y="1538" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1538" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1538" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="1755" y="1538" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1538" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1538" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1538" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1569" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1620" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">11. mp-696138 (Li10Ge(PS6)2)</text>
+<rect x="900" y="1588" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1588" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1588" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1755" y="1588" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1588" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1588" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1588" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1619" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<text x="125" y="1670" font-size="22" fill="#0F172A" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">12. mp-769074 (Na2LiTi3Al(PO4)6)</text>
+<rect x="900" y="1638" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1042.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1185" y="1638" width="281" height="46" rx="6" fill="#2F7D4E" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1327.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">PASS</text>
+<rect x="1470" y="1638" width="281" height="46" rx="6" fill="#B65A4A" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1612.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">FAIL</text>
+<rect x="1755" y="1638" width="281" height="46" rx="6" fill="#D9A441" stroke="#FFFFFF" stroke-width="2"/>
+<text x="1897.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">WATCH</text>
+<rect x="2040" y="1638" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2182.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2325" y="1638" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2467.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="2610" y="1638" width="281" height="46" rx="6" fill="#C9CED6" stroke="#FFFFFF" stroke-width="2"/>
+<text x="2752.5" y="1669" font-size="18" fill="#263238" font-weight="700" text-anchor="middle" font-family="Arial, Helvetica, sans-serif">MISSING</text>
+<rect x="1090" y="1731" width="32" height="32" rx="5" fill="#2F7D4E" stroke="none" stroke-width="0"/>
+<text x="1135" y="1755" font-size="23" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Pass</text>
+<rect x="1420" y="1731" width="32" height="32" rx="5" fill="#D9A441" stroke="none" stroke-width="0"/>
+<text x="1465" y="1755" font-size="23" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Watch</text>
+<rect x="1750" y="1731" width="32" height="32" rx="5" fill="#B65A4A" stroke="none" stroke-width="0"/>
+<text x="1795" y="1755" font-size="23" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Fail</text>
+<rect x="2080" y="1731" width="32" height="32" rx="5" fill="#C9CED6" stroke="none" stroke-width="0"/>
+<text x="2125" y="1755" font-size="23" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Missing</text>
+<text x="125" y="1815" font-size="24" fill="#334155" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Interpretation: all shortlisted candidates remain proxy-level because transport and electrochemical evidence gates are missing.</text>
+<text x="80" y="1950" font-size="18" fill="#64748B" font-weight="400" text-anchor="start" font-family="Arial, Helvetica, sans-serif">Source: OpenClaw Materials Lab E2E run, live Materials Project data only; generated from candidate-ranking.csv and summary.json.</text>
+</svg>
